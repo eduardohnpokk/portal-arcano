@@ -5,272 +5,248 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Arcano | Dossiê Astrológico</title>
     
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        :root { --gold: #d4af37; --gold-dim: #8a7018; --bg-dark: #050505; --card-bg: #0f0f0f; }
-        
-        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: #000 url('portalarcano_background.jpg') no-repeat center center fixed; background-size: cover; color: #e0e0e0; line-height: 1.6; font-size: 18px; }
-        
-        header { background: linear-gradient(to bottom, #000 0%, rgba(0,0,0,0.8) 100%); padding: 20px; text-align: center; border-bottom: 1px solid var(--gold-dim); }
-        h1 { font-family: 'Cinzel', serif; color: var(--gold); font-size: 2em; margin: 0; text-shadow: 0 0 20px var(--gold-dim); }
+        :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #111; }
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: #000; color: #e0e0e0; font-size: 18px; padding-bottom: 50px; }
         
         .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
         
-        /* Grid Layout */
-        .mapa-grid { display: grid; grid-template-columns: 1fr; gap: 30px; }
-        @media(min-width: 900px) { .mapa-grid { grid-template-columns: 400px 1fr; } }
+        /* Layout */
+        .mapa-grid { display: grid; grid-template-columns: 1fr; gap: 40px; margin-top: 30px; }
+        @media(min-width: 900px) { .mapa-grid { grid-template-columns: 450px 1fr; } }
 
-        /* O círculo do mapa */
+        /* Gráfico */
         .chart-box { 
-            background: rgba(10,10,10,0.95); 
-            border: 2px solid var(--gold); 
-            border-radius: 50%; 
-            width: 100%; 
-            max-width: 400px;
-            aspect-ratio: 1/1; 
-            position: relative; 
-            box-shadow: 0 0 50px rgba(212,175,55,0.2); 
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
+            background: #0a0a0a; border: 2px solid var(--gold); border-radius: 50%; 
+            width: 100%; aspect-ratio: 1/1; position: relative; 
+            box-shadow: 0 0 40px rgba(212,175,55,0.15); margin: 0 auto;
+            display: flex; align-items: center; justify-content: center;
         }
-        
-        svg { width: 100%; height: 100%; display: block; }
+        svg { width: 100%; height: 100%; }
 
-        .planet-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.9em; }
-        .planet-name { font-weight: bold; color: #fff; }
+        /* Lista Lateral */
+        .data-panel { background: #111; padding: 25px; border: 1px solid #333; border-radius: 8px; }
+        .planet-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #222; }
+        .planet-name { font-weight: bold; color: #fff; display: flex; align-items: center; gap: 10px; }
         .planet-sign { font-family: 'Cinzel'; color: var(--gold); }
 
-        .reading-section { margin-top: 40px; background: rgba(0,0,0,0.8); padding: 30px; border: 1px solid var(--gold-dim); border-radius: 8px; }
-        .reading-block { margin-bottom: 30px; }
-        .reading-block h3 { color: var(--gold); font-family: 'Cinzel'; border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 10px; }
+        /* Textos */
+        .reading-section { margin-top: 50px; background: #111; padding: 40px; border: 1px solid var(--gold); border-radius: 8px; }
+        .reading-block h3 { color: var(--gold); font-family: 'Cinzel'; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
+        .reading-text { text-align: justify; color: #ccc; margin-bottom: 30px; }
 
-        .breadcrumb { cursor: pointer; color: #888; font-size: 0.8em; text-transform: uppercase; margin-bottom: 10px; display: inline-block; }
-        .breadcrumb:hover { color: var(--gold); }
+        .btn-back { cursor: pointer; color: #888; text-transform: uppercase; display: inline-block; margin-bottom: 20px; font-family: sans-serif; font-size: 0.8em; }
+        .btn-back:hover { color: var(--gold); }
 
-        /* Debug Box - Para diagnóstico */
-        #debug-log {
-            position: fixed; bottom: 0; left: 0; width: 100%; background: #330000; color: #ffcccc; 
-            font-family: monospace; font-size: 12px; padding: 5px; display: none; z-index: 9999;
-        }
+        /* Info Técnica (Debug) */
+        .tech-info { font-size: 0.75em; color: #555; text-align: center; margin-top: 10px; font-family: monospace; }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="breadcrumb" onclick="window.location.href='dashboard-premium.html'"><i class="fas fa-arrow-left"></i> Voltar ao Menu</div>
-    <h1>DOSSIÊ ASTRAL</h1>
-</header>
-
 <div class="container">
+    <div class="btn-back" onclick="window.location.href='dashboard-premium.html'">← Voltar ao Menu</div>
+    <h1 style="font-family:'Cinzel'; color:var(--gold); text-align:center; margin:0;">DOSSIÊ ASTRAL COMPLETO</h1>
     
     <div class="mapa-grid">
         <div>
             <div class="chart-box" id="chart-render">
-                <div id="loader-msg" style="color:var(--gold); text-align:center;">
-                    <i class="fas fa-circle-notch fa-spin fa-2x"></i><br><br>Inicializando Astrolábio...
-                </div>
+                <p id="loading-msg" style="color:var(--gold)">Carregando Dados...</p>
             </div>
-            <div style="text-align: center; margin-top: 15px; font-size: 0.9em; color: #aaa;">
-                <i class="fas fa-map-marker-alt"></i> Mapa de: <span id="nome-display" style="color:white">...</span>
-            </div>
+            <div class="tech-info" id="debug-coords">Aguardando GPS...</div>
         </div>
 
-        <div>
-            <h2 style="font-family:'Cinzel'; color:var(--gold); margin-top:0;">Efemérides Calculadas</h2>
+        <div class="data-panel">
+            <h2 style="font-family:'Cinzel'; color:var(--gold); margin-top:0;">Posições</h2>
             <div id="planetary-list">
-                <p style="opacity:0.5">Aguardando processamento...</p>
-            </div>
+                </div>
         </div>
     </div>
 
     <div class="reading-section">
         <div class="reading-block">
-            <h3><i class="fas fa-sun"></i> O Sol (Essência)</h3>
-            <div id="txt-sol">...</div>
+            <h3><i class="fas fa-sun"></i> O Sol (Sua Essência)</h3>
+            <div class="reading-text" id="txt-sol">...</div>
         </div>
         <div class="reading-block">
-            <h3><i class="fas fa-arrow-up"></i> Ascendente (Destino)</h3>
-            <div id="txt-asc">...</div>
+            <h3><i class="fas fa-arrow-up"></i> Ascendente (Sua Máscara)</h3>
+            <div class="reading-text" id="txt-asc">...</div>
         </div>
         <div class="reading-block">
-            <h3><i class="fas fa-moon"></i> A Lua (Emoção)</h3>
-            <div id="txt-lua">...</div>
+            <h3><i class="fas fa-moon"></i> A Lua (Suas Emoções)</h3>
+            <div class="reading-text" id="txt-lua">...</div>
         </div>
     </div>
-
 </div>
 
-<div id="debug-log">Log do Sistema: Inicializando...</div>
-
 <script>
-    // --- 0. SISTEMA DE LOG VISUAL (DIAGNÓSTICO) ---
-    function logErro(msg) {
-        const box = document.getElementById('debug-log');
-        box.style.display = 'block';
-        box.innerHTML += " | " + msg;
-        console.error(msg);
-    }
-
     // --- 1. CONFIGURAÇÃO FIREBASE ---
     const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
-    
-    try {
-        firebase.initializeApp(firebaseConfig);
-    } catch(e) { logErro("Firebase Init Erro: " + e.message); }
-    
+    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // --- 2. BANCO DE TEXTOS (RESUMIDO PARA TESTE, MAS COMPLETO NA LÓGICA) ---
-    const DB_TEXTOS = {
-        sol: { "Áries": "Sol em Áries: Iniciativa e coragem.", "Touro": "Sol em Touro: Estabilidade e prazer.", "Gêmeos": "Sol em Gêmeos: Comunicação e dualidade.", "Câncer": "Sol em Câncer: Emoção e proteção.", "Leão": "Sol em Leão: Brilho e criatividade.", "Virgem": "Sol em Virgem: Análise e perfeição.", "Libra": "Sol em Libra: Harmonia e beleza.", "Escorpião": "Sol em Escorpião: Intensidade e transformação.", "Sagitário": "Sol em Sagitário: Expansão e verdade.", "Capricórnio": "Sol em Capricórnio: Ambição e estrutura.", "Aquário": "Sol em Aquário: Inovação e liberdade.", "Peixes": "Sol em Peixes: Empatia e espiritualidade." },
-        asc: { "Áries": "Ascendente Áries: Impulsivo e direto.", "Touro": "Ascendente Touro: Calmo e resistente.", "Gêmeos": "Ascendente Gêmeos: Curioso e jovial.", "Câncer": "Ascendente Câncer: Tímido e protetor.", "Leão": "Ascendente Leão: Magnético e orgulhoso.", "Virgem": "Ascendente Virgem: Modesto e prestativo.", "Libra": "Ascendente Libra: Charmoso e sociável.", "Escorpião": "Ascendente Escorpião: Intenso e reservado.", "Sagitário": "Ascendente Sagitário: Otimista e aventureiro.", "Capricórnio": "Ascendente Capricórnio: Sério e responsável.", "Aquário": "Ascendente Aquário: Amigável e diferente.", "Peixes": "Ascendente Peixes: Sensível e misterioso." }
+    // --- 2. BANCO DE DADOS GEOGRÁFICO (EXPANDIDO) ---
+    // Adicionei mais variações para evitar que caia no Default
+    const GEO_DB = {
+        "SP": {lat:-23.55, lon:-46.63}, "SAO PAULO": {lat:-23.55, lon:-46.63}, "SÃO PAULO": {lat:-23.55, lon:-46.63},
+        "RJ": {lat:-22.90, lon:-43.17}, "RIO": {lat:-22.90, lon:-43.17}, "RIO DE JANEIRO": {lat:-22.90, lon:-43.17},
+        "MG": {lat:-19.91, lon:-43.93}, "BELO HORIZONTE": {lat:-19.91, lon:-43.93}, "BH": {lat:-19.91, lon:-43.93},
+        "RS": {lat:-30.03, lon:-51.22}, "PORTO ALEGRE": {lat:-30.03, lon:-51.22},
+        "BA": {lat:-12.97, lon:-38.50}, "SALVADOR": {lat:-12.97, lon:-38.50},
+        "PR": {lat:-25.42, lon:-49.27}, "CURITIBA": {lat:-25.42, lon:-49.27},
+        "PE": {lat:-8.04, lon:-34.87}, "RECIFE": {lat:-8.04, lon:-34.87},
+        "CE": {lat:-3.71, lon:-38.54}, "FORTALEZA": {lat:-3.71, lon:-38.54},
+        "DF": {lat:-15.79, lon:-47.88}, "BRASILIA": {lat:-15.79, lon:-47.88}, "BRASÍLIA": {lat:-15.79, lon:-47.88},
+        "AM": {lat:-3.11, lon:-60.02}, "MANAUS": {lat:-3.11, lon:-60.02},
+        "SC": {lat:-27.59, lon:-48.54}, "FLORIANOPOLIS": {lat:-27.59, lon:-48.54},
+        "GO": {lat:-16.68, lon:-49.26}, "GOIANIA": {lat:-16.68, lon:-49.26}
     };
 
+    // --- 3. TEXTOS INTERPRETATIVOS ---
+    const DB_TEXTOS = {
+        sol: { "Áries": "Sol em Áries: Fogo cardinal. Você veio para iniciar, liderar e desbravar.", "Touro": "Sol em Touro: Terra fixa. Você busca estabilidade, conforto e construção sólida.", "Gêmeos": "Sol em Gêmeos: Ar mutável. Comunicação, trocas e inteligência rápida.", "Câncer": "Sol em Câncer: Água cardinal. Sensibilidade, proteção e memória ancestral.", "Leão": "Sol em Leão: Fogo fixo. Criatividade, brilho pessoal e generosidade.", "Virgem": "Sol em Virgem: Terra mutável. Ordem, análise e serviço ao próximo.", "Libra": "Sol em Libra: Ar cardinal. Harmonia, justiça e relacionamentos.", "Escorpião": "Sol em Escorpião: Água fixa. Transformação, intensidade e mistério.", "Sagitário": "Sol em Sagitário: Fogo mutável. Expansão, fé e busca pela verdade.", "Capricórnio": "Sol em Capricórnio: Terra cardinal. Estrutura, ambição e tempo.", "Aquário": "Sol em Aquário: Ar fixo. Inovação, liberdade e coletividade.", "Peixes": "Sol em Peixes: Água mutável. Empatia, espiritualidade e fusão." },
+        asc: { "Áries": "Ascendente Áries: O mundo te vê como enérgico e direto. Abordagem corajosa.", "Touro": "Ascendente Touro: O mundo te vê como calmo e confiável. Abordagem paciente.", "Gêmeos": "Ascendente Gêmeos: O mundo te vê como jovial e curioso. Abordagem comunicativa.", "Câncer": "Ascendente Câncer: O mundo te vê como acolhedor. Abordagem protetora.", "Leão": "Ascendente Leão: O mundo te vê como magnético. Abordagem nobre.", "Virgem": "Ascendente Virgem: O mundo te vê como organizado. Abordagem eficiente.", "Libra": "Ascendente Libra: O mundo te vê como charmoso. Abordagem diplomática.", "Escorpião": "Ascendente Escorpião: O mundo te vê como misterioso. Abordagem intensa.", "Sagitário": "Ascendente Sagitário: O mundo te vê como alegre. Abordagem aventureira.", "Capricórnio": "Ascendente Capricórnio: O mundo te vê como sério. Abordagem responsável.", "Aquário": "Ascendente Aquário: O mundo te vê como original. Abordagem independente.", "Peixes": "Ascendente Peixes: O mundo te vê como empático. Abordagem intuitiva." }
+    };
     const SIGNOS = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
-    
-    // --- 3. MOTOR DE CÁLCULO ---
-    function normalize(deg) { deg = deg % 360; if (deg < 0) deg += 360; return deg; }
+
+    // --- 4. MOTOR MATEMÁTICO ---
     function toJulian(date) { return (date.getTime() / 86400000) - (date.getTimezoneOffset() / 1440) + 2440587.5; }
+    function normalize(deg) { deg = deg % 360; if (deg < 0) deg += 360; return deg; }
 
-    function calcularAstro(dataStr, horaStr) {
-        // Fallback de segurança se os dados vierem vazios
-        if(!dataStr) dataStr = new Date().toISOString().split('T')[0];
-        if(!horaStr) horaStr = "12:00";
-
+    function calcularMapa(dataStr, horaStr, localStr) {
+        // 1. Data e Hora
         const [ano, mes, dia] = dataStr.split('-').map(Number);
-        const data = new Date(ano, mes-1, dia);
-        const jd = toJulian(data);
+        const [hora, min] = horaStr.split(':').map(Number);
+        const dataObj = new Date(ano, mes-1, dia, hora, min);
+        
+        // 2. Coordenadas (Busca Inteligente)
+        let lat = -15.79, lon = -47.88; // Default Brasilia
+        let cidadeUsada = "BRASÍLIA (Padrão)";
+        
+        if (localStr) {
+            const busca = localStr.toUpperCase();
+            let achou = false;
+            // Busca exata ou parcial
+            for (let chave in GEO_DB) {
+                if (busca.includes(chave)) {
+                    lat = GEO_DB[chave].lat;
+                    lon = GEO_DB[chave].lon;
+                    cidadeUsada = chave;
+                    achou = true;
+                    break;
+                }
+            }
+        }
+
+        // Exibe Debug para o Usuário saber o que está acontecendo
+        document.getElementById('debug-coords').innerText = `Base de Cálculo: ${cidadeUsada} (Lat:${lat}, Lon:${lon}) | ${horaStr}`;
+
+        // 3. Cálculos Astronômicos
+        const jd = toJulian(dataObj);
+        const t = (jd - 2451545.0) / 36525.0;
         
         // Sol
-        const n = jd - 2451545.0;
-        const L = normalize(280.460 + 0.9856474 * n);
-        const g = normalize(357.528 + 0.9856003 * n);
-        const solDeg = normalize(L + 1.915 * Math.sin(g * Math.PI/180));
-        
+        const L_sun = normalize(280.46646 + 36000.76983 * t + 0.0003032 * t * t);
+        const M_sun = normalize(357.52911 + 35999.05029 * t - 0.0001537 * t * t);
+        const solDeg = normalize(L_sun + 1.914602 * Math.sin(M_sun * Math.PI/180));
+
         // Lua
-        const L_moon = normalize(218.316 + 13.176396 * n);
-        const M_moon = normalize(134.963 + 13.064993 * n);
+        const L_moon = normalize(218.316 + 13.176396 * (jd - 2451545.0));
+        const M_moon = normalize(134.963 + 13.064993 * (jd - 2451545.0));
         const luaDeg = normalize(L_moon + 6.289 * Math.sin(M_moon * Math.PI/180));
 
-        // Ascendente (Cálculo aproximado robusto para não quebrar)
-        const [h, m] = horaStr.split(':').map(Number);
-        const lon = -47.0; // Brasil Central
-        const t = (jd - 2451545.0) / 36525.0;
+        // Ascendente (Fórmula Rigorosa)
         const gmst = 280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * t * t;
-        const lst = normalize(gmst + (h+3)*15 + m*0.25 + lon); 
-        const ascDeg = normalize(lst + 270); // Simplificação geométrica para garantir renderização
+        const lst = normalize(gmst + lon); // Tempo Sideral Local
+        const eps = 23.439 * Math.PI / 180; // Obliquidade
+        const latRad = lat * Math.PI / 180;
+        const lstRad = lst * Math.PI / 180;
+        
+        const y = Math.cos(lstRad);
+        const x = - (Math.sin(lstRad) * Math.cos(eps) + Math.tan(latRad) * Math.sin(eps));
+        const ascDeg = normalize((Math.atan2(y, x) * 180 / Math.PI));
 
         return { sol: solDeg, lua: luaDeg, asc: ascDeg };
     }
 
-    function getSigno(grau) {
-        return SIGNOS[Math.floor(grau / 30)] || "Áries";
-    }
+    function getSigno(grau) { return SIGNOS[Math.floor(grau / 30)] || "Áries"; }
 
-    // --- 4. RENDERIZAÇÃO DA PÁGINA ---
-    
-    // Função que desenha na tela (separada da lógica de dados)
-    function renderizarTela(dados) {
-        document.getElementById('nome-display').innerText = dados.nome;
-        
-        const pos = calcularAstro(dados.nasc, dados.hora);
-        const sSol = getSigno(pos.sol);
-        const sAsc = getSigno(pos.asc);
-        const sLua = getSigno(pos.lua);
+    // --- 5. LÓGICA PRINCIPAL ---
+    auth.onAuthStateChanged(user => {
+        if(!user) { window.location.href = "index.html"; return; }
 
-        // Preenche Lista
-        document.getElementById('planetary-list').innerHTML = `
-            <div class="planet-row"><span class="planet-name">☉ Sol</span> <span class="planet-sign">${sSol} ${(pos.sol%30).toFixed(0)}°</span></div>
-            <div class="planet-row"><span class="planet-name">↑ Ascendente</span> <span class="planet-sign">${sAsc} ${(pos.asc%30).toFixed(0)}°</span></div>
-            <div class="planet-row"><span class="planet-name">☽ Lua</span> <span class="planet-sign">${sLua} ${(pos.lua%30).toFixed(0)}°</span></div>
-        `;
+        db.collection("usuarios").doc(user.uid).get().then(doc => {
+            if(doc.exists) {
+                const d = doc.data();
+                
+                // Executa Cálculo
+                const pos = calcularMapa(d.dataNascimento, d.horaNascimento, d.localNascimento);
+                
+                const sSol = getSigno(pos.sol);
+                const sAsc = getSigno(pos.asc);
+                const sLua = getSigno(pos.lua);
 
-        // Preenche Texto
-        document.getElementById('txt-sol').innerText = DB_TEXTOS.sol[sSol] || "Energia solar intensa.";
-        document.getElementById('txt-asc').innerText = DB_TEXTOS.asc[sAsc] || "Caminho de destino traçado.";
-        document.getElementById('txt-lua').innerText = `Lua em ${sLua}: Emoções fluem através desta energia.`;
+                // Renderiza Lista
+                document.getElementById('planetary-list').innerHTML = `
+                    <div class="planet-row"><span class="planet-name"><i class="fas fa-sun" style="color:gold"></i> Sol</span> <span class="planet-sign">${sSol}</span></div>
+                    <div class="planet-row"><span class="planet-name"><i class="fas fa-arrow-up" style="color:var(--gold)"></i> Ascendente</span> <span class="planet-sign">${sAsc}</span></div>
+                    <div class="planet-row"><span class="planet-name"><i class="fas fa-moon" style="color:silver"></i> Lua</span> <span class="planet-sign">${sLua}</span></div>
+                `;
 
-        // Desenha SVG
-        desenharSVG(pos.sol, pos.asc, pos.lua);
-    }
+                // Renderiza Textos
+                document.getElementById('txt-sol').innerText = DB_TEXTOS.sol[sSol];
+                document.getElementById('txt-asc').innerText = DB_TEXTOS.asc[sAsc];
+                document.getElementById('txt-lua').innerText = `A Lua em ${sLua} revela como você nutre sua alma.`;
 
-    function desenharSVG(solDeg, ascDeg, luaDeg) {
+                // Renderiza Gráfico
+                desenharSVG(pos.sol, pos.asc, pos.lua);
+            }
+        });
+    });
+
+    function desenharSVG(sol, asc, lua) {
         const cx = 200, cy = 200, r = 160;
-        const rot = 180 - ascDeg; // Gira o mapa para Ascendente ficar na esquerda
+        const rot = 180 - asc; // Ascendente na esquerda (180deg)
         
-        const svgHTML = `
-        <svg viewBox="0 0 400 400">
+        let svg = `<svg viewBox="0 0 400 400">
             <circle cx="${cx}" cy="${cy}" r="${r}" fill="#050505" stroke="#d4af37" stroke-width="2"/>
+            <circle cx="${cx}" cy="${cy}" r="${r*0.75}" fill="none" stroke="#333" stroke-width="1"/>
+            
             <g transform="rotate(${rot}, ${cx}, ${cy})">
-                ${SIGNOS.map((s, i) => {
-                    const ang = i * 30;
+                ${SIGNOS.map((s,i) => {
+                    const ang = i*30;
                     const rad = ang * Math.PI/180;
                     const x2 = cx + r * Math.cos(rad);
                     const y2 = cy + r * Math.sin(rad);
                     return `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#333" stroke-width="1"/>
-                            <text x="${cx + (r-20)*Math.cos(rad+0.26)}" y="${cy + (r-20)*Math.sin(rad+0.26)}" fill="#666" font-size="10" text-anchor="middle" transform="rotate(${ang+90}, ${cx + (r-20)*Math.cos(rad+0.26)}, ${cy + (r-20)*Math.sin(rad+0.26)})">${s.substring(0,3)}</text>`;
+                            <text x="${cx + (r-20)*Math.cos(rad+0.26)}" y="${cy + (r-20)*Math.sin(rad+0.26)}" fill="#666" font-size="12" text-anchor="middle" transform="rotate(${ang+90}, ${cx + (r-20)*Math.cos(rad+0.26)}, ${cy + (r-20)*Math.sin(rad+0.26)})">${s.substring(0,3)}</text>`;
                 }).join('')}
-                ${plot(cx, cy, r, solDeg, "☉", "gold")}
-                ${plot(cx, cy, r, luaDeg, "☽", "silver")}
+                
+                ${plot(cx, cy, r, sol, "☉", "gold")}
+                ${plot(cx, cy, r, lua, "☽", "silver")}
             </g>
+            
             <path d="M ${cx-r} ${cy} L ${cx-r-15} ${cy-7} L ${cx-r-15} ${cy+7} Z" fill="#d4af37"/>
             <text x="${cx-r-25}" y="${cy+5}" fill="#d4af37" font-weight="bold">AC</text>
         </svg>`;
-        document.getElementById('chart-render').innerHTML = svgHTML;
+        
+        document.getElementById('chart-render').innerHTML = svg;
     }
 
     function plot(cx, cy, r, deg, sym, color) {
         const rad = deg * Math.PI/180;
-        const x = cx + (r*0.7) * Math.cos(rad);
-        const y = cy + (r*0.7) * Math.sin(rad);
-        return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="${color}" opacity="0.5"/><circle cx="${x}" cy="${y}" r="12" fill="#111" stroke="${color}"/><text x="${x}" y="${y}" fill="${color}" font-size="16" text-anchor="middle" alignment-baseline="middle">${sym}</text>`;
+        const x = cx + (r*0.7)*Math.cos(rad);
+        const y = cy + (r*0.7)*Math.sin(rad);
+        return `<circle cx="${x}" cy="${y}" r="14" fill="#000" stroke="${color}" stroke-width="2"/><text x="${x}" y="${y+5}" fill="${color}" font-size="18" text-anchor="middle" font-weight="bold">${sym}</text>`;
     }
-
-    // --- 5. INICIALIZAÇÃO SEGURA ---
-    // Timeout de segurança: Se o Firebase não carregar em 4s, carrega modo demonstração
-    const safetyTimeout = setTimeout(() => {
-        logErro("Tempo limite excedido. Carregando Modo Segurança.");
-        renderizarTela({ nome: "Modo Demonstração (Erro Conexão)", nasc: "2000-01-01", hora: "12:00" });
-    }, 4000);
-
-    auth.onAuthStateChanged(user => {
-        clearTimeout(safetyTimeout); // Cancela o timeout se carregou
-        if (user) {
-            db.collection("usuarios").doc(user.uid).get()
-                .then(doc => {
-                    if (doc.exists) {
-                        const d = doc.data();
-                        renderizarTela({ 
-                            nome: d.nomeNascimento || "Iniciado", 
-                            nasc: d.dataNascimento, 
-                            hora: d.horaNascimento 
-                        });
-                    } else {
-                        logErro("Usuário sem dados cadastrados.");
-                        renderizarTela({ nome: "Visitante", nasc: new Date().toISOString().split('T')[0], hora: "12:00" });
-                    }
-                })
-                .catch(err => {
-                    logErro("Erro ao ler banco: " + err.message);
-                    renderizarTela({ nome: "Erro Leitura", nasc: "2000-01-01", hora: "12:00" });
-                });
-        } else {
-            // Se não estiver logado, redireciona ou mostra demo
-            // window.location.href = "index.html"; // Comentei para você poder testar sem login se quiser
-            renderizarTela({ nome: "Visitante (Não Logado)", nasc: "1990-01-01", hora: "12:00" });
-        }
-    });
-
 </script>
 </body>
 </html>
