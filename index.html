@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Arcano | Inicie sua Jornada</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Raleway:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #d4af37; --gold-light: #f9e29c; --glass: rgba(0, 0, 0, 0.3); }
+        body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Raleway', sans-serif; background: #000 url('portalarcano_background.jpg') no-repeat center center fixed; background-size: cover; color: white; overflow-x: hidden; }
+        body::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.2); z-index: 1; }
+        
+        .card { position: relative; z-index: 2; background: var(--glass); padding: 30px; border-radius: 20px; border: 1px solid var(--gold); width: 90%; max-width: 450px; backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); text-align: center; margin: 20px 0; }
+        h2 { font-family: 'Cinzel', serif; color: var(--gold); font-size: 1.8em; letter-spacing: 2px; margin-bottom: 20px; text-transform: uppercase; }
+        
+        .grid-campos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .full-width { grid-column: span 2; }
+        
+        input, select { width: 100%; padding: 10px; margin: 5px 0; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(212, 175, 55, 0.4); color: white; border-radius: 8px; box-sizing: border-box; font-family: 'Raleway', sans-serif; font-size: 0.9em; }
+        input:focus, select:focus { border-color: var(--gold); outline: none; }
+        
+        label { display: block; text-align: left; font-size: 0.75em; color: var(--gold-light); margin-top: 5px; padding-left: 5px; }
+        .opcional-info { font-style: italic; opacity: 0.8; font-size: 0.9em; }
+
+        button { width: 100%; padding: 15px; margin-top: 20px; background: linear-gradient(135deg, #d4af37 0%, #f9e29c 50%, #d4af37 100%); border: none; color: #000; font-family: 'Cinzel', serif; font-weight: bold; cursor: pointer; border-radius: 8px; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
+        button:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); }
+
+        .toggle-link { display: inline-block; margin-top: 20px; color: var(--gold-light); cursor: pointer; font-size: 0.85em; text-decoration: underline; }
+        .hidden { display: none; }
+        #mensagem { color: #ff6b6b; margin-top: 10px; font-size: 0.9em; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2 id="titulo">Criar Conta</h2>
+    
+    <div id="campos-cadastro">
+        <input type="text" id="nome" placeholder="Nome Completo Atual" class="full-width">
+        <input type="text" id="nomeNascimento" placeholder="Nome de Nascimento (Batismo)" class="full-width">
+        
+        <div class="grid-campos">
+            <div>
+                <label>Data de Nascimento</label>
+                <input type="date" id="dataNasc">
+            </div>
+            <div>
+                <label>Hora de Nascimento</label>
+                <input type="time" id="horaNasc">
+            </div>
+        </div>
+
+        <input type="text" id="localNasc" placeholder="Cidade e Estado de Nascimento" class="full-width">
+        
+        <div class="grid-campos">
+            <select id="sexo">
+                <option value="">Sexo Biológico</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Feminino">Feminino</option>
+            </select>
+            <input type="tel" id="telefone" placeholder="WhatsApp">
+        </div>
+
+        <div class="full-width">
+            <input type="text" id="nomeMae" placeholder="Nome Completo da Mã">
+            <label class="opcional-info">Opcional, mas necessário para algumas leituras esotéricas profundas.</label>
+        </div>
+    </div>
+
+    <input type="email" id="email" placeholder="E-mail" class="full-width">
+    <input type="password" id="senha" placeholder="Senha" class="full-width">
+
+    <button id="btn-principal" onclick="processarAcesso()">INICIAR JORNADA</button>
+    
+    <div id="mensagem"></div>
+    <div class="toggle-link" id="alternador" onclick="alternarTela()">Já possui cadastro? Entrar</div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE",
+        authDomain: "portal-mistico-6532b.firebaseapp.com",
+        projectId: "portal-mistico-6532b",
+        storageBucket: "portal-mistico-6532b.firebasestorage.app",
+        messagingSenderId: "925159229004",
+        appId: "1:925159229004:web:5d9dc758474789085016e9"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let modoLogin = false;
+
+    function alternarTela() {
+        modoLogin = !modoLogin;
+        document.getElementById('campos-cadastro').classList.toggle('hidden');
+        document.getElementById('titulo').innerText = modoLogin ? "Login" : "Criar Conta";
+        document.getElementById('btn-principal').innerText = modoLogin ? "ACESSAR PORTAL" : "INICIAR JORNADA";
+        document.getElementById('alternador').innerText = modoLogin ? "Não tem conta? Cadastre-se" : "Já possui cadastro? Entrar";
+        document.getElementById('mensagem').innerText = "";
+    }
+
+    function processarAcesso() {
+        const email = document.getElementById('email').value;
+        const senha = document.getElementById('senha').value;
+        const msg = document.getElementById('mensagem');
+
+        if(modoLogin) {
+            auth.signInWithEmailAndPassword(email, senha)
+                .then(() => { window.location.href = "dashboard.html"; })
+                .catch(err => { msg.innerText = "Credenciais inválidas."; });
+        } else {
+            auth.createUserWithEmailAndPassword(email, senha)
+                .then(userCredential => {
+                    db.collection("usuarios").doc(userCredential.user.uid).set({
+                        nome: document.getElementById('nome').value,
+                        nomeNascimento: document.getElementById('nomeNascimento').value,
+                        dataNascimento: document.getElementById('dataNasc').value,
+                        horaNascimento: document.getElementById('horaNasc').value,
+                        localNascimento: document.getElementById('localNasc').value,
+                        sexo: document.getElementById('sexo').value,
+                        telefone: document.getElementById('telefone').value,
+                        nomeMae: document.getElementById('nomeMae').value,
+                        email: email,
+                        plano: 'gratuito',
+                        dataCadastro: new Date().toISOString()
+                    }).then(() => { window.location.href = "dashboard.html"; });
+                })
+                .catch(err => { msg.innerText = "Erro ao cadastrar: " + err.message; });
+        }
+    }
+</script>
+</body>
+</html>

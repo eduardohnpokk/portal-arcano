@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Arcano | Ritualística & Banhos</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root { 
+            --gold: #d4af37; 
+            --gold-dim: #8a7018;
+            --bg-dark: #050505;
+            --card-bg: rgba(15, 15, 15, 0.95);
+        }
+        
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: #000 url('portalarcano_background.jpg') no-repeat center center fixed; background-size: cover; color: #e0e0e0; line-height: 1.8; font-size: 18px; }
+        
+        /* HEADER */
+        header { background: linear-gradient(to bottom, #000 0%, rgba(0,0,0,0.8) 100%); padding: 40px 20px; text-align: center; border-bottom: 1px solid var(--gold-dim); }
+        h1 { font-family: 'Cinzel', serif; color: var(--gold); font-size: 2.2em; margin: 0; letter-spacing: 3px; text-shadow: 0 0 20px var(--gold-dim); }
+        .breadcrumb { font-family: 'Cinzel'; font-size: 0.8em; color: #888; margin-top: 10px; cursor: pointer; text-transform: uppercase; }
+        .breadcrumb:hover { color: var(--gold); }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        
+        /* CARDS */
+        .card { 
+            background: var(--card-bg); 
+            border: 1px solid rgba(212, 175, 55, 0.2); 
+            padding: 40px; 
+            margin-bottom: 40px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.8);
+            position: relative;
+        }
+        /* Detalhe dourado no topo */
+        .card::after { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100px; height: 3px; background: var(--gold); }
+
+        h2 { font-family: 'Cinzel', serif; color: var(--gold); font-size: 1.8em; margin-top: 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
+        h3 { font-family: 'Cinzel', serif; color: #fff; font-size: 1.4em; margin-top: 30px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        
+        .destaque { color: var(--gold); font-weight: bold; }
+        .aviso-box { background: rgba(100, 20, 20, 0.3); border-left: 3px solid #d44; padding: 15px; margin: 20px 0; font-size: 0.9em; color: #ffcccc; }
+
+        /* ASTRO BAR */
+        .astro-bar { display: flex; justify-content: space-around; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #333; text-transform: uppercase; font-family: 'Cinzel'; font-size: 0.9em; letter-spacing: 1px; }
+        .astro-item { text-align: center; }
+        .astro-val { display: block; color: var(--gold); font-size: 1.2em; font-weight: bold; margin-top: 5px; }
+
+        /* LISTA INGREDIENTES */
+        .ingredientes-list { list-style: none; padding: 0; }
+        .ingredientes-list li { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 15px 0; display: flex; align-items: flex-start; gap: 15px; }
+        .ing-icon { color: var(--gold); font-size: 1.2em; margin-top: 3px; }
+        .ing-desc { color: #aaa; font-size: 0.9em; display: block; margin-top: 5px; font-style: italic; }
+
+        /* PASSO A PASSO */
+        .step { margin-bottom: 20px; }
+        .step-num { display: inline-block; background: var(--gold); color: #000; font-weight: bold; width: 25px; height: 25px; text-align: center; line-height: 25px; border-radius: 50%; margin-right: 10px; font-family: 'Cinzel'; }
+
+        /* MANTRA */
+        .mantra-box { text-align: center; background: rgba(0,0,0,0.5); border: 1px dashed var(--gold); padding: 30px; margin-top: 30px; font-style: italic; font-size: 1.2em; color: var(--gold-light); }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="breadcrumb" onclick="window.location.href='dashboard-premium.html'"><i class="fas fa-arrow-left"></i> Voltar ao Dashboard</div>
+    <h1>ALQUIMIA DIÁRIA</h1>
+</header>
+
+<div class="container">
+
+    <div class="astro-bar">
+        <div class="astro-item">Regente do Dia <span class="astro-val" id="regente-dia">...</span></div>
+        <div class="astro-item">Fase da Lua <span class="astro-val" id="fase-lua">...</span></div>
+        <div class="astro-item">Energia <span class="astro-val" id="energia-tipo">...</span></div>
+    </div>
+
+    <div class="card">
+        <h2>Diagnóstico Energético</h2>
+        <p id="diagnostico-texto">
+            Aguarde, estamos calculando a intersecção entre a regência planetária e o ciclo lunar para formular sua alquimia...
+        </p>
+    </div>
+
+    <div class="card">
+        <h2><i class="fas fa-mortar-pestle"></i> A Receita Sagrada</h2>
+        <p>Este banho foi calculado para <span class="destaque" id="objetivo-banho">...</span>. Siga rigorosamente os componentes.</p>
+        
+        <ul class="ingredientes-list" id="lista-ingredientes">
+            </ul>
+        
+        <div class="aviso-box">
+            <b>⚠️ Contraindicações:</b> Este banho contém ervas quentes. Não recomendado para gestantes ou pessoas com alergias dermatológicas severas. Em caso de dúvida, faça o teste no pulso.
+        </div>
+    </div>
+
+    <div class="card">
+        <h2><i class="fas fa-book-open"></i> Gnose (O Conhecimento Oculto)</h2>
+        <div id="gnose-texto">
+            </div>
+    </div>
+
+    <div class="card">
+        <h2><i class="fas fa-fire"></i> Ritual de Preparo e Ativação</h2>
+        
+        <div class="step">
+            <span class="step-num">1</span>
+            <span id="passo-1">Ferva 2 litros de água mineral ou filtrada. Assim que ferver, desligue o fogo. (Não ferva as ervas frescas para não matar o prana).</span>
+        </div>
+        <div class="step">
+            <span class="step-num">2</span>
+            <span id="passo-2">Adicione os ingredientes na ordem listada acima. Tampe a panela com um prato branco ou pano limpo. Isso se chama "Abafar", para que os óleos essenciais fiquem na água.</span>
+        </div>
+        <div class="step">
+            <span class="step-num">3</span>
+            <span id="passo-3">Aguarde amornar (cerca de 20 minutos). Coe as ervas e devolva-as à natureza (um vaso ou jardim). Leve apenas o líquido para o banho.</span>
+        </div>
+        <div class="step">
+            <span class="step-num">4</span>
+            <span id="passo-4">Tome seu banho de higiene normal. Ao final, desligue o chuveiro. Despeje o preparado <span class="destaque">do pescoço para baixo</span>, lentamente.</span>
+        </div>
+
+        <div class="mantra-box">
+            <i class="fas fa-quote-left" style="color:#444; margin-right: 10px;"></i>
+            <span id="mantra-texto">...</span>
+            <i class="fas fa-quote-right" style="color:#444; margin-left: 10px;"></i>
+            <p style="font-size: 0.7em; margin-top: 15px; color: #666; font-family: sans-serif;">(Repita 3x em voz alta enquanto a água cai)</p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // === MOTOR ALQUÍMICO COMPLETO ===
+    
+    // 1. Dicionário de Fitoenergética (A Ciência das Ervas)
+    const FITO = {
+        "Alecrim": "Atua no neurotransmissor da alegria. Eleva a frequência vibracional imediatamente, cortando a apatia.",
+        "Arruda": "Erva de altíssimo poder de limpeza. Sua estrutura etérica age como uma espada cortando larvas astrais.",
+        "Sal Grosso": "Cristal de geometria cúbica que neutraliza íons. Ele 'zera' o campo magnético, removendo tanto o bom quanto o ruim (por isso precisa de ervas depois).",
+        "Lavanda": "Erva da transmutação violeta. Acalma o corpo mental e prepara o espírito para a intuição.",
+        "Canela": "Especiaria do fogo. Acelera a vibração das moléculas ao redor, atraindo movimento e prosperidade.",
+        "Louro": "A folha da vitória. Usada por imperadores romanos. Atrai reconhecimento, sucesso material e abre caminhos.",
+        "Rosas Vermelhas": "Trabalha diretamente no Chakra Cardíaco. Ativa o magnetismo pessoal e a autoestima.",
+        "Hortelã": "Erva de Mercúrio. Limpa a confusão mental, ajuda no foco e na tomada de decisões rápidas.",
+        "Mel": "O ouro líquido. Suaviza a aura, adoça as palavras e atrai simpatia das pessoas ao redor.",
+        "Guiné": "Erva 'corta-inveja'. Cria um campo de força impenetrável contra pensamentos negativos alheios."
+    };
+
+    // 2. Dicionário de Cristais
+    const CRISTAIS = {
+        "Quartzo Branco": "Amplificador universal. Potencializa o efeito de qualquer erva.",
+        "Ametista": "Transmutação. Transforma energia densa em sutil.",
+        "Citrino": "O cristal do sol. Atrai alegria e dinheiro.",
+        "Quartzo Rosa": "O cristal do amor incondicional. Cura feridas emocionais.",
+        "Turmalina Negra": "O escudo. Repele negatividade pesada."
+    };
+
+    // 3. Matriz de Decisão (Dia da Semana + Fase Lunar)
+    const MATRIX = {
+        // DOMINGO (SOL - Sucesso/Vitalidade)
+        0: {
+            "Nova": { nome: "Semeadura Solar", objetivo: "Iniciar projetos com brilho", ervas: ["Alecrim", "Laranja", "Girassol"], cristal: "Citrino", mantra: "Eu sou o Sol do meu próprio universo. Onde eu toco, a luz se faz." },
+            "Crescente": { nome: "Explosão de Vitalidade", objetivo: "Crescer na carreira e saúde", ervas: ["Louro", "Canela", "Calêndula"], cristal: "Pirita", mantra: "Minha energia cresce e ocupa todos os espaços. Sou visível e próspero." },
+            "Cheia": { nome: "Coroação do Rei", objetivo: "Atrair fama e reconhecimento", ervas: ["Alecrim", "Camomila", "Mel"], cristal: "Topázio", mantra: "Eu aceito a abundância completa. O universo me aplaude." },
+            "Minguante": { nome: "Limpeza do Ego", objetivo: "Remover orgulho e estagnação", ervas: ["Casca de Limão", "Sal Grosso"], cristal: "Quartzo Branco", mantra: "Limpo o que impede meu brilho. Sou pura essência." }
+        },
+        // SEGUNDA (LUA - Emoção/Intuição)
+        1: {
+            "Nova": { nome: "Semente da Intuição", objetivo: "Conectar com o subconsciente", ervas: ["Artemísia", "Anis Estrelado"], cristal: "Pedra da Lua", mantra: "Ouço a voz do silêncio. Minha intuição é meu guia." },
+            "Crescente": { nome: "Magnetismo Emocional", objetivo: "Atrair carinho e proteção", ervas: ["Jasmim", "Alfazema"], cristal: "Quartzo Rosa", mantra: "Meu coração se abre para receber o que é meu por direito." },
+            "Cheia": { nome: "Clarividência Máxima", objetivo: "Sonhos proféticos e visão", ervas: ["Sândalo", "Rosa Branca"], cristal: "Ametista", mantra: "A luz da lua revela o oculto. Eu vejo a verdade." },
+            "Minguante": { nome: "Cura das Mágoas", objetivo: "Esquecer traumas passados", ervas: ["Melissa", "Sal Grosso"], cristal: "Quartzo Fumê", mantra: "Eu deixo ir o que me feriu. Minhas águas estão limpas." }
+        },
+        // TERÇA (MARTE - Coragem/Ação)
+        2: {
+            "Nova": { nome: "Início da Batalha", objetivo: "Coragem para novos desafios", ervas: ["Hortelã", "Gengibre"], cristal: "Granada", mantra: "Tenho a força do ferro. Nada me detém." },
+            "Crescente": { nome: "Avanço Tático", objetivo: "Vencer concorrência", ervas: ["Espada de São Jorge", "Pimenta"], cristal: "Jaspe Vermelho", mantra: "Abro meus caminhos com a força da minha vontade." },
+            "Cheia": { nome: "Vitória Total", objetivo: "Conquista material rápida", ervas: ["Cravo", "Canela", "Girassol"], cristal: "Olho de Tigre", mantra: "Eu conquisto, eu venço, eu realizo. É meu." },
+            "Minguante": { nome: "Corte de Demandas", objetivo: "Quebrar inveja e ataques", ervas: ["Guiné", "Arruda", "Aroeira"], cristal: "Turmalina Negra", mantra: "Todo mal enviado a mim retorna à origem. Estou blindado." }
+        },
+        // QUARTA (MERCÚRIO - Mente/Comércio)
+        3: {
+            "Nova": { nome: "Clareza de Ideias", objetivo: "Planejamento mental", ervas: ["Hortelã", "Capim Limão"], cristal: "Sodalita", mantra: "Minha mente é afiada como uma espada. Vejo as soluções." },
+            "Crescente": { nome: "Expansão de Negócios", objetivo: "Vendas e acordos", ervas: ["Manjericão", "Louro"], cristal: "Citrino", mantra: "Minha palavra cria riqueza. O dinheiro flui para mim." },
+            "Cheia": { nome: "Eloquência Poderosa", objetivo: "Convencer pessoas", ervas: ["Noz Moscada", "Anis"], cristal: "Ágata", mantra: "Minha voz encanta e convence. O mundo me ouve." },
+            "Minguante": { nome: "Limpeza Mental", objetivo: "Acabar com ansiedade", ervas: ["Camomila", "Lavanda"], cristal: "Ametista", mantra: "Silencio o ruído. Minha mente encontra a paz." }
+        },
+        // QUINTA (JÚPITER - Sorte/Expansão)
+        4: {
+            "Nova": { nome: "Semente da Fortuna", objetivo: "Iniciar ciclo financeiro", ervas: ["Cedro", "Sálvia"], cristal: "Pirita", mantra: "Eu planto hoje a riqueza de amanhã." },
+            "Crescente": { nome: "Crescimento Acelerado", objetivo: "Dinheiro rápido", ervas: ["Canela", "Fermento (pitada)"], cristal: "Olho de Tigre", mantra: "Tudo o que eu toco cresce e prospera." },
+            "Cheia": { nome: "Abundância Plena", objetivo: "Sorte e grandes ganhos", ervas: ["Louro", "Noz Moscada", "Girassol"], cristal: "Topázio Imperial", mantra: "Sou um ímã de oportunidades divinas." },
+            "Minguante": { nome: "Justiça Divina", objetivo: "Resolver processos/dívidas", ervas: ["Café", "Sal Grosso"], cristal: "Lápis Lazúli", mantra: "A justiça do universo trabalha a meu favor." }
+        },
+        // SEXTA (VÊNUS - Amor/Beleza)
+        5: {
+            "Nova": { nome: "Amor Próprio", objetivo: "Autoestima e valor", ervas: ["Maçã", "Hibisco"], cristal: "Quartzo Rosa", mantra: "Eu me amo, eu me aprovo, eu me basto." },
+            "Crescente": { nome: "Atração Magnética", objetivo: "Atrair olhares/parceiros", ervas: ["Canela", "Rosa Vermelha"], cristal: "Rodocrosita", mantra: "Sou irresistível. O amor vem a mim facilmente." },
+            "Cheia": { nome: "Paixão Intensa", objetivo: "Apimentar relação", ervas: ["Pimenta Rosa", "Mel"], cristal: "Granada", mantra: "Meu coração ferve de vida e prazer." },
+            "Minguante": { nome: "Corte de Laços", objetivo: "Esquecer ex-amor", ervas: ["Folha de Limão", "Nogueira"], cristal: "Obsidiana", mantra: "Corto os laços do passado. Sou livre para amar de novo." }
+        },
+        // SÁBADO (SATURNO - Karma/Estrutura)
+        6: {
+            "Nova": { nome: "Alicerce Sólido", objetivo: "Planejamento a longo prazo", ervas: ["Cavalinha", "Cipreste"], cristal: "Ônix", mantra: "Construo minha vida sobre rocha firme." },
+            "Crescente": { nome: "Disciplina Férrea", objetivo: "Foco e trabalho duro", ervas: ["Bambu", "Raiz de Gengibre"], cristal: "Hematita", mantra: "Tenho a disciplina dos mestres. Nada me desvia." },
+            "Cheia": { nome: "Realização Kármica", objetivo: "Colher o que plantou", ervas: ["Comigo-Ninguém-Pode", "Guiné"], cristal: "Turmalina", mantra: "Recebo o fruto do meu esforço sagrado." },
+            "Minguante": { nome: "O Grande Descarrego", objetivo: "Limpeza espiritual pesada", ervas: ["Arruda", "Guiné", "Sal Grosso", "Aroeira"], cristal: "Turmalina Negra", mantra: "Que todo mal seja banido para as profundezas da terra." }
+        }
+    };
+
+    // === LÓGICA DE EXECUÇÃO ===
+    
+    // Calcula Fase da Lua Real
+    function getLunarPhase() {
+        const date = new Date();
+        let year = date.getFullYear();
+        let month = date.getMonth() + 1;
+        let day = date.getDate();
+        if (month < 3) { year--; month += 12; }
+        ++month;
+        let c = 365.25 * year;
+        let e = 30.6 * month;
+        let total = c + e + day - 694039.09; // Dias desde epoca
+        total /= 29.5305882; // Ciclo lunar
+        let cycle = parseInt(total);
+        total -= cycle;
+        total *= 29.5305882;
+        
+        // Idade da lua em dias (0 a 29)
+        const age = total;
+        
+        if (age < 1.84566) return "Nova";
+        if (age < 5.53699) return "Crescente"; // Waxing Crescent
+        if (age < 9.22831) return "Crescente"; // First Quarter
+        if (age < 12.91963) return "Crescente"; // Waxing Gibbous
+        if (age < 16.61096) return "Cheia";
+        if (age < 20.30228) return "Minguante"; // Waning Gibbous
+        if (age < 23.99361) return "Minguante"; // Last Quarter
+        if (age < 27.68493) return "Minguante"; // Waning Crescent
+        return "Nova";
+    }
+
+    function renderPage() {
+        const hoje = new Date();
+        const diaSemana = hoje.getDay(); // 0 a 6
+        const faseLua = getLunarPhase();
+        
+        const nomesDias = ["Domingo (Sol)", "Segunda (Lua)", "Terça (Marte)", "Quarta (Mercúrio)", "Quinta (Júpiter)", "Sexta (Vênus)", "Sábado (Saturno)"];
+        const regentes = ["O Sol (Vitalidade)", "A Lua (Emoção)", "Marte (Guerra)", "Mercúrio (Intelecto)", "Júpiter (Expansão)", "Vênus (Amor)", "Saturno (Karma)"];
+
+        // 1. Preenche Astro Bar
+        document.getElementById('regente-dia').innerText = nomesDias[diaSemana].split(' ')[1].replace('(','').replace(')','');
+        document.getElementById('fase-lua').innerText = faseLua;
+        document.getElementById('energia-tipo').innerText = (faseLua === "Minguante" || faseLua === "Nova") ? "Interiorização/Limpeza" : "Expansão/Ação";
+
+        // 2. Busca o Banho na Matriz
+        const ritual = MATRIX[diaSemana][faseLua];
+
+        // 3. Preenche Diagnóstico
+        const diagText = `Hoje é ${nomesDias[diaSemana]}, um dia regido por ${regentes[diaSemana]}. O céu noturno nos apresenta uma Lua ${faseLua}. 
+        Essa combinação cria um vórtice energético específico: A força de ${regentes[diaSemana].split(' ')[0]} encontra o momento de ${faseLua === "Minguante" ? "contração e limpeza" : "expansão"} da Lua. 
+        Portanto, não é dia de qualquer banho. É dia de <b>${ritual.nome}</b>.`;
+        document.getElementById('diagnostico-texto').innerHTML = diagText;
+
+        // 4. Preenche Receita
+        document.getElementById('objetivo-banho').innerText = ritual.objetivo;
+        const listaUl = document.getElementById('lista-ingredientes');
+        
+        // Adiciona Cristal
+        listaUl.innerHTML = `<li><i class="fas fa-gem ing-icon"></i> <div><b>Cristal Potencializador:</b> ${ritual.cristal} <span class="ing-desc">${CRISTAIS[ritual.cristal] || "Cristal de conexão com a frequência do dia."}</span></div></li>`;
+
+        // Adiciona Ervas
+        ritual.ervas.forEach(erva => {
+            const nomeErva = erva;
+            // Tenta achar explicação na base de dados (busca parcial)
+            let explicacao = "Erva de poder para sintonização.";
+            for (const [key, value] of Object.entries(FITO)) {
+                if (nomeErva.includes(key)) explicacao = value;
+            }
+
+            listaUl.innerHTML += `<li><i class="fas fa-leaf ing-icon"></i> <div><b>${nomeErva}</b> <span class="ing-desc">${explicacao}</span></div></li>`;
+        });
+
+        // 5. Preenche Gnose
+        const gnoseHTML = `<p><b>Por que estas ervas hoje?</b><br>
+        Você está utilizando elementos da <i>Fitoenergética</i>. Diferente da fitoterapia (que usa o princípio químico), aqui usamos o campo áurico da planta. 
+        Ao combinar <b>${ritual.ervas[0]}</b> com a regência de hoje, criamos uma ressonância. É como sintonizar um rádio: se você usasse uma erva de Vênus (amor) numa Terça de Marte (guerra), criaria ruído estático na sua aura. 
+        A receita acima está perfeitamente afinada com a frequência do dia.</p>`;
+        document.getElementById('gnose-texto').innerHTML = gnoseHTML;
+
+        // 6. Preenche Mantra
+        document.getElementById('mantra-texto').innerText = ritual.mantra;
+    }
+
+    // Inicializa
+    auth.onAuthStateChanged(user => {
+        if (!user) window.location.href = "index.html";
+        else renderPage();
+    });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Arcano | Área do Iniciado</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root { --gold: #d4af37; --dark-bg: #050505; --card-bg: #111; }
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: #000 url('portalarcano_background.jpg') no-repeat center center fixed; background-size: cover; color: #e0e0e0; min-height: 100vh; }
+        
+        .overlay { background: rgba(0,0,0,0.85); min-height: 100vh; padding-bottom: 50px; }
+        
+        header { padding: 40px 20px; text-align: center; border-bottom: 1px solid rgba(212,175,55,0.3); }
+        h1 { font-family: 'Cinzel', serif; color: var(--gold); font-size: 2.2em; margin: 0; text-shadow: 0 0 20px var(--gold); }
+        .welcome { font-family: 'Cinzel', serif; color: #fff; margin-top: 10px; font-size: 1.1em; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        
+        .grid-menu { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 30px; 
+        }
+
+        /* CARD DE NAVEGAÇÃO */
+        .nav-card {
+            background: rgba(20, 20, 20, 0.9);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 250px;
+        }
+
+        .nav-card:hover { 
+            border-color: var(--gold); 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 40px rgba(212,175,55,0.15);
+            background: rgba(30,30,30,0.95);
+        }
+
+        .nav-card i { font-size: 3em; color: var(--gold); margin-bottom: 20px; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .nav-card h3 { font-family: 'Cinzel', serif; font-size: 1.4em; margin: 0; color: #fff; }
+        .nav-card p { color: #888; font-size: 1em; margin-top: 10px; line-height: 1.4; }
+        
+        .nav-card::after {
+            content: "ACESSAR";
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--gold);
+            font-family: 'Cinzel';
+            font-size: 0.9em;
+            transition: 0.3s;
+            opacity: 0;
+        }
+        .nav-card:hover::after { bottom: 15px; opacity: 1; }
+
+        .logout { position: fixed; bottom: 20px; right: 20px; color: #555; cursor: pointer; font-family: sans-serif; font-size: 0.8em; z-index: 100; }
+    </style>
+</head>
+<body>
+<div class="overlay">
+    <header>
+        <h1>PORTAL ARCANO</h1>
+        <div class="welcome">Bem-vindo(a) ao Círculo Interno, <span id="user-name">Iniciado</span></div>
+    </header>
+
+    <div class="container">
+        <div class="grid-menu">
+            
+            <div class="nav-card" onclick="window.location.href='premium-mapa.html'">
+                <i class="fas fa-globe-europe"></i>
+                <h3>Mapa Astral Natal</h3>
+                <p>A geometria sagrada do seu nascimento. Leitura profunda de Sol, Ascendente, Lua e Casas.</p>
+            </div>
+
+            <div class="nav-card" onclick="window.location.href='premium-numerologia.html'">
+                <i class="fas fa-hashtag"></i>
+                <h3>Numerologia Cabalística</h3>
+                <p>Descubra seu Número de Destino, Missão de Alma e a vibração exata do dia de hoje.</p>
+            </div>
+
+            <div class="nav-card" onclick="window.location.href='premium-banhos.html'">
+                <i class="fas fa-bath"></i>
+                <h3>Rituais & Banhos</h3>
+                <p>Alquimia diária baseada na fase lunar e regência planetária. Receitas completas.</p>
+            </div>
+
+            <div class="nav-card" onclick="window.location.href='premium-oraculos.html'">
+                <i class="fas fa-eye"></i>
+                <h3>Templo dos Oráculos</h3>
+                <p>Tarot, Búzios e Consultas Diretas. Envie perguntas e receba orientações dos mestres.</p>
+            </div>
+
+            <div class="nav-card" onclick="window.location.href='premium-fengshui.html'">
+                <i class="fas fa-home"></i>
+                <h3>Feng Shui & Lar</h3>
+                <p>Curas para sua casa, ativação do Baguá e harmonização de ambientes.</p>
+            </div>
+
+            <div class="nav-card" onclick="window.location.href='premium-chines.html'">
+                <i class="fas fa-dragon"></i>
+                <h3>Zodíaco Oriental</h3>
+                <p>Seu Animal Guardião, elemento chinês e as previsões anuais do Dragão.</p>
+            </div>
+
+        </div>
+    </div>
+    
+    <div class="logout" onclick="firebase.auth().signOut().then(() => window.location.href='index.html')">Sair</div>
+</div>
+
+<script>
+    const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
+    firebase.initializeApp(firebaseConfig);
+    
+    firebase.auth().onAuthStateChanged(user => {
+        if (!user) window.location.href = "index.html";
+        else {
+            // Pega apenas o primeiro nome para a saudação
+            firebase.firestore().collection("usuarios").doc(user.uid).get().then(doc => {
+                if(doc.exists) {
+                    const nome = doc.data().nomeNascimento || doc.data().nome || "Iniciado";
+                    document.getElementById('user-name').innerText = nome.split(' ')[0];
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>
