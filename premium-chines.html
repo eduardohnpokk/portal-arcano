@@ -153,39 +153,19 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // 2. ORQUESTRADOR AUTOMÁTICO (LÓGICA BLINDADA)
-    auth.onAuthStateChanged(user => {
-        // DATA PADRÃO DE SEGURANÇA (Seu Nascimento)
-        const DATA_PADRAO = "1978-05-01";
+    const DATA_PADRAO = "1978-05-01";
+    let dadosCarregados = false; // Flag de controle
 
-        if(!user) {
-            // Se não logado (Anônimo), usa padrão imediatamente
-            console.log("Visitante: Usando data padrão.");
-            processarResultado(DATA_PADRAO);
-            return;
-        }
+    // --- FUNÇÃO DE PROCESSAMENTO CENTRAL ---
+    function exibirResultado(dataNasc) {
+        if (dadosCarregados) return; // Se já carregou, não faz nada
+        dadosCarregados = true;
 
-        db.collection("usuarios").doc(user.uid).get().then(doc => {
-            if(doc.exists && doc.data().dataNascimento) {
-                // Tem dados: Usa a data do usuário
-                processarResultado(doc.data().dataNascimento);
-            } else {
-                // Logado mas sem dados: Usa padrão (não pergunta nada)
-                console.log("Sem data no perfil: Usando padrão.");
-                processarResultado(DATA_PADRAO);
-            }
-        }).catch(err => {
-            // Erro de rede: Usa padrão
-            console.log("Erro de conexão: Usando padrão.");
-            processarResultado(DATA_PADRAO);
-        });
-    });
-
-    // 3. PROCESSAMENTO (Core)
-    function processarResultado(dataNasc) {
         // Garante que o banco de dados carregou
         if (typeof calcularSignoChines !== "function") {
-            alert("Erro: Banco de dados oriental-database.js não carregado.");
+            // Se o JS database falhar, recarrega a página ou mostra erro crítico
+            document.querySelector('.loading-spinner').style.color = 'red';
+            document.querySelector('.loading-area p').innerText = "Erro ao carregar banco de dados.";
             return;
         }
 
@@ -217,11 +197,40 @@
         document.getElementById('res-inimigo-titulo').innerText = `O Conflito com: ${resultado.animal.conflito.animal}`;
         document.getElementById('res-inimigo-desc').innerText = resultado.animal.conflito.motivo;
 
-        // Transição de Tela (Tira o Loading, Mostra o Resultado)
+        // Tira o Loading
         document.getElementById('loading-screen').style.display = 'none';
         document.getElementById('intro-box').style.display = 'block';
         document.getElementById('result-area').style.display = 'block';
     }
+
+    // --- FAILSAFE (DISJUNTOR DE SEGURANÇA) ---
+    // Se em 2 segundos nada acontecer, força a exibição.
+    setTimeout(() => {
+        if (!dadosCarregados) {
+            console.log("Tempo esgotado. Forçando exibição padrão.");
+            exibirResultado(DATA_PADRAO);
+        }
+    }, 2000);
+
+    // --- TENTATIVA DE CARREGAR FIREBASE ---
+    auth.onAuthStateChanged(user => {
+        if (dadosCarregados) return; 
+
+        if (user) {
+            db.collection("usuarios").doc(user.uid).get().then(doc => {
+                if(doc.exists && doc.data().dataNascimento) {
+                    exibirResultado(doc.data().dataNascimento);
+                } else {
+                    exibirResultado(DATA_PADRAO);
+                }
+            }).catch(() => exibirResultado(DATA_PADRAO));
+        } else {
+            // Se não tiver usuário, o timeout de 2s vai pegar. 
+            // Mas podemos acelerar se o auth responder "null" rápido:
+            exibirResultado(DATA_PADRAO);
+        }
+    });
+
 </script>
 </body>
 </html>
