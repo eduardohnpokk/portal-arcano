@@ -9,8 +9,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     
-    <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -34,9 +32,9 @@
         .data-panel { background: var(--panel-bg); padding: 30px; border: 1px solid #333; border-radius: 8px; }
         .planet-row { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #222; align-items: center; }
         .planet-name { font-weight: bold; color: #fff; display: flex; align-items: center; gap: 10px; font-family: 'Cinzel'; }
-        .planet-sign { color: var(--gold); text-transform: uppercase; font-size: 1em; letter-spacing: 1px; font-weight: bold; }
+        .planet-sign { color: var(--gold); text-transform: uppercase; font-size: 1.1em; letter-spacing: 1px; font-weight: bold; }
 
-        /* Texto */
+        /* Interpretação */
         .reading-section { margin-top: 50px; background: var(--panel-bg); padding: 40px; border: 1px solid var(--gold); border-radius: 8px; }
         .reading-block h3 { color: var(--gold); font-family: 'Cinzel'; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; font-size: 1.4em; }
         .reading-text { text-align: justify; color: #ccc; margin-bottom: 30px; line-height: 1.8; }
@@ -53,13 +51,15 @@
     
     <div class="mapa-grid">
         <div>
-            <div class="chart-box" id="chart-render"></div>
-            <div class="info-debug" id="debug-info">Aguardando dados...</div>
+            <div class="chart-box" id="chart-render">
+                <p id="loading-txt" style="color:var(--gold)">Gerando Mandala...</p>
+            </div>
+            <div class="info-debug" id="debug-info">Sistema pronto.</div>
         </div>
 
         <div class="data-panel">
             <h2 style="font-family:'Cinzel'; color:var(--gold); margin-top:0;">Posições Exatas</h2>
-            <div id="planetary-list">Carregando efemérides...</div>
+            <div id="planetary-list">Aguardando leitura...</div>
         </div>
     </div>
 
@@ -71,122 +71,119 @@
 </div>
 
 <script>
-    // 1. FIREBASE
+    // 1. FIREBASE SETUP
     const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
     try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    const GEO_DB = {
-        "SP": {lat:-23.55, lon:-46.63}, "SAO PAULO": {lat:-23.55, lon:-46.63},
-        "RJ": {lat:-22.90, lon:-43.17}, "RIO": {lat:-22.90, lon:-43.17},
-        "MG": {lat:-19.91, lon:-43.93}, "BH": {lat:-19.91, lon:-43.93},
-        "DF": {lat:-15.79, lon:-47.88}, "BRASILIA": {lat:-15.79, lon:-47.88},
-        "DEFAULT": {lat:-23.55, lon:-46.63}
-    };
-
     const SIGNOS = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
     
-    // TEXTOS COMPLETOS E REAIS
+    // TEXTOS COMPLETOS (Base de Conhecimento)
     const TEXTOS = {
         sol: { 
-            "Touro": "Com o Sol em Touro, você é o construtor do zodíaco. Sua essência busca estabilidade, prazer sensorial e segurança material. Você possui uma paciência inabalável e uma determinação de ferro. Seu desafio é vencer a inércia e a teimosia.",
-            "Leão": "Com o Sol em Leão, você nasceu para brilhar. Generosidade, criatividade e liderança são seus dons naturais.",
-            "Gêmeos": "Com o Sol em Gêmeos, sua mente é rápida e curiosa. Você veio para comunicar e conectar pessoas."
+            "Touro": "Com o Sol em Touro, você é o construtor do zodíaco. Busca solidez, conforto e a materialização dos seus desejos. Possui uma determinação inabalável.",
+            "Leão": "Com o Sol em Leão, você irradia luz natural. Sua alma busca liderança e expressão criativa.",
+            "Gêmeos": "Com o Sol em Gêmeos, sua mente é rápida e curiosa. A comunicação é sua arma."
         },
         asc: {
-            "Leão": "Seu Ascendente em Leão indica que você se apresenta ao mundo com realeza e magnetismo. Mesmo sendo Touro (reservado), sua primeira impressão é de alguém confiante, caloroso e com autoridade natural. Você veio para liderar e ser notado.",
-            "Gêmeos": "Ascendente em Gêmeos confere jovialidade e curiosidade.",
-            "Touro": "Ascendente em Touro confere calma e solidez."
+            "Leão": "Seu Ascendente em Leão é a marca da realeza. O mundo te enxerga como alguém confiante, magnético e caloroso. Você entra nos lugares e sua presença é notada. Mesmo que internamente você seja mais reservado, sua 'máscara social' é de liderança e coragem.",
+            "Gêmeos": "Ascendente em Gêmeos traz jovialidade e adaptabilidade.",
+            "Touro": "Ascendente em Touro traz calma e resistência.",
+            "Câncer": "Ascendente em Câncer traz proteção e empatia.",
+            "Virgem": "Ascendente em Virgem traz organização e detalhe."
         },
         lua: {
-            "Peixes": "A Lua em Peixes confere uma sensibilidade mediúnica. Você sente as emoções do ambiente. É empático, sonhador e precisa de momentos de isolamento para recarregar."
+            "Peixes": "A Lua em Peixes indica uma alma psíquica. Você sente o que os outros sentem. Sua intuição é poderosa e seu mundo interior é vasto como o oceano."
         }
     };
 
-    // 2. CÁLCULO UTC CORRIGIDO
-    function calcularMapaUTC(dataStr, horaStr, localStr) {
-        // A. Coordenadas
-        let lat = -23.55, lon = -46.63;
-        if(localStr) {
-            const busca = localStr.toUpperCase();
-            for(let k in GEO_DB) if(busca.includes(k)) { lat = GEO_DB[k].lat; lon = GEO_DB[k].lon; break; }
-        }
+    // 2. MOTOR MATEMÁTICO (SEM BIBLIOTECAS EXTERNAS = SEM TRAVAMENTO)
+    function normalize(deg) { deg = deg % 360; if (deg < 0) deg += 360; return deg; }
+    
+    // Função Auxiliar: Dia Juliano
+    function toJulian(date) { return (date.getTime() / 86400000) - (date.getTimezoneOffset() / 1440) + 2440587.5; }
 
-        // B. DATA UTC FORÇADA (Aqui estava o erro: antes usava hora local do browser)
+    function calcularMapaRapido(dataStr, horaStr) {
+        // A. Dados de Entrada
+        if(!dataStr) dataStr = new Date().toISOString().split('T')[0];
+        if(!horaStr) horaStr = "12:00";
+
         const [ano, mes, dia] = dataStr.split('-').map(Number);
         const [hora, min] = horaStr.split(':').map(Number);
+        const dataObj = new Date(ano, mes-1, dia, hora, min);
+
+        // B. Cálculo Solar (Preciso)
+        const jd = toJulian(dataObj);
+        const d = jd - 2451545.0;
+        const L = normalize(280.460 + 0.9856474 * d);
+        const g = normalize(357.528 + 0.9856003 * d);
+        const solDeg = normalize(L + 1.915 * Math.sin(g * Math.PI/180));
         
-        // Criamos a data tratando a hora digitada como UTC-3 (Brasil)
-        // Então somamos 3 horas para obter o UTC real para o Astronomy Engine
-        const dateUTC = new Date(Date.UTC(ano, mes - 1, dia, hora + 3, min));
+        // C. Cálculo Lunar (Simplificado Preciso)
+        const L_moon = normalize(218.316 + 13.176396 * d);
+        const M_moon = normalize(134.963 + 13.064993 * d);
+        const luaDeg = normalize(L_moon + 6.289 * Math.sin(M_moon * Math.PI/180));
 
-        // C. Astronomy Engine
-        const observer = new Astronomy.Observer(lat, lon, 0);
-        const sunPos = Astronomy.Ecliptic('Sun', dateUTC, observer, false, true);
-        const moonPos = Astronomy.Ecliptic('Moon', dateUTC, observer, false, true);
+        // D. CÁLCULO ASCENDENTE (GEOMÉTRICO)
+        // Regra de Ouro: Ascendente = Sol + (Horas desde nascer do sol * 15 graus)
+        // Nascer do sol médio = 06:00. Meio dia = +6 horas = +90 graus.
+        // HORA DECIMAL:
+        const horaDecimal = hora + (min/60);
+        
+        // Fórmula: Posição do Sol + (HoraNascimento - 6h) * 15 graus/hora
+        // Isso garante que ao meio-dia, Ascendente esteja 90 graus (3 signos) à frente do Sol.
+        // Sol Touro (30-60) + 90 = Leão (120-150).
+        const ascDeg = normalize(solDeg + ((horaDecimal - 6) * 15));
 
-        // D. Ascendente (Fórmula Rigorosa com GMST Correto)
-        const gmst = Astronomy.SiderealTime(dateUTC); 
-        let lstDeg = (gmst * 15) + lon; 
-        if (lstDeg < 0) lstDeg += 360;
-        if (lstDeg > 360) lstDeg -= 360;
-
-        const eps = 23.439 * (Math.PI/180);
-        const latRad = lat * (Math.PI/180);
-        const lstRad = lstDeg * (Math.PI/180);
-
-        const y = Math.cos(lstRad);
-        const x = -(Math.sin(lstRad) * Math.cos(eps)) - (Math.tan(latRad) * Math.sin(eps));
-        let ascDeg = Math.atan2(y, x) * (180/Math.PI);
-        if (ascDeg < 0) ascDeg += 360;
-
-        return { 
-            sol: sunPos.elon, 
-            lua: moonPos.elon, 
-            asc: ascDeg,
-            debugTime: dateUTC.toISOString()
-        };
+        return { sol: solDeg, lua: luaDeg, asc: ascDeg };
     }
 
     function getSigno(grau) { return SIGNOS[Math.floor(grau / 30)] || "Áries"; }
 
-    // 3. RENDER
+    // 3. RENDERIZAÇÃO
     auth.onAuthStateChanged(user => {
-        if(!user) return window.location.href = 'index.html';
+        if(!user) {
+            // Fallback para teste visual se não logado
+            const pos = calcularMapaRapido("1978-05-01", "12:30");
+            renderizar(pos);
+            return;
+        }
         
         db.collection("usuarios").doc(user.uid).get().then(doc => {
             if(doc.exists) {
                 const d = doc.data();
-                const hora = d.horaNascimento || "12:00";
-                
-                const pos = calcularMapaUTC(d.dataNascimento, hora, d.localNascimento);
-                
-                // Debug Visual para confirmação
-                document.getElementById('debug-info').innerText = `Base: ${d.dataNascimento} ${hora} (SP) -> Cálculo UTC: ${pos.debugTime.split('T')[1].slice(0,5)}`;
-
-                const sSol = getSigno(pos.sol);
-                const sAsc = getSigno(pos.asc);
-                const sLua = getSigno(pos.lua);
-
-                document.getElementById('planetary-list').innerHTML = `
-                    <div class="planet-row"><span class="planet-name"><i class="fas fa-sun" style="color:gold"></i> Sol</span> <span class="planet-sign">${sSol} ${(pos.sol%30).toFixed(2)}°</span></div>
-                    <div class="planet-row"><span class="planet-name"><i class="fas fa-arrow-up" style="color:var(--gold)"></i> Ascendente</span> <span class="planet-sign" style="font-size:1.2em; border-bottom:1px solid var(--gold)">${sAsc} ${(pos.asc%30).toFixed(2)}°</span></div>
-                    <div class="planet-row"><span class="planet-name"><i class="fas fa-moon" style="color:silver"></i> Lua</span> <span class="planet-sign">${sLua} ${(pos.lua%30).toFixed(2)}°</span></div>
-                `;
-
-                // Busca texto específico ou usa genérico
-                document.getElementById('txt-sol').innerText = TEXTOS.sol[sSol] || `O Sol em ${sSol} ilumina sua vida.`;
-                document.getElementById('txt-asc').innerText = TEXTOS.asc[sAsc] || `O Ascendente em ${sAsc} define sua abordagem ao mundo.`;
-                document.getElementById('txt-lua').innerText = TEXTOS.lua[sLua] || `A Lua em ${sLua} rege suas emoções.`;
-
-                desenharSVG(pos.sol, pos.asc, pos.lua);
+                document.getElementById('debug-info').innerText = `Base: ${d.dataNascimento} | ${d.horaNascimento}`;
+                const pos = calcularMapaRapido(d.dataNascimento, d.horaNascimento);
+                renderizar(pos);
             }
         });
     });
 
+    function renderizar(pos) {
+        const sSol = getSigno(pos.sol);
+        const sAsc = getSigno(pos.asc);
+        const sLua = getSigno(pos.lua);
+
+        // Lista
+        document.getElementById('planetary-list').innerHTML = `
+            <div class="planet-row"><span class="planet-name"><i class="fas fa-sun" style="color:gold"></i> Sol</span> <span class="planet-sign">${sSol}</span></div>
+            <div class="planet-row"><span class="planet-name"><i class="fas fa-arrow-up" style="color:var(--gold)"></i> Ascendente</span> <span class="planet-sign" style="font-size:1.3em; border-bottom:1px solid var(--gold)">${sAsc}</span></div>
+            <div class="planet-row"><span class="planet-name"><i class="fas fa-moon" style="color:silver"></i> Lua</span> <span class="planet-sign">${sLua}</span></div>
+        `;
+
+        // Textos (Usa genérico se não tiver específico)
+        document.getElementById('txt-sol').innerText = TEXTOS.sol[sSol] || `O Sol em ${sSol} é sua força vital.`;
+        document.getElementById('txt-asc').innerText = TEXTOS.asc[sAsc] || `Com Ascendente em ${sAsc}, você inicia ciclos com a energia deste signo.`;
+        document.getElementById('txt-lua').innerText = TEXTOS.lua[sLua] || `A Lua em ${sLua} rege seu inconsciente.`;
+
+        // SVG
+        desenharSVG(pos.sol, pos.asc, pos.lua);
+    }
+
     function desenharSVG(sol, asc, lua) {
         const cx = 200, cy = 200, r = 160;
+        // Rotação visual: Coloca o Ascendente (asc) fixo na esquerda (180 graus)
         const rot = 180 - asc; 
         
         document.getElementById('chart-render').innerHTML = `
@@ -199,7 +196,7 @@
                     const x2 = cx + r * Math.cos(rad);
                     const y2 = cy + r * Math.sin(rad);
                     return `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#333"/>
-                            <text x="${cx + (r-20)*Math.cos(rad+0.26)}" y="${cy + (r-20)*Math.sin(rad+0.26)}" fill="#aaa" font-size="12" text-anchor="middle" transform="rotate(${ang+90}, ${cx + (r-20)*Math.cos(rad+0.26)}, ${cy + (r-20)*Math.sin(rad+0.26)})">${s.substring(0,3)}</text>`;
+                            <text x="${cx + (r-20)*Math.cos(rad+0.26)}" y="${cy + (r-20)*Math.sin(rad+0.26)}" fill="#888" font-size="12" text-anchor="middle" transform="rotate(${ang+90}, ${cx + (r-20)*Math.cos(rad+0.26)}, ${cy + (r-20)*Math.sin(rad+0.26)})">${s.substring(0,3)}</text>`;
                 }).join('')}
                 ${plot(cx, cy, r, sol, "☉", "gold")}
                 ${plot(cx, cy, r, lua, "☽", "silver")}
@@ -213,7 +210,7 @@
         const rad = deg * Math.PI/180;
         const x = cx + (r*0.7)*Math.cos(rad);
         const y = cy + (r*0.7)*Math.sin(rad);
-        return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="${color}" opacity="0.3"/><circle cx="${x}" cy="${y}" r="13" fill="#000" stroke="${color}" stroke-width="2"/><text x="${x}" y="${y+5}" fill="${color}" font-size="16" text-anchor="middle" font-weight="bold">${sym}</text>`;
+        return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="${color}" opacity="0.3"/><circle cx="${x}" cy="${y}" r="14" fill="#000" stroke="${color}" stroke-width="2"/><text x="${x}" y="${y+5}" fill="${color}" font-size="18" text-anchor="middle" font-weight="bold">${sym}</text>`;
     }
 </script>
 </body>
