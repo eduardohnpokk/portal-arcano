@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Arcano | Zodíaco Chinês</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <script src="oriental-database.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; --red-china: #8a1c1c; }
+        
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; padding-bottom: 100px; }
+        
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        
+        .header-title { font-family: 'Cinzel'; color: var(--gold); text-align: center; margin-top: 40px; font-size: 2.8em; letter-spacing: 2px; }
+        .header-sub { text-align: center; color: #888; font-family: sans-serif; margin-bottom: 30px; }
+
+        /* INTRODUÇÃO TEÓRICA */
+        .intro-box {
+            background: rgba(20, 20, 20, 0.9); border: 1px solid var(--gold);
+            padding: 30px; margin-bottom: 40px; border-radius: 8px; text-align: center;
+        }
+        .intro-box p { margin: 0; color: #ccc; line-height: 1.6; }
+        .intro-box strong { color: var(--gold); font-family: 'Cinzel'; }
+
+        /* FORMULÁRIO */
+        .date-form { 
+            background: #111; padding: 30px; border-radius: 8px; border: 1px solid #333;
+            display: flex; gap: 20px; max-width: 500px; margin: 0 auto 50px auto; flex-direction: column;
+        }
+        .form-label { color: #fff; font-family: 'Cinzel'; margin-bottom: 5px; display: block; }
+        .date-input { 
+            padding: 15px; background: #000; border: 1px solid #444; color: #fff; 
+            font-size: 1.1em; border-radius: 4px; font-family: sans-serif; width: 93%;
+        }
+        .btn-calc { 
+            background: var(--gold); color: #000; border: none; padding: 15px; width: 100%; 
+            font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border-radius: 4px; transition: 0.3s;
+        }
+        .btn-calc:hover { background: #fff; }
+
+        /* RESULTADOS */
+        #result-area { display: none; }
+
+        .main-card {
+            background: var(--card-bg); border: 1px solid var(--gold); border-radius: 8px;
+            padding: 40px; text-align: center; margin-bottom: 30px;
+            box-shadow: 0 0 50px rgba(212,175,55,0.1);
+        }
+        
+        .animal-icon { font-size: 5em; color: var(--gold); margin-bottom: 20px; }
+        .animal-title { font-size: 3em; font-family: 'Cinzel'; color: #fff; margin: 0; line-height: 1; }
+        .element-badge { 
+            display: inline-block; background: var(--red-china); color: #fff; 
+            padding: 5px 15px; border-radius: 20px; font-family: 'Cinzel'; 
+            margin-top: 15px; font-size: 0.9em; letter-spacing: 1px;
+        }
+
+        .desc-text { text-align: justify; color: #ccc; line-height: 1.8; margin-top: 30px; font-size: 1.1em; }
+
+        /* GRID DE RELACIONAMENTOS */
+        .relations-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
+        .rel-card { background: #111; padding: 20px; border-radius: 8px; border-left: 4px solid #555; }
+        .rel-card h4 { margin: 0 0 10px 0; font-family: 'Cinzel'; color: #fff; }
+        .rel-card.ally { border-color: #4caf50; }
+        .rel-card.enemy { border-color: #ff4444; }
+        .rel-card p { margin: 0; color: #aaa; }
+
+        /* BOTÕES */
+        .btn-float { position: fixed; bottom: 30px; right: 30px; background: var(--gold); color: #000; padding: 15px 35px; border-radius: 50px; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border: none; z-index: 100; font-size: 1.1em; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .btn-back { cursor: pointer; color: #888; text-transform: uppercase; font-size: 0.8em; margin-bottom: 20px; display: inline-block; }
+
+        @media print {
+            .date-form, .btn-float, .btn-back, .intro-box { display: none !important; }
+            #result-area { display: block !important; }
+            body { background: #fff; color: #000; }
+            .main-card { border: 2px solid #000; background: #fff; color: #000; box-shadow: none; }
+            .animal-title, .desc-text { color: #000; }
+            .element-badge { background: #000; color: #fff; }
+            .rel-card { border: 1px solid #000; background: #fff; color: #000; }
+            .rel-card h4, .rel-card p { color: #000; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div onclick="window.location.href='dashboard-premium.html'" class="btn-back">← Voltar ao Hub</div>
+    
+    <h1 class="header-title">ZODÍACO CHINÊS</h1>
+    <p class="header-sub">Sabedoria Ancestral</p>
+
+    <div class="intro-box">
+        <p>Diferente da Astrologia Ocidental (Solar), o <strong>Zodíaco Chinês</strong> segue o calendário Luni-Solar. Por isso, o ano novo muda de data anualmente.<br><br><strong>Nosso sistema Premium calcula exatamente em qual ciclo lunar você nasceu</strong>, garantindo que você descubra seu Animal e Elemento verdadeiros.</p>
+    </div>
+
+    <div class="date-form" id="input-area">
+        <div>
+            <label class="form-label">Sua Data de Nascimento</label>
+            <input type="date" id="dataInput" class="date-input">
+        </div>
+        <button class="btn-calc" onclick="revelarSigno()">REVELAR MEU DESTINO</button>
+    </div>
+
+    <div id="result-area">
+        
+        <div class="main-card">
+            <div class="animal-icon" id="res-icon"><i class="fas fa-dragon"></i></div>
+            <h2 class="animal-title" id="res-animal">DRAGÃO</h2>
+            <div class="element-badge" id="res-elemento">FOGO</div>
+            
+            <div class="desc-text" id="res-desc">
+                </div>
+        </div>
+
+        <h3 style="text-align:center; font-family:'Cinzel'; color:var(--gold); margin-top:40px;">Triângulo de Afinidade</h3>
+        
+        <div class="relations-grid">
+            <div class="rel-card ally">
+                <h4><i class="fas fa-handshake"></i> Aliados Secretos</h4>
+                <p id="res-aliados">Rato e Macaco</p>
+                <small style="color:#666; display:block; margin-top:5px;">Estes signos trazem sorte e apoio incondicional para você.</small>
+            </div>
+            <div class="rel-card enemy">
+                <h4><i class="fas fa-bolt"></i> Oponente Natural</h4>
+                <p id="res-inimigo">Cão</p>
+                <small style="color:#666; display:block; margin-top:5px;">Evite conflitos diretos ou parcerias precipitadas com este signo.</small>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<button class="btn-float" onclick="window.print()"><i class="fas fa-file-pdf"></i> SALVAR LEITURA</button>
+
+<script>
+    // 1. FIREBASE INIT
+    const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
+    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Pré-preenchimento
+    auth.onAuthStateChanged(user => {
+        if(user) {
+            db.collection("usuarios").doc(user.uid).get().then(doc => {
+                if(doc.exists && doc.data().dataNascimento) {
+                    document.getElementById('dataInput').value = doc.data().dataNascimento;
+                }
+            });
+        }
+    });
+
+    // 2. LÓGICA DE EXIBIÇÃO
+    function revelarSigno() {
+        const data = document.getElementById('dataInput').value;
+        if(!data) { alert("Por favor, selecione a data."); return; }
+
+        // Chama o banco de dados (oriental-database.js)
+        const resultado = calcularSignoChines(data);
+        
+        // Renderiza
+        document.getElementById('res-animal').innerText = resultado.animal.nome.toUpperCase();
+        document.getElementById('res-elemento').innerText = resultado.elemento.nome.toUpperCase();
+        document.getElementById('res-icon').innerHTML = `<i class="${resultado.animal.icone}"></i>`;
+        
+        // Constrói o texto rico
+        document.getElementById('res-desc').innerHTML = `
+            <p><strong>O Arquétipo:</strong> ${resultado.animal.arquetipo}</p>
+            <p>${resultado.animal.perfil}</p>
+            <p style="border-top:1px solid #333; padding-top:15px; margin-top:20px;">
+                <strong>A Influência do Elemento ${resultado.elemento.nome}:</strong><br>
+                Este elemento adiciona ${resultado.elemento.qualidade.toLowerCase()} à sua personalidade base.
+                Isso torna você um ${resultado.animal.nome} único, diferente dos nascidos em outros anos.
+            </p>
+        `;
+
+        document.getElementById('res-aliados').innerText = resultado.animal.aliados;
+        document.getElementById('res-inimigo').innerText = resultado.animal.inimigo;
+
+        // Efeitos
+        document.getElementById('input-area').style.display = 'none';
+        document.getElementById('result-area').style.display = 'block';
+    }
+</script>
+</body>
+</html>
