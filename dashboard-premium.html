@@ -79,42 +79,42 @@
 <div class="container">
     <div class="modules-grid">
         
-        <div class="module-card" onclick="window.location.href='index.html'">
+        <div class="module-card" onclick="irPara('premium-mapa.html')">
             <div class="card-icon"><i class="fas fa-star"></i></div>
             <h3 class="card-title">Mapa Astral</h3>
             <p class="card-desc">Descubra a posição dos astros no momento do seu nascimento e como eles influenciam sua personalidade.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
 
-        <div class="module-card" onclick="window.location.href='premium-numerologia.html'">
+        <div class="module-card" onclick="irPara('premium-numerologia.html')">
             <div class="card-icon"><i class="fas fa-sort-numeric-up-alt"></i></div>
             <h3 class="card-title">Numerologia Cabalística</h3>
             <p class="card-desc">Decodifique seu nome e data de nascimento para revelar sua Missão de Alma e Destino.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
 
-        <div class="module-card" onclick="window.location.href='premium-oraculo.html'">
+        <div class="module-card" onclick="irPara('premium-oraculo.html')">
             <div class="card-icon"><i class="fas fa-eye"></i></div>
             <h3 class="card-title">Templo do Oráculo</h3>
             <p class="card-desc">Consulte o Tarô de Marselha para obter respostas imediatas sobre seus desafios atuais.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
 
-        <div class="module-card" onclick="window.location.href='premium-fengshui.html'">
+        <div class="module-card" onclick="irPara('premium-fengshui.html')">
             <div class="card-icon"><i class="fas fa-compass"></i></div>
             <h3 class="card-title">Feng Shui Kua</h3>
             <p class="card-desc">Harmonize sua casa. Descubra suas direções de poder para prosperidade, saúde e amor.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
 
-        <div class="module-card" onclick="window.location.href='premium-chines.html'">
+        <div class="module-card" onclick="irPara('premium-chines.html')">
             <div class="card-icon"><i class="fas fa-dragon"></i></div>
             <h3 class="card-title">Zodíaco Chinês</h3>
             <p class="card-desc">Revele seu animal interior e elemento regente baseados no calendário lunar ancestral.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
 
-        <div class="module-card" onclick="window.location.href='premium-banhos.html'">
+        <div class="module-card" onclick="irPara('premium-banhos.html')">
             <div class="card-icon"><i class="fas fa-mortar-pestle"></i></div>
             <h3 class="card-title">Alquimia & Rituais</h3>
             <p class="card-desc">Receitas de banhos e rituais calculados astrologicamente para o momento atual.</p>
@@ -144,15 +144,17 @@
                     document.getElementById('user-name').innerText = `Bem-vindo, ${nome}`;
                 }
             });
-        } else {
-            // Se não estiver logado, manda pro login (opcional)
-            // window.location.href = 'login.html'; 
         }
     });
 
+    // Função segura de navegação
+    function irPara(pagina) {
+        window.location.href = pagina;
+    }
+
     function logout() {
         auth.signOut().then(() => {
-            window.location.href = 'index.html';
+            window.location.href = 'index.html'; // Volta pro login ao sair
         });
     }
 </script>
