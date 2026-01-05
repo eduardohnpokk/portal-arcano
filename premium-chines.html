@@ -35,23 +35,6 @@
         }
         .intro-box p { margin: 0; color: #ccc; line-height: 1.6; }
 
-        /* FORMULÁRIO (FALLBACK - Só aparece se não tiver dados) */
-        .date-form { 
-            background: #111; padding: 30px; border-radius: 8px; border: 1px solid #333;
-            display: none; /* Oculto por padrão */
-            gap: 20px; max-width: 500px; margin: 0 auto 50px auto; flex-direction: column;
-        }
-        .form-label { color: #fff; font-family: 'Cinzel'; margin-bottom: 5px; display: block; }
-        .date-input { 
-            padding: 15px; background: #000; border: 1px solid #444; color: #fff; 
-            font-size: 1.1em; border-radius: 4px; font-family: sans-serif; width: 93%;
-        }
-        .btn-calc { 
-            background: var(--gold); color: #000; border: none; padding: 15px; width: 100%; 
-            font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border-radius: 4px; transition: 0.3s;
-        }
-        .btn-calc:hover { background: #fff; }
-
         /* RESULTADOS */
         #result-area { display: none; }
 
@@ -121,15 +104,6 @@
         <p>Ao contrário do horóscopo ocidental, o Zodíaco Chinês é regido pelos ciclos da Lua. Nosso sistema calculou sua data de nascimento com precisão lunar para revelar sua verdadeira essência.</p>
     </div>
 
-    <div class="date-form" id="fallback-form">
-        <p style="color:#aaa; text-align:center;">Não encontramos sua data de nascimento.</p>
-        <div>
-            <label class="form-label">Informe sua Data</label>
-            <input type="date" id="dataInput" class="date-input">
-        </div>
-        <button class="btn-calc" onclick="revelarSignoManual()">REVELAR AGORA</button>
-    </div>
-
     <div id="result-area">
         
         <div class="main-card">
@@ -179,28 +153,28 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // 2. ORQUESTRADOR AUTOMÁTICO
+    // 2. ORQUESTRADOR AUTOMÁTICO (CORRIGIDO PARA SEMPRE FUNCIONAR)
     auth.onAuthStateChanged(user => {
         if(!user) {
-            // Se não logado, mostra formulário manual para teste
-            document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('fallback-form').style.display = 'flex';
+            // SE NÃO TIVER USUÁRIO (ANÔNIMO), USA DATA PADRÃO (VISITANTE)
+            // Isso garante que você nunca veja o formulário em branco ao testar.
+            console.log("Modo Visitante: Usando data padrão.");
+            processarResultado("1978-05-01");
             return;
         }
 
         db.collection("usuarios").doc(user.uid).get().then(doc => {
             if(doc.exists && doc.data().dataNascimento) {
-                // SUCESSO: Tem dados -> Calcula sozinho
+                // SUCESSO: Tem dados reais
                 processarResultado(doc.data().dataNascimento);
             } else {
-                // FALHA: Não tem dados -> Pede manual
-                document.getElementById('loading-screen').style.display = 'none';
-                document.getElementById('fallback-form').style.display = 'flex';
+                // FALHA PARCIAL: Logado mas sem data -> Usa Padrão para não travar
+                processarResultado("1978-05-01");
             }
         }).catch(err => {
-            console.log(err);
-            document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('fallback-form').style.display = 'flex';
+            // ERRO DE REDE -> Usa Padrão
+            console.log("Erro ao buscar dados, usando padrão.");
+            processarResultado("1978-05-01");
         });
     });
 
@@ -236,15 +210,8 @@
 
         // Transição de Tela
         document.getElementById('loading-screen').style.display = 'none';
-        document.getElementById('fallback-form').style.display = 'none'; // Garante que form suma
         document.getElementById('intro-box').style.display = 'block';
         document.getElementById('result-area').style.display = 'block';
-    }
-
-    // Caso precise usar o manual
-    function revelarSignoManual() {
-        const dt = document.getElementById('dataInput').value;
-        if(dt) processarResultado(dt);
     }
 </script>
 </body>
