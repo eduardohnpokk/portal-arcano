@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Arcano | Hub</title>
+    <title>Portal Arcano | Hub do Iniciado</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -15,10 +15,10 @@
     <style>
         :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
         
-        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 18px; }
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 18px; overflow-x: hidden; }
         
-        /* LOADING */
-        #verificacao-seguranca {
+        /* LOADING SCREEN (Sempre visível inicialmente) */
+        #loading-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 9999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -26,74 +26,86 @@
         .spinner { font-size: 4em; color: var(--gold); animation: spin 2s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* HEADER PREMIUM */
+        /* HEADER DE LUXO (HUD) */
         .premium-header {
-            text-align: center; padding: 50px 20px;
+            text-align: center; padding: 40px 20px 60px 20px;
             background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid #333; margin-bottom: 40px;
         }
-        .user-welcome { font-family: 'Cinzel'; color: #888; font-size: 1em; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; }
-        .portal-title { font-family: 'Cinzel'; font-size: 3.5em; margin: 0; color: var(--gold); text-shadow: 0 0 30px rgba(212,175,55,0.2); }
         
-        /* BARRA DE DADOS ASTRAIS */
-        .astro-bar {
-            display: flex; justify-content: center; gap: 20px; margin-top: 25px;
-            font-family: 'Cinzel'; font-size: 0.9em; color: #ccc; flex-wrap: wrap;
+        .user-welcome { font-family: 'Cinzel'; color: #888; font-size: 0.9em; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; }
+        .portal-title { font-family: 'Cinzel'; font-size: 3em; margin: 0; color: var(--gold); text-shadow: 0 0 30px rgba(212,175,55,0.3); letter-spacing: 2px; }
+        
+        /* BARRA DE DADOS ASTRAIS (O que você pediu de volta) */
+        .astro-hud {
+            display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; margin-top: 30px;
+            max-width: 900px; margin-left: auto; margin-right: auto;
         }
-        .astro-item { display: flex; align-items: center; gap: 8px; border: 1px solid #333; padding: 8px 15px; border-radius: 20px; background: rgba(0,0,0,0.5); }
-        .astro-item i { color: var(--gold); }
-        .astro-highlight { color: #fff; font-weight: bold; }
+        
+        .hud-item {
+            background: rgba(20, 20, 20, 0.8); border: 1px solid #333; padding: 10px 20px;
+            border-radius: 4px; display: flex; align-items: center; gap: 10px;
+            font-family: 'Cinzel'; font-size: 0.9em; color: #ccc;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: 0.3s;
+        }
+        .hud-item:hover { border-color: var(--gold); transform: translateY(-3px); }
+        .hud-icon { color: var(--gold); font-size: 1.2em; }
+        .hud-val { color: #fff; font-weight: bold; margin-left: 5px; }
 
-        /* GRID */
-        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        /* GRID DE MÓDULOS */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px 60px 20px; }
         .modules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
 
         .module-card {
             background: var(--card-bg); border: 1px solid #333; border-radius: 8px;
-            padding: 30px; text-align: center; transition: 0.4s; cursor: pointer;
+            padding: 35px 25px; text-align: center; transition: 0.4s; cursor: pointer;
             position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center;
         }
-        .module-card:hover { transform: translateY(-10px); border-color: var(--gold); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .module-card:hover { transform: translateY(-10px); border-color: var(--gold); box-shadow: 0 10px 40px rgba(212,175,55,0.15); }
         .card-icon { font-size: 3em; color: var(--gold); margin-bottom: 20px; transition: 0.3s; }
         .module-card:hover .card-icon { transform: scale(1.1); text-shadow: 0 0 15px var(--gold); }
-        .card-title { font-family: 'Cinzel'; font-size: 1.5em; margin: 0 0 10px 0; color: #fff; }
-        .card-desc { color: #888; font-size: 0.95em; line-height: 1.6; margin-bottom: 20px; }
+        .card-title { font-family: 'Cinzel'; font-size: 1.4em; margin: 0 0 10px 0; color: #fff; }
+        .card-desc { color: #888; font-size: 0.9em; line-height: 1.6; margin-bottom: 20px; }
         
         .btn-access {
             margin-top: auto; padding: 10px 30px; border: 1px solid var(--gold); 
             color: var(--gold); text-decoration: none; font-family: 'Cinzel'; 
-            transition: 0.3s; border-radius: 30px; font-size: 0.9em;
+            transition: 0.3s; border-radius: 30px; font-size: 0.85em; background: rgba(0,0,0,0.5);
         }
         .module-card:hover .btn-access { background: var(--gold); color: #000; }
 
-        .logout-bar { text-align: center; margin-top: 60px; margin-bottom: 40px; }
-        .btn-logout { color: #555; text-decoration: none; font-family: sans-serif; font-size: 0.9em; cursor: pointer; transition: 0.3s; }
-        .btn-logout:hover { color: #ff4444; }
+        .logout-bar { text-align: center; margin-top: 60px; }
+        .btn-logout { color: #666; text-decoration: none; font-family: sans-serif; font-size: 0.9em; cursor: pointer; transition: 0.3s; padding: 10px 20px; border: 1px solid #333; border-radius: 4px; }
+        .btn-logout:hover { color: #ff4444; border-color: #ff4444; }
     </style>
 </head>
 <body>
 
-<div id="verificacao-seguranca">
+<div id="loading-screen">
     <i class="fas fa-compass spinner"></i>
-    <p style="color:#666; font-family:'Cinzel';">Sintonizando Frequência...</p>
+    <p style="color:#666; font-family:'Cinzel'; margin-top:15px;">Sintonizando Frequência Astral...</p>
 </div>
 
 <div class="premium-header">
-    <div class="user-welcome" id="user-name">Iniciado</div>
+    <div class="user-welcome" id="user-welcome">BEM-VINDO, INICIADO</div>
     <h1 class="portal-title">PORTAL ARCANO</h1>
     
-    <div class="astro-bar" id="astro-info" style="display:none;">
-        <div class="astro-item">
-            <i class="fas fa-map-marker-alt"></i>
-            <span id="user-city">...</span>
+    <div class="astro-hud" id="astro-hud" style="visibility: hidden;">
+        <div class="hud-item">
+            <i class="fas fa-map-marker-alt hud-icon"></i>
+            <span id="hud-city">...</span>
         </div>
-        <div class="astro-item">
-            <i class="fas fa-sun"></i>
-            <span>Sol em <span class="astro-highlight" id="user-sun">...</span></span>
+        <div class="hud-item">
+            <i class="fas fa-sun hud-icon"></i>
+            Sol em <span class="hud-val" id="hud-sun">...</span>
         </div>
-        <div class="astro-item">
-            <i class="fas fa-arrow-up"></i>
-            <span>Ascendente em <span class="astro-highlight" id="user-asc">...</span></span>
+        <div class="hud-item">
+            <i class="fas fa-arrow-up hud-icon"></i>
+            Ascendente em <span class="hud-val" id="hud-asc">...</span>
+        </div>
+        <div class="hud-item">
+            <i class="fas fa-moon hud-icon"></i>
+            Lua <span class="hud-val" id="hud-moon">...</span>
         </div>
     </div>
 </div>
@@ -104,51 +116,52 @@
         <div class="module-card" onclick="irPara('premium-mapa.html')">
             <div class="card-icon"><i class="fas fa-star"></i></div>
             <h3 class="card-title">Mapa Astral</h3>
-            <p class="card-desc">Sua tríade astrológica: Sol, Lua e Ascendente.</p>
+            <p class="card-desc">Sua tríade astrológica: Sol, Lua e Ascendente decodificados.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
 
         <div class="module-card" onclick="irPara('premium-numerologia.html')">
             <div class="card-icon"><i class="fas fa-sort-numeric-up-alt"></i></div>
             <h3 class="card-title">Numerologia</h3>
-            <p class="card-desc">Missão de vida e destino.</p>
+            <p class="card-desc">Missão de vida, destino e expressão da alma.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
 
         <div class="module-card" onclick="irPara('premium-oraculo.html')">
             <div class="card-icon"><i class="fas fa-eye"></i></div>
             <h3 class="card-title">Oráculo</h3>
-            <p class="card-desc">Respostas do Tarô para o momento.</p>
+            <p class="card-desc">Consulte o Tarô para obter respostas imediatas.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
 
         <div class="module-card" onclick="irPara('premium-fengshui.html')">
             <div class="card-icon"><i class="fas fa-compass"></i></div>
             <h3 class="card-title">Feng Shui</h3>
-            <p class="card-desc">Harmonize sua casa e ative a prosperidade.</p>
+            <p class="card-desc">Harmonize sua casa e ative as direções de poder.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
 
         <div class="module-card" onclick="irPara('premium-chines.html')">
             <div class="card-icon"><i class="fas fa-dragon"></i></div>
             <h3 class="card-title">Zodíaco Chinês</h3>
-            <p class="card-desc">Seu animal interior e elemento.</p>
+            <p class="card-desc">Seu animal interior e elemento regente.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
 
         <div class="module-card" onclick="irPara('premium-banhos.html')">
             <div class="card-icon"><i class="fas fa-mortar-pestle"></i></div>
             <h3 class="card-title">Rituais</h3>
-            <p class="card-desc">Alquimia para prosperidade e amor.</p>
+            <p class="card-desc">Alquimia, banhos e magias para o momento atual.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
 
         <div class="module-card" onclick="irPara('perguntas.html')">
             <div class="card-icon"><i class="fas fa-question-circle"></i></div>
             <h3 class="card-title">Perguntas</h3>
-            <p class="card-desc">Conselhos diretos da sabedoria arcana.</p>
+            <p class="card-desc">Tire suas dúvidas e aprofunde seu conhecimento.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
+
     </div>
 
     <div class="logout-bar">
@@ -157,20 +170,25 @@
 </div>
 
 <script>
-    // 1. FAILSAFE VISUAL
-    setTimeout(() => { document.getElementById('verificacao-seguranca').style.display = 'none'; }, 3000);
+    // --- 1. FAILSAFE DE SEGURANÇA (3 SEGUNDOS) ---
+    // Se o Firebase demorar, abre a tela de qualquer jeito pra não travar.
+    setTimeout(() => {
+        const loading = document.getElementById('loading-screen');
+        if (loading) loading.style.display = 'none';
+        document.getElementById('astro-hud').style.visibility = 'visible';
+    }, 3000);
 
-    // 2. FIREBASE
+    // --- 2. FIREBASE INIT ---
     const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
     try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // 3. FUNÇÕES ASTROLÓGICAS RÁPIDAS
+    // --- 3. LÓGICA ASTRAL (EMBUTIDA) ---
     const SIGNOS = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
     
-    function calcularSol(data) {
-        if(!data) return "...";
+    function calcSol(data) {
+        if(!data || !data.includes('-')) return "Desconhecido";
         const [a, m, d] = data.split('-').map(Number);
         if((m==3&&d>=21)||(m==4&&d<=19)) return "Áries"; if((m==4&&d>=20)||(m==5&&d<=20)) return "Touro";
         if((m==5&&d>=21)||(m==6&&d<=20)) return "Gêmeos"; if((m==6&&d>=21)||(m==7&&d<=22)) return "Câncer";
@@ -180,8 +198,8 @@
         if((m==1&&d>=20)||(m==2&&d<=18)) return "Aquário"; return "Peixes";
     }
 
-    function calcularAsc(sol, hora) {
-        if(!sol || !hora || sol === "...") return "...";
+    function calcAsc(sol, hora) {
+        if(!sol || !hora || sol==="Desconhecido") return "?";
         const idx = SIGNOS.indexOf(sol);
         const h = parseInt(hora.split(':')[0]);
         const offset = Math.floor((h - 6) / 2);
@@ -190,7 +208,21 @@
         return SIGNOS[idxAsc];
     }
 
-    // 4. LÓGICA PRINCIPAL
+    function calcLua(data) {
+        if(!data) return "Nova";
+        const d = new Date(data);
+        // Algoritmo simples de fase (Conway)
+        let year = d.getFullYear(); let month = d.getMonth() + 1; let day = d.getDate();
+        if (month < 3) { year--; month += 12; } ++month;
+        let c = 365.25 * year; let e = 30.6 * month;
+        let jd = c + e + day - 694039.09; jd /= 29.5305882;
+        let b = parseInt(jd); jd -= b; b = Math.round(jd * 8);
+        if (b >= 8) b = 0;
+        const fases = ["Nova", "Crescente", "Crescente", "Gibosa", "Cheia", "Gibosa", "Minguante", "Minguante"];
+        return fases[b];
+    }
+
+    // --- 4. EXECUÇÃO ---
     auth.onAuthStateChanged(user => {
         if (user) {
             db.collection("usuarios").doc(user.uid).get().then(doc => {
@@ -198,28 +230,34 @@
                 const status = (d.status || "").toLowerCase();
                 const plano = (d.plano || "").toLowerCase();
 
+                // VERIFICAÇÃO PREMIUM
                 if (status === "premium" || plano === "premium") {
-                    // PREENCHE DADOS
-                    document.getElementById('user-name').innerText = `Bem-vindo, ${d.nome || "Iniciado"}`;
-                    document.getElementById('user-city').innerText = `${d.cidade || "Local Desconhecido"} - ${d.estado || "BR"}`;
                     
-                    const sol = calcularSol(d.dataNascimento);
-                    const asc = calcularAsc(sol, d.horaNascimento);
+                    // 1. Preenche Nome
+                    document.getElementById('user-welcome').innerText = `BEM-VINDO, ${d.nome || "INICIADO"}`;
                     
-                    document.getElementById('user-sun').innerText = sol;
-                    document.getElementById('user-asc').innerText = asc;
+                    // 2. Preenche Dados do HUD
+                    document.getElementById('hud-city').innerText = `${d.cidade || "Local Desconhecido"} - ${d.estado || "BR"}`;
                     
-                    document.getElementById('astro-info').style.display = 'flex';
-                    
-                    // LIBERA TELA
-                    document.getElementById('verificacao-seguranca').style.display = 'none';
+                    const sol = calcSol(d.dataNascimento);
+                    const asc = calcAsc(sol, d.horaNascimento);
+                    const lua = calcLua(d.dataNascimento);
+
+                    document.getElementById('hud-sun').innerText = sol;
+                    document.getElementById('hud-asc').innerText = asc;
+                    document.getElementById('hud-moon').innerText = lua;
+
+                    // 3. Destrava a Tela
+                    document.getElementById('astro-hud').style.visibility = 'visible';
+                    document.getElementById('loading-screen').style.display = 'none';
+
                 } else {
-                    alert("Acesso Negado.");
+                    alert("Acesso exclusivo para Premium.");
                     window.location.href = "index.html";
                 }
             }).catch(e => {
-                // Erro de rede (Offline), libera visualização básica
-                document.getElementById('verificacao-seguranca').style.display = 'none';
+                console.error(e);
+                // Erro de rede? Failsafe remove loading em 3s
             });
         } else {
             window.location.href = "index.html";
