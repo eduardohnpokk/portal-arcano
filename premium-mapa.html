@@ -15,10 +15,9 @@
     <style>
         :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
         
-        /* CORREÇÃO: O corpo é visível, o loading cobre ele. */
         body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; }
         
-        /* TELA DE LOADING (Preta e Dourada) */
+        /* LOADING SCREEN (SEGURANÇA VISUAL) */
         #loading-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 9999;
@@ -27,90 +26,83 @@
         .spinner { font-size: 4em; color: var(--gold); animation: spin 2s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .container { max-width: 900px; margin: 0 auto; padding: 20px 20px 100px 20px; }
-        .btn-back { cursor: pointer; color: #888; text-transform: uppercase; font-size: 0.8em; margin-bottom: 20px; display: inline-block; border-bottom: 1px solid transparent; transition:0.3s; }
-        .btn-back:hover { color: var(--gold); border-color: var(--gold); }
+        /* HEADER E VOLTAR */
+        .container { max-width: 800px; margin: 0 auto; padding: 20px 20px 100px 20px; }
+        .btn-back { cursor: pointer; color: #666; text-transform: uppercase; font-size: 0.8em; margin-bottom: 30px; display: inline-block; letter-spacing: 2px; transition: 0.3s; }
+        .btn-back:hover { color: var(--gold); }
         
-        .header-title { font-family: 'Cinzel'; color: var(--gold); text-align: center; margin-top: 40px; font-size: 2.5em; text-shadow: 0 0 20px rgba(212,175,55,0.3); }
-        .header-sub { text-align: center; color: #888; margin-bottom: 50px; text-transform: uppercase; letter-spacing: 2px; }
+        /* TÍTULO MÍSTICO */
+        .page-header { text-align: center; margin-bottom: 40px; border-bottom: 1px solid #333; padding-bottom: 20px; }
+        .page-icon { font-size: 2em; color: var(--gold); margin-bottom: 10px; }
+        .page-title { font-family: 'Cinzel'; color: var(--gold); font-size: 2.2em; margin: 0; letter-spacing: 1px; }
 
-        .astro-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 50px; }
-        .astro-card { background: radial-gradient(circle, #111 0%, #000 100%); border: 1px solid var(--gold); padding: 25px; border-radius: 8px; text-align: center; position: relative; overflow: hidden; transition: 0.3s; }
-        .astro-card:hover { transform: translateY(-5px); box-shadow: 0 0 15px rgba(212,175,55,0.2); }
-        .astro-icon { font-size: 2.5em; color: var(--gold); margin-bottom: 10px; }
-        .astro-label { color: #888; font-size: 0.8em; text-transform: uppercase; letter-spacing: 2px; }
-        .astro-value { font-family: 'Cinzel'; font-size: 1.4em; color: #fff; margin-top: 8px; font-weight: bold; }
+        /* O RELATÓRIO NARRATIVO */
+        .soul-report {
+            background: rgba(20, 20, 20, 0.6); 
+            border: 1px solid #333; 
+            padding: 40px; 
+            border-radius: 4px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+        
+        .narrative-text {
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #ccc;
+            margin-bottom: 30px;
+            text-align: justify;
+        }
+        
+        .highlight { color: #fff; font-weight: bold; border-bottom: 1px solid var(--gold); }
+        .gold-txt { color: var(--gold); font-family: 'Cinzel'; font-weight: bold; }
 
-        .report-section { display: flex; flex-direction: column; gap: 30px; }
-        .report-block { background: var(--card-bg); padding: 40px; border-left: 3px solid var(--gold); border-bottom: 1px solid #222; border-radius: 4px; }
-        .report-block h3 { margin: 0 0 20px 0; color: var(--gold); font-family: 'Cinzel'; font-size: 1.6em; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .report-block p { line-height: 1.8; color: #ccc; text-align: justify; margin-bottom: 15px; font-size: 1.05em; }
+        /* GRID DE DETALHES */
+        .astro-details {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 40px;
+            border-top: 1px solid #333; padding-top: 30px;
+        }
+        .detail-box { text-align: center; }
+        .detail-label { font-family: 'Cinzel'; color: #666; font-size: 0.9em; text-transform: uppercase; }
+        .detail-val { font-size: 1.4em; color: var(--gold); margin-top: 5px; }
 
-        @media(max-width: 600px) { .astro-grid { grid-template-columns: 1fr; } }
+        @media(max-width: 600px) { .astro-details { grid-template-columns: 1fr; } .narrative-text { text-align: left; } }
     </style>
 </head>
 <body>
 
 <div id="loading-screen">
     <i class="fas fa-compass spinner"></i>
-    <p style="color:#666; font-family:'Cinzel'; letter-spacing:2px;">Calculando Mapa Astral...</p>
+    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Decodificando Assinatura Estelar...</p>
 </div>
 
 <div class="container">
     <div onclick="window.location.href='dashboard-premium.html'" class="btn-back">← Voltar ao Hub</div>
-    
-    <h1 class="header-title">ARQUITETURA DA ALMA</h1>
-    <div class="header-sub" id="user-info">Carregando dados...</div>
 
-    <div class="astro-grid">
-        <div class="astro-card">
-            <div class="astro-icon"><i class="fas fa-sun"></i></div>
-            <div class="astro-label">Essência (Sol)</div>
-            <div class="astro-value" id="val-sol">...</div>
-        </div>
-        <div class="astro-card">
-            <div class="astro-icon"><i class="fas fa-arrow-up"></i></div>
-            <div class="astro-label">Máscara (Ascendente)</div>
-            <div class="astro-value" id="val-asc">...</div>
-        </div>
-        <div class="astro-card">
-            <div class="astro-icon"><i class="fas fa-moon"></i></div>
-            <div class="astro-label">Emoção (Lua)</div>
-            <div class="astro-value" id="val-lua">...</div>
-        </div>
+    <div class="page-header">
+        <i class="fas fa-telescope page-icon"></i>
+        <h1 class="page-title">ARQUITETURA DA ALMA</h1>
     </div>
 
-    <div class="report-section" id="report-area"></div>
+    <div class="soul-report" id="report-content" style="opacity:0; transition: opacity 1s;">
+        </div>
 </div>
 
 <script>
-    // --- 1. SEGURANÇA: REMOVE LOADING EM 3s SE O BANCO FALHAR ---
-    setTimeout(() => { document.getElementById('loading-screen').style.display = 'none'; }, 3000);
+    // --- 1. SEGURANÇA (FAILSAFE) ---
+    setTimeout(() => { 
+        document.getElementById('loading-screen').style.display = 'none'; 
+        document.getElementById('report-content').style.opacity = '1';
+    }, 3000);
 
     const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
     try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // --- 2. LÓGICA COMPLEXA E TEXTOS ---
+    // --- 2. LÓGICA DE GERAÇÃO DE TEXTO ---
     const SIGNOS = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
-    
-    const INTERPRETACAO_SOL = {
-        "Áries": "Energia cardinal de Fogo. Você possui a chama da iniciativa, coragem e liderança. Seu espírito é pioneiro e não teme abrir novos caminhos.",
-        "Touro": "Energia fixa de Terra. Você valoriza a estabilidade, o conforto e a construção sólida. Sua força reside na persistência e na conexão com o mundo material.",
-        "Gêmeos": "Energia mutável de Ar. Sua mente é rápida, curiosa e adaptável. Você veio para comunicar, conectar ideias e transitar entre mundos.",
-        "Câncer": "Energia cardinal de Água. Sua sensibilidade é sua maior força. Você nutre, protege e cria laços profundos com suas raízes e família.",
-        "Leão": "Energia fixa de Fogo. Você nasceu para brilhar e expressar sua individualidade criativa. Sua presença é magnética e seu coração generoso.",
-        "Virgem": "Energia mutável de Terra. Você busca o aprimoramento constante através da análise e do serviço. Sua atenção aos detalhes traz ordem ao caos.",
-        "Libra": "Energia cardinal de Ar. Sua busca é pela harmonia, justiça e beleza. Você floresce através dos relacionamentos e do equilíbrio.",
-        "Escorpião": "Energia fixa de Água. Você vive a vida com intensidade e profundidade. Sua capacidade de transformação e regeneração é inigualável.",
-        "Sagitário": "Energia mutável de Fogo. Você é o buscador da verdade e da sabedoria. Sua flecha aponta para horizontes distantes, físicos ou filosóficos.",
-        "Capricórnio": "Energia cardinal de Terra. Você constrói seu legado com disciplina, ambição e responsabilidade. O tempo é seu aliado na escalada da montanha.",
-        "Aquário": "Energia fixa de Ar. Você olha para o futuro e para o coletivo. Sua originalidade e visão humanitária quebram padrões obsoletos.",
-        "Peixes": "Energia mutável de Água. Você sente a conexão com o todo. Sua compaixão, intuição e sensibilidade artística são seus dons espirituais."
-    };
 
-    function calcularSigno(d, m) {
+    function getSigno(d, m) {
         if((m==3&&d>=21)||(m==4&&d<=19)) return "Áries"; if((m==4&&d>=20)||(m==5&&d<=20)) return "Touro";
         if((m==5&&d>=21)||(m==6&&d<=20)) return "Gêmeos"; if((m==6&&d>=21)||(m==7&&d<=22)) return "Câncer";
         if((m==7&&d>=23)||(m==8&&d<=22)) return "Leão"; if((m==8&&d>=23)||(m==9&&d<=22)) return "Virgem";
@@ -119,80 +111,73 @@
         if((m==1&&d>=20)||(m==2&&d<=18)) return "Aquário"; return "Peixes";
     }
 
-    function calcularAscendente(sol, hora) {
-        if(!hora) return "Desconhecido";
-        const idxSol = SIGNOS.indexOf(sol);
-        const h = parseInt(hora.split(':')[0]);
-        // Lógica simplificada: O Ascendente muda a cada 2h, começando no Signo Solar ao nascer do sol (aprox 6h)
-        const offset = Math.floor((h - 6) / 2);
-        let idxAsc = (idxSol + offset) % 12;
-        if(idxAsc < 0) idxAsc += 12;
-        return SIGNOS[idxAsc];
+    function getAsc(s, h) {
+        if(!h) return "Desconhecido";
+        const idx = SIGNOS.indexOf(s);
+        const hr = parseInt(h.split(':')[0]);
+        const off = Math.floor((hr - 6) / 2);
+        let a = (idx + off) % 12;
+        if(a < 0) a += 12;
+        return SIGNOS[a];
     }
 
-    function calcularLua(data) {
-        // Cálculo algorítmico da fase da Lua
-        const d = new Date(data);
-        let year = d.getFullYear(); let month = d.getMonth() + 1; let day = d.getDate();
-        if (month < 3) { year--; month += 12; } ++month;
-        let c = 365.25 * year; let e = 30.6 * month;
-        let jd = c + e + day - 694039.09; jd /= 29.5305882;
-        let b = parseInt(jd); jd -= b; b = Math.round(jd * 8);
-        if (b >= 8) b = 0;
-        const fases = ["Nova", "Crescente", "Quarto Crescente", "Gibosa Crescente", "Cheia", "Gibosa Minguante", "Quarto Minguante", "Minguante"];
-        return fases[b];
-    }
-
-    function renderizar(nome, data, hora, cidade) {
-        // Proteção contra dados vazios
-        const [ano, mes, dia] = (data || "2000-01-01").split('-').map(Number);
-        const sol = calcularSigno(dia, mes);
-        const asc = calcularAscendente(sol, hora || "12:00");
-        const lua = calcularLua(new Date(ano, mes-1, dia));
-
-        document.getElementById('user-info').innerText = `${nome} • ${cidade || "Local Desconhecido"} • ${data}`;
-        document.getElementById('val-sol').innerText = sol;
-        document.getElementById('val-asc').innerText = asc;
-        document.getElementById('val-lua').innerText = lua;
-
-        const area = document.getElementById('report-area');
-        area.innerHTML = `
-            <div class="report-block">
-                <h3>O SOL EM ${sol.toUpperCase()}</h3>
-                <p>${INTERPRETACAO_SOL[sol]}</p>
-                <p>O Sol é o centro do seu sistema. Ele representa onde você brilha e como você encontra vitalidade.</p>
+    function gerarRelatorio(cidade, sol, asc) {
+        return `
+            <div class="narrative-text">
+                Sua vinda ao mundo em <span class="highlight">${cidade}</span> não foi um acaso. O cosmos registrou sua assinatura exata naquele momento.
+                <br><br>
+                Calculamos que seu Sol está em <span class="gold-txt">${sol}</span>, definindo sua essência vital, e sua personalidade externa (Ascendente) se projeta através de <span class="gold-txt">${asc}</span>.
+                <br><br>
+                Detectamos uma <span class="highlight">"Frequência de Estagnação"</span> no seu mapa. Você sente que, por mais que lute, uma força invisível trava seus resultados em certas áreas? Isso é a tensão planetária do seu nascimento agindo sem controle consciente.
+                <br><br>
+                Agora que você é um Iniciado, vamos decodificar essa tensão e transformá-la em poder.
             </div>
-            <div class="report-block">
-                <h3>O ASCENDENTE EM ${asc.toUpperCase()}</h3>
-                <p>O Ascendente representa a sua "máscara social", a primeira impressão que você causa e a maneira como você inicia as coisas. Com ${asc} no horizonte, sua abordagem é marcada pelas características deste signo.</p>
-            </div>
-            <div class="report-block">
-                <h3>LUA NA FASE ${lua.toUpperCase()}</h3>
-                <p>A Lua rege seu mundo emocional. Nascendo sob a Lua ${lua}, seus instintos e reações emocionais estão sintonizados com este ciclo.</p>
+
+            <div class="astro-details">
+                <div class="detail-box">
+                    <div class="detail-label">Energia Solar</div>
+                    <div class="detail-val">${sol}</div>
+                </div>
+                <div class="detail-box">
+                    <div class="detail-label">Máscara Social</div>
+                    <div class="detail-val">${asc}</div>
+                </div>
             </div>
         `;
-        document.getElementById('loading-screen').style.display = 'none';
     }
 
+    // --- 3. CONEXÃO E RENDERIZAÇÃO ---
     auth.onAuthStateChanged(user => {
         if(user){
             db.collection("usuarios").doc(user.uid).get().then(doc => {
                 const d = doc.exists ? doc.data() : {};
-                // Verifica Premium novamente por segurança
-                const status = (d.status || "").toLowerCase();
-                const plano = (d.plano || "").toLowerCase();
-                if(status === "premium" || plano === "premium") {
-                    renderizar(d.nome, d.dataNascimento, d.horaNascimento, d.cidade);
-                } else {
-                    alert("Acesso Restrito.");
-                    window.location.href='index.html';
-                }
+                
+                // Dados (com fallbacks)
+                const cidade = d.cidade || "sua cidade";
+                const data = d.dataNascimento || "2000-01-01";
+                const hora = d.horaNascimento || "12:00";
+                
+                // Cálculos
+                const [a, m, dia] = data.split('-').map(Number);
+                const sol = getSigno(dia, m);
+                const asc = getAsc(sol, hora);
+
+                // Injeta o HTML complexo
+                const htmlContent = gerarRelatorio(cidade, sol, asc);
+                document.getElementById('report-content').innerHTML = htmlContent;
+
+                // Destrava a tela
+                document.getElementById('report-content').style.opacity = '1';
+                document.getElementById('loading-screen').style.display = 'none';
+
             }).catch(e => {
-                // Erro de rede? Renderiza o que der pra não travar
-                renderizar("Visitante (Offline)", "2000-01-01", "12:00", "Local");
+                // Erro? Mostra algo genérico
+                document.getElementById('report-content').innerHTML = gerarRelatorio("Terra", "Desconhecido", "Desconhecido");
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('report-content').style.opacity = '1';
             });
         } else {
-            window.location.href='index.html';
+            window.location.href = 'index.html';
         }
     });
 </script>
