@@ -9,189 +9,290 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
-    <script src="auth-guard.js"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; --red-china: #8a1c1c; }
+        :root { --gold: #d4af37; --bg-dark: #050505; --red: #8a1c1c; }
         
-        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; padding-bottom: 100px; }
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; line-height: 1.6; }
         
-        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
-        
-        .header-title { font-family: 'Cinzel'; color: var(--gold); text-align: center; margin-top: 40px; font-size: 2.8em; letter-spacing: 2px; }
-        .header-sub { text-align: center; color: #888; font-family: sans-serif; margin-bottom: 30px; }
+        /* LOADING */
+        #loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .spinner { font-size: 4em; color: var(--gold); animation: spin 2s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        /* LAYOUT */
+        .container { max-width: 900px; margin: 0 auto; padding: 20px 20px 100px 20px; }
+        
+        .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .btn-back { cursor: pointer; color: #666; text-transform: uppercase; font-size: 0.8em; letter-spacing: 2px; border-bottom: 1px solid transparent; transition:0.3s; }
+        .btn-back:hover { color: var(--gold); border-color: var(--gold); }
+        .btn-print { background: var(--gold); color: #000; border: none; padding: 8px 15px; border-radius: 4px; font-family: 'Cinzel'; cursor: pointer; font-weight: bold; }
+
+        .header-title { font-family: 'Cinzel'; color: var(--gold); text-align: center; font-size: 2.5em; margin-top: 20px; text-shadow: 0 0 20px rgba(212,175,55,0.3); }
+        .user-details { text-align: center; color: #888; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* BLOCO DE EXPLICAÇÃO (INTRO) */
         .intro-box {
-            background: rgba(20, 20, 20, 0.9); border: 1px solid var(--gold);
-            padding: 30px; margin-bottom: 40px; border-radius: 8px; text-align: center;
+            background: rgba(20, 20, 20, 0.6); border: 1px solid #333; padding: 30px; 
+            border-radius: 8px; margin-bottom: 50px; text-align: justify; border-left: 3px solid var(--red);
         }
-        .intro-box p { margin: 0; color: #ccc; line-height: 1.6; }
+        .intro-title { color: var(--gold); font-family: 'Cinzel'; font-size: 1.2em; margin-bottom: 15px; text-transform: uppercase; }
+        .intro-text { font-size: 1em; color: #ccc; line-height: 1.7; }
 
-        /* RESULTADO - Sempre visível para evitar loading infinito, o Guard já protegeu a entrada */
-        #result-area { display: block; animation: fadeIn 0.5s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .main-card {
-            background: var(--card-bg); border: 1px solid var(--gold); border-radius: 8px;
-            padding: 40px; text-align: center; margin-bottom: 30px;
-            box-shadow: 0 0 50px rgba(212,175,55,0.1);
+        /* CARTÃO DO RESULTADO */
+        .china-card {
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+            border: 1px solid var(--gold); border-radius: 8px; padding: 50px 30px; margin-top: 30px;
+            text-align: center; position: relative; overflow: hidden;
+            box-shadow: 0 0 40px rgba(138, 28, 28, 0.15);
         }
-        
-        .animal-icon { font-size: 5em; color: var(--gold); margin-bottom: 20px; }
-        .animal-title { font-size: 3em; font-family: 'Cinzel'; color: #fff; margin: 0; line-height: 1; }
+        .china-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: var(--red); }
+
+        .animal-icon { font-size: 6em; color: var(--gold); margin-bottom: 20px; text-shadow: 0 0 20px rgba(212,175,55,0.3); }
+        .animal-title { font-family: 'Cinzel'; font-size: 3.5em; color: #fff; margin: 0; text-transform: uppercase; line-height: 1; }
         .element-badge { 
-            display: inline-block; background: var(--red-china); color: #fff; 
-            padding: 5px 15px; border-radius: 20px; font-family: 'Cinzel'; 
-            margin-top: 15px; font-size: 0.9em; letter-spacing: 1px;
+            background: var(--red); color: #fff; padding: 5px 25px; border-radius: 30px; 
+            display: inline-block; margin-top: 15px; font-family: 'Cinzel'; font-size: 1.1em; letter-spacing: 2px;
         }
 
-        .desc-text { text-align: justify; color: #ccc; line-height: 1.8; margin-top: 30px; font-size: 1.1em; }
-        .desc-text p { margin-bottom: 20px; }
-        .desc-text strong { color: #fff; }
+        /* REPORT DETALHADO */
+        .report-section { margin-top: 50px; display: grid; grid-template-columns: 1fr; gap: 30px; }
+        .report-block { background: rgba(255,255,255,0.03); padding: 30px; border-radius: 4px; border: 1px solid #222; }
+        .block-head { color: var(--gold); font-family: 'Cinzel'; font-size: 1.4em; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .block-text { color: #ccc; text-align: justify; font-size: 1.05em; }
+        .highlight { color: #fff; font-weight: bold; }
 
-        .relations-grid { display: grid; grid-template-columns: 1fr; gap: 30px; margin-top: 40px; }
-        @media(min-width: 700px) { .relations-grid { grid-template-columns: 1fr 1fr; } }
-
-        .rel-card { background: #111; padding: 25px; border-radius: 8px; border-left: 5px solid #555; height: 100%; }
-        .rel-card.ally { border-color: #4caf50; background: linear-gradient(145deg, #111 0%, #1a2e1a 100%); }
-        .rel-card.enemy { border-color: #ff4444; background: linear-gradient(145deg, #111 0%, #2e1a1a 100%); }
-        
-        .rel-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
-        .rel-icon { font-size: 1.5em; }
-        .rel-title { margin: 0; font-family: 'Cinzel'; color: #fff; font-size: 1.2em; }
-        
-        .rel-content h5 { color: var(--gold); margin: 0 0 10px 0; font-family: 'Cinzel'; font-size: 1.1em; }
-        .rel-content p { margin: 0; color: #aaa; line-height: 1.6; text-align: justify; font-size: 0.95em; }
-
-        .btn-float { position: fixed; bottom: 30px; right: 30px; background: var(--gold); color: #000; padding: 15px 35px; border-radius: 50px; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border: none; z-index: 100; font-size: 1.1em; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-        .btn-back { cursor: pointer; color: #888; text-transform: uppercase; font-size: 0.8em; margin-bottom: 20px; display: inline-block; }
-
-        @media print {
-            .btn-float, .btn-back, .intro-box { display: none !important; }
-            body { background: #fff; color: #000; }
-            .main-card { border: 2px solid #000; background: #fff; color: #000; box-shadow: none; }
-            .animal-title, .desc-text { color: #000; }
-            .element-badge { background: #000; color: #fff; }
-            .rel-card { border: 1px solid #000; background: #fff; color: #000; }
-            .rel-title, .rel-content p, .rel-content h5 { color: #000 !important; }
-        }
+        @media print { .btn-back, .btn-print, .intro-box { display: none; } body { background: #fff; color: #000; } .china-card, .report-block { border: 1px solid #000; color: #000; background: #fff; } }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div onclick="window.location.href='dashboard-premium.html'" class="btn-back">← Voltar ao Hub</div>
-    
-    <h1 class="header-title">ZODÍACO CHINÊS</h1>
-    <p class="header-sub">Sabedoria Ancestral</p>
-
-    <div class="intro-box" id="intro-box">
-        <p>Ao contrário do horóscopo ocidental, o Zodíaco Chinês é regido pelos ciclos da Lua. Nosso sistema calculou sua data de nascimento com precisão lunar para revelar sua verdadeira essência.</p>
-    </div>
-
-    <div id="result-area">
-        <div class="main-card">
-            <div class="animal-icon" id="res-icon"></div>
-            <h2 class="animal-title" id="res-animal"></h2>
-            <div class="element-badge" id="res-elemento"></div>
-            <div class="desc-text" id="res-desc"></div>
-        </div>
-
-        <h3 style="text-align:center; font-family:'Cinzel'; color:var(--gold); margin-top:50px; margin-bottom:30px;">DINÂMICA DE RELACIONAMENTOS</h3>
-        
-        <div class="relations-grid">
-            <div class="rel-card ally">
-                <div class="rel-header">
-                    <div class="rel-icon" style="color:#4caf50"><i class="fas fa-handshake"></i></div>
-                    <h3 class="rel-title">Triângulo de Afinidade (San He)</h3>
-                </div>
-                <div class="rel-content">
-                    <h5 id="res-aliados-titulo"></h5>
-                    <p id="res-aliados-desc"></p>
-                </div>
-            </div>
-
-            <div class="rel-card enemy">
-                <div class="rel-header">
-                    <div class="rel-icon" style="color:#ff4444"><i class="fas fa-bolt"></i></div>
-                    <h3 class="rel-title">Oponente Natural (Liu Chong)</h3>
-                </div>
-                <div class="rel-content">
-                    <h5 id="res-inimigo-titulo"></h5>
-                    <p id="res-inimigo-desc"></p>
-                </div>
-            </div>
-        </div>
-    </div>
+<div id="loading-screen">
+    <i class="fas fa-compass spinner"></i>
+    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Calculando Ciclos Lunares...</p>
 </div>
 
-<button class="btn-float" onclick="window.print()"><i class="fas fa-file-pdf"></i> SALVAR LEITURA</button>
+<div class="container">
+    <div class="nav-bar">
+        <div onclick="window.location.href='dashboard-premium.html'" class="btn-back">← Voltar ao Hub</div>
+        <button onclick="window.print()" class="btn-print"><i class="fas fa-print"></i> Imprimir</button>
+    </div>
+
+    <h1 class="header-title">ZODÍACO CHINÊS (SHENG XIAO)</h1>
+    <div class="user-details" id="user-info">...</div>
+
+    <div class="intro-box">
+        <div class="intro-title">Como Funciona este Sistema?</div>
+        <div class="intro-text">
+            Diferente da astrologia ocidental, baseada nos meses solares, o Zodíaco Chinês baseia-se em um ciclo lunar de 12 anos. Cada ano é regido por um animal arquétipo.
+            <br><br>
+            Porém, o animal é apenas metade da história. Existe também um ciclo de 10 anos dos <strong>5 Elementos</strong> (Metal, Água, Madeira, Fogo, Terra). 
+            A combinação do seu Animal com seu Elemento de nascimento cria sua identidade única entre 60 possibilidades. Abaixo, revelamos a sua combinação exata.
+        </div>
+    </div>
+
+    <div class="china-card">
+        <div class="animal-icon" id="res-icon"></div>
+        <h2 class="animal-title" id="res-animal">...</h2>
+        <div class="element-badge" id="res-element">...</div>
+    </div>
+
+    <div class="report-section" id="report-content">
+        </div>
+</div>
 
 <script>
-    // --- 1. BANCO DE DADOS EMBUTIDO (ZERO ERROS DE CARREGAMENTO) ---
-    const LUNAR_DATES={1930:"01-30",1931:"02-17",1932:"02-06",1933:"01-26",1934:"02-14",1935:"02-04",1936:"01-24",1937:"02-11",1938:"01-31",1939:"02-19",1940:"02-08",1941:"01-27",1942:"02-15",1943:"02-05",1944:"01-25",1945:"02-13",1946:"02-02",1947:"01-22",1948:"02-10",1949:"01-29",1950:"02-17",1951:"02-06",1952:"01-27",1953:"02-14",1954:"02-03",1955:"01-24",1956:"02-12",1957:"01-31",1958:"02-18",1959:"02-08",1960:"01-28",1961:"02-15",1962:"02-05",1963:"01-25",1964:"02-13",1965:"02-02",1966:"01-21",1967:"02-09",1968:"01-30",1969:"02-17",1970:"02-06",1971:"01-27",1972:"02-15",1973:"02-03",1974:"01-23",1975:"02-11",1976:"01-31",1977:"02-18",1978:"02-07",1979:"01-28",1980:"02-16",1981:"02-05",1982:"01-25",1983:"02-13",1984:"02-02",1985:"02-20",1986:"02-09",1987:"01-29",1988:"02-17",1989:"02-06",1990:"01-27",1991:"02-15",1992:"02-04",1993:"01-23",1994:"02-10",1995:"01-31",1996:"02-19",1997:"02-07",1998:"01-28",1999:"02-16",2000:"02-05",2001:"01-24",2002:"02-12",2003:"02-01",2004:"01-22",2005:"02-09",2006:"01-29",2007:"02-18",2008:"02-07",2009:"01-26",2010:"02-14",2011:"02-03",2012:"01-23",2013:"02-10",2014:"01-31",2015:"02-19",2016:"02-08",2017:"01-28",2018:"02-16",2019:"02-05",2020:"01-25",2021:"02-12",2022:"02-01",2023:"01-22",2024:"02-10",2025:"01-29",2026:"02-17",2027:"02-06",2028:"01-26",2029:"02-13"};
-    const ELEMENTOS_CHINESES={0:{nome:"Metal",qualidade:"Traz determinação, inflexibilidade e ambição cortante. O Metal refina o caráter, mas pode torná-lo rígido."},1:{nome:"Metal",qualidade:"Traz determinação, inflexibilidade e ambição cortante. O Metal refina o caráter, mas pode torná-lo rígido."},2:{nome:"Água",qualidade:"Traz fluidez, diplomacia e intuição profunda. A Água torna o signo mais adaptável e comunicativo."},3:{nome:"Água",qualidade:"Traz fluidez, diplomacia e intuição profunda. A Água torna o signo mais adaptável e comunicativo."},4:{nome:"Madeira",qualidade:"Traz crescimento, criatividade e idealismo. A Madeira expande os horizontes e favorece o planejamento."},5:{nome:"Madeira",qualidade:"Traz crescimento, criatividade e idealismo. A Madeira expande os horizontes e favorece o planejamento."},6:{nome:"Fogo",qualidade:"Traz paixão, liderança e dinamismo. O Fogo acende o carisma, mas pode aumentar a impaciência."},7:{nome:"Fogo",qualidade:"Traz paixão, liderança e dinamismo. O Fogo acende o carisma, mas pode aumentar a impaciência."},8:{nome:"Terra",qualidade:"Traz estabilidade, pragmatismo e responsabilidade. A Terra ancora os sonhos na realidade."},9:{nome:"Terra",qualidade:"Traz estabilidade, pragmatismo e responsabilidade. A Terra ancora os sonhos na realidade."}};
-    const ANIMAIS_CHINESES=[{nome:"Rato",arquetipo:"O Estrategista Mestre",icone:"fas fa-mouse",perfil:`<p>O Rato é o signo da genialidade estratégica e da sobrevivência...</p>`,compatibilidade:{titulo:"Os Realizadores (Rato, Dragão, Macaco)",desc:"Este é o triângulo da Ação e da Inteligência..."},conflito:{animal:"Cavalo",motivo:"O Cavalo preza a liberdade absoluta e a honestidade brutal..."}},{nome:"Boi",arquetipo:"O Pilar da Terra",icone:"fas fa-bullhorn",perfil:`<p>O Boi representa a prosperidade alcançada através da perseverança...</p>`,compatibilidade:{titulo:"Os Intelectuais (Boi, Serpente, Galo)",desc:"Este triângulo valoriza o planejamento..."},conflito:{animal:"Cabra",motivo:"A Cabra é sonhadora e emocional, o que irrita profundamente..."}},{nome:"Tigre",arquetipo:"O Guerreiro Nobre",icone:"fas fa-paw",perfil:`<p>O Tigre é a encarnação da coragem e da imprevisibilidade...</p>`,compatibilidade:{titulo:"Os Idealistas (Tigre, Cavalo, Cão)",desc:"Este triângulo é movido por honra..."},conflito:{animal:"Macaco",motivo:"O Macaco é brincalhão demais para o seu gosto..."}},{nome:"Coelho",arquetipo:"O Diplomata Refinado",icone:"fas fa-carrot",perfil:`<p>O Coelho é o signo da virtude, da prudência e da elegância...</p>`,compatibilidade:{titulo:"Os Emocionais (Coelho, Cabra, Porco)",desc:"Este grupo prioriza a beleza e a sensibilidade..."},conflito:{animal:"Galo",motivo:"O Galo é crítico e direto, ferindo sua sensibilidade..."}},{nome:"Dragão",arquetipo:"O Imperador Mítico",icone:"fas fa-dragon",perfil:`<p>O único animal mítico do zodíaco. Você carrega uma aura de poder...</p>`,compatibilidade:{titulo:"Os Realizadores (Dragão, Rato, Macaco)",desc:"A união do Poder..."},conflito:{animal:"Cão",motivo:"O Cão é pessimista e realista demais..."}},{nome:"Serpente",arquetipo:"O Sábio Enigmático",icone:"fas fa-staff-snake",perfil:`<p>A Serpente é o signo da sabedoria profunda e do mistério...</p>`,compatibilidade:{titulo:"Os Intelectuais (Serpente, Boi, Galo)",desc:"Uma aliança mental..."},conflito:{animal:"Porco",motivo:"O Porco é ingênuo e honesto demais..."}},{nome:"Cavalo",arquetipo:"O Espírito Livre",icone:"fas fa-horse",perfil:`<p>O Cavalo é a energia pura em movimento...</p>`,compatibilidade:{titulo:"Os Idealistas (Cavalo, Tigre, Cão)",desc:"A união da Liberdade..."},conflito:{animal:"Rato",motivo:"O Rato é calculista e econômico..."}},{nome:"Cabra",arquetipo:"O Sonhador Criativo",icone:"fas fa-cloud-meatball",perfil:`<p>A Cabra é o signo da arte, da gentileza e da paz...</p>`,compatibilidade:{titulo:"Os Emocionais (Cabra, Coelho, Porco)",desc:"A aliança da Sensibilidade..."},conflito:{animal:"Boi",motivo:"O Boi exige disciplina e realismo..."}},{nome:"Macaco",arquetipo:"O Inventor Brilhante",icone:"fas fa-lightbulb",perfil:`<p>O Macaco é o signo mais versátil e inteligente do zodíaco...</p>`,compatibilidade:{titulo:"Os Realizadores (Macaco, Rato, Dragão)",desc:"A aliança da Inteligência..."},conflito:{animal:"Tigre",motivo:"O Tigre exige respeito e seriedade..."}},{nome:"Galo",arquetipo:"O Administrador Perfeito",icone:"fas fa-feather",perfil:`<p>O Galo é o signo da precisão, da ordem e da franqueza...</p>`,compatibilidade:{titulo:"Os Intelectuais (Galo, Serpente, Boi)",desc:"A aliança da Eficiência..."},conflito:{animal:"Coelho",motivo:"O Coelho é diplomático e detesta confronto..."}},{nome:"Cão",arquetipo:"O Guardião Leal",icone:"fas fa-dog",perfil:`<p>O Cão é o signo da justiça, da lealdade e da ansiedade...</p>`,compatibilidade:{titulo:"Os Idealistas (Cão, Tigre, Cavalo)",desc:"A aliança da Ética..."},conflito:{animal:"Dragão",motivo:"O Dragão busca poder e glória pessoal..."}},{nome:"Porco",arquetipo:"O Filantropo Generoso",icone:"fas fa-piggy-bank",perfil:`<p>O Porco é o signo da generosidade, da honestidade e do prazer...</p>`,compatibilidade:{titulo:"Os Emocionais (Porco, Coelho, Cabra)",desc:"A aliança da Harmonia..."},conflito:{animal:"Serpente",motivo:"A Serpente é desconfiada e secreta..."}}];
+    // --- 1. FAILSAFE ---
+    setTimeout(() => { document.getElementById('loading-screen').style.display = 'none'; }, 3000);
 
-    function calcularSignoChines(dataNascimento) {
-        const [anoStr, mesStr, diaStr] = dataNascimento.split('-');
-        let ano = parseInt(anoStr);
-        const mes = parseInt(mesStr);
-        const dia = parseInt(diaStr);
-        const dataLimite = LUNAR_DATES[ano];
-        let ehAnoAnterior = false;
-        if (dataLimite) {
-            const [limiteMes, limiteDia] = dataLimite.split('-').map(Number);
-            if (mes < limiteMes || (mes === limiteMes && dia < limiteDia)) { ehAnoAnterior = true; }
+    // --- 2. DADOS DENSOS ---
+    const ANIMAIS_DATA = {
+        "Rato": {
+            icon: "fas fa-mouse",
+            arq: "O Estrategista",
+            desc: "Inteligente, engenhoso e versátil. O Rato é o primeiro signo do ciclo, representando inícios e sobrevivência. Você possui uma mente afiada capaz de ver oportunidades onde ninguém mais vê. Seu charme social esconde um observador calculista e prudente.",
+            work: "Excelente em negócios, finanças e qualquer campo que exija adaptação rápida. Você trabalha melhor quando tem autonomia.",
+            love: "Você é dedicado e apaixonado, mas pode ser possessivo. Busca parceiros que ofereçam segurança e lealdade."
+        },
+        "Boi": {
+            icon: "fas fa-bullhorn", // Representação visual
+            arq: "O Realizador Silencioso",
+            desc: "Diligente, dependente e forte. O Boi representa a prosperidade alcançada através do trabalho duro. Você não gosta de atalhos. Sua palavra é uma promessa inquebrável. Embora possa parecer teimoso, é apenas sua firmeza de caráter em ação.",
+            work: "Metódico e lógico. Você constrói impérios tijolo por tijolo. É um líder respeitado pela ética, não pelo medo.",
+            love: "Você demora para se abrir, mas quando ama, é para a vida toda. Busca estabilidade acima de aventura."
+        },
+        "Tigre": {
+            icon: "fas fa-cat",
+            arq: "O Rebelde Corajoso",
+            desc: "Corajoso, confiante e magnético. O Tigre nasceu para liderar e desafiar o status quo. Você é movido pela paixão e pelo instinto. Sua natureza é imprevisível e nobre; você protege ferozmente aqueles que ama, mas não tolera desrespeito.",
+            work: "Precisa de desafios. Ambientes monótonos matam seu espírito. Você brilha em posições de comando ou empreendedorismo arriscado.",
+            love: "Intenso e dominador. Relacionamentos com você são uma aventura emocionante, cheia de altos e baixos."
+        },
+        "Coelho": {
+            icon: "fas fa-paw",
+            arq: "O Diplomata Refinado",
+            desc: "Tranquilo, elegante e responsável. O Coelho é o símbolo da longevidade e da sorte. Você detesta conflitos e tem um talento natural para encontrar soluções pacíficas. Sua sensibilidade artística e bom gosto são notáveis. Por trás da gentileza, há uma mente astuta.",
+            work: "Excelente em diplomacia, artes, design e direito. Você avança através de conexões sociais e tato.",
+            love: "Romântico e sensível. Você precisa de um parceiro que entenda sua necessidade de harmonia e evite agressividade."
+        },
+        "Dragão": {
+            icon: "fas fa-dragon",
+            arq: "O Visionário Poderoso",
+            desc: "Poderoso, nobre e sortudo. O Dragão é o único animal mítico do zodíaco, representando poder celestial. Você possui um carisma natural e uma autoconfiança inabalável. Nasceu para deixar um legado e inspirar os outros com sua visão grandiosa.",
+            work: "Visionário. Você não lida bem com detalhes rotineiros; precisa de uma equipe para executar suas grandes ideias.",
+            love: "Você busca alguém que admire sua força, mas que não compita com ela. Precisa de espaço para voar."
+        },
+        "Serpente": {
+            icon: "fas fa-staff-snake",
+            arq: "O Filósofo Enigmático",
+            desc: "Enigmática, inteligente e sábia. A Serpente é o arquétipo do mistério e da intuição profunda. Você não fala muito, mas quando fala, todos ouvem. Possui um sexto sentido apurado para mentiras e situações vantajosas. Sua mente é filosófica e calculista.",
+            work: "Pesquisador, cientista ou estrategista. Você resolve problemas complexos em silêncio e com precisão.",
+            love: "Sedutor e possessivo. Você escolhe parceiros com muito critério e exige lealdade absoluta."
+        },
+        "Cavalo": {
+            icon: "fas fa-horse",
+            arq: "O Espírito Livre",
+            desc: "Animado, ativo e enérgico. O Cavalo ama a liberdade acima de tudo. Você é a alma da festa, otimista e comunicativo. Sua mente é rápida, mas pode ser impaciente. Você galopa pela vida buscando novas experiências e detesta se sentir amarrado.",
+            work: "Vendas, comunicação e viagens. Você precisa de movimento e interação social constante.",
+            love: "Apaixona-se rápido e intensamente, mas pode perder o interesse se a rotina se instalar. Precisa de um parceiro independente."
+        },
+        "Cabra": {
+            icon: "fas fa-bacon", // Placeholder approx
+            arq: "O Artista Compassivo",
+            desc: "Calma, gentil e simpática. A Cabra é o signo da arte e da beleza. Você é sonhador e tem um coração enorme, sempre preocupado com o bem-estar alheio. Evita confrontos diretos e prefere persuadir pela gentileza. Sua criatividade é sua maior arma.",
+            work: "Artes, cura e assistência social. Você precisa de um ambiente harmonioso e sem pressão excessiva.",
+            love: "Carente e carinhoso. Você precisa de proteção e estabilidade emocional em um relacionamento."
+        },
+        "Macaco": {
+            icon: "fas fa-atom", // Intellect
+            arq: "O Inovador Ágil",
+            desc: "Afiado, inteligente e curioso. O Macaco é o solucionador de problemas do zodíaco. Não há desafio que sua mente ágil não possa desvendar. Você é brincalhão, às vezes travesso, e possui uma capacidade de aprendizado acelerada.",
+            work: "Inovação, tecnologia e engenharia. Você prospera em ambientes caóticos onde precisa improvisar.",
+            love: "Divertido e estimulante. Você precisa de um parceiro intelectualmente desafiador para não ficar entediado."
+        },
+        "Galo": {
+            icon: "fas fa-crow",
+            arq: "O Perfeccionista",
+            desc: "Observador, trabalhador e corajoso. O Galo é o signo da franqueza e da organização. Você gosta de estar no comando e de aparecer, sempre impecável. Sua atenção aos detalhes é lendária, embora possa ser crítico demais consigo mesmo e com os outros.",
+            work: "Administração, finanças e moda. Você organiza o caos e garante que tudo esteja perfeito.",
+            love: "Leal e protetor. Você gosta de cuidar do parceiro, mas exige que ele atenda aos seus altos padrões."
+        },
+        "Cão": {
+            icon: "fas fa-dog",
+            arq: "O Guardião Leal",
+            desc: "Leal, honesto e prudente. O Cão é o signo da justiça. Você tem um radar moral inabalável e luta pelos oprimidos. É o melhor amigo que alguém pode ter, sempre alerta e fiel. Tende a se preocupar demais, mas isso vem do seu desejo de proteger.",
+            work: "Justiça, segurança e serviço social. Você trabalha por uma causa, não apenas por dinheiro.",
+            love: "Fiel até o fim. Você demora para confiar, mas uma vez que entrega seu coração, é para sempre."
+        },
+        "Porco": {
+            icon: "fas fa-piggy-bank",
+            arq: "O Filantropo Hedonista",
+            desc: "Compassivo, generoso e diligente. O Porco fecha o ciclo com sabedoria e prazer. Você ama as coisas boas da vida e gosta de compartilhar. É ingênuo por escolha, preferindo ver o lado bom das pessoas. Sua força interior é imensa, suportando fardos sem reclamar.",
+            work: "Qualquer área onde possa ajudar ou entreter. Você trabalha duro para poder desfrutar depois.",
+            love: "Afetuoso e sensual. Você se entrega totalmente e busca uma conexão profunda e confortável."
         }
-        if (ehAnoAnterior) ano = ano - 1;
-        const offset = (ano - 1900) % 12;
-        const index = offset < 0 ? offset + 12 : offset; 
-        return { animal: ANIMAIS_CHINESES[index], elemento: ELEMENTOS_CHINESES[ano % 10], anoReal: ano };
+    };
+
+    const ELEMENTOS_DATA = {
+        "Metal": "O Metal traz rigidez, determinação e ambição. Torna você mais focado no sucesso, independente e às vezes inflexível. Sua mente é cortante como uma espada.",
+        "Água": "A Água traz fluidez, intuição e diplomacia. Torna você mais adaptável, comunicativo e capaz de influenciar os outros sutilmente, infiltrando-se como a maré.",
+        "Madeira": "A Madeira traz crescimento, criatividade e cooperação. Torna você mais ético, expansivo e interessado no progresso comunitário. Você busca criar raízes.",
+        "Fogo": "O Fogo traz paixão, dinamismo e liderança. Torna você mais impulsivo, carismático e aventureiro. Você queima com um desejo de ação e reconhecimento.",
+        "Terra": "A Terra traz estabilidade, praticidade e cautela. Torna você mais confiável, pé no chão e focado em resultados tangíveis e segurança a longo prazo."
+    };
+
+    // --- 3. LÓGICA DE CÁLCULO ---
+    const ANIMAIS_LIST = ["Macaco","Galo","Cão","Porco","Rato","Boi","Tigre","Coelho","Dragão","Serpente","Cavalo","Cabra"];
+    const ELEMENTOS_LIST = ["Metal","Metal","Água","Água","Madeira","Madeira","Fogo","Fogo","Terra","Terra"];
+
+    function calcularChines(ano) {
+        // Animal: Ciclo de 12 (Resto da divisão por 12)
+        const animalNome = ANIMAIS_LIST[ano % 12];
+        
+        // Elemento: Último dígito do ano (0-9)
+        const elementoNome = ELEMENTOS_LIST[ano % 10];
+        
+        return { animal: animalNome, elemento: elementoNome };
     }
 
-    // --- 2. LÓGICA DE EXIBIÇÃO INSTANTÂNEA ---
-    const DATA_PADRAO = "1978-05-01";
-    atualizarTela(DATA_PADRAO);
+    // --- 4. RENDERIZAÇÃO ---
+    function renderizar(ano) {
+        const res = calcularChines(ano);
+        const dataAnimal = ANIMAIS_DATA[res.animal];
+        const textoElemento = ELEMENTOS_DATA[res.elemento];
 
-    function atualizarTela(dataNasc) {
-        const resultado = calcularSignoChines(dataNasc);
-        document.getElementById('res-animal').innerText = resultado.animal.nome.toUpperCase();
-        document.getElementById('res-icon').innerHTML = `<i class="${resultado.animal.icone}"></i>`;
-        document.getElementById('res-elemento').innerText = resultado.elemento.nome.toUpperCase();
-        
-        document.getElementById('res-desc').innerHTML = `
-            <div style="background:#111; padding:15px; border-left:3px solid var(--gold); margin-bottom:20px;">
-                <strong>Arquétipo:</strong> ${resultado.animal.arquetipo}
+        // Preenche Cartão Principal
+        document.getElementById('res-icon').innerHTML = `<i class="${dataAnimal.icon}"></i>`;
+        document.getElementById('res-animal').innerText = res.animal;
+        document.getElementById('res-element').innerText = `${res.elemento} (Yin/Yang)`;
+
+        // Gera Relatório Denso
+        const area = document.getElementById('report-content');
+        area.innerHTML = `
+            <div class="report-block">
+                <div class="block-head">ARQUÉTIPO: ${dataAnimal.arq.toUpperCase()}</div>
+                <div class="block-text">
+                    ${dataAnimal.desc}
+                </div>
             </div>
-            ${resultado.animal.perfil}
-            <div style="border-top:1px solid #333; padding-top:20px; margin-top:30px;">
-                <h4 style="color:var(--gold); font-family:'Cinzel'; margin-top:0;">A Influência do Elemento ${resultado.elemento.nome}</h4>
-                <p>${resultado.elemento.qualidade}</p>
-                <p><em>Este elemento modifica sua personalidade base, tornando você um ${resultado.animal.nome} de ${resultado.elemento.nome} único.</em></p>
+
+            <div class="report-block">
+                <div class="block-head">A INFLUÊNCIA DO ELEMENTO ${res.elemento.toUpperCase()}</div>
+                <div class="block-text">
+                    Você não é apenas um ${res.animal}, você é um <strong>${res.animal} de ${res.elemento}</strong>. 
+                    <br><br>
+                    ${textoElemento}
+                    <br><br>
+                    Essa combinação molda sua personalidade de forma única, diferenciando você de pessoas do mesmo signo nascidas em anos diferentes.
+                </div>
+            </div>
+
+            <div class="report-block">
+                <div class="block-head">CARREIRA E DINHEIRO</div>
+                <div class="block-text">
+                    ${dataAnimal.work}
+                </div>
+            </div>
+
+            <div class="report-block">
+                <div class="block-head">AMOR E RELACIONAMENTOS</div>
+                <div class="block-text">
+                    ${dataAnimal.love}
+                </div>
             </div>
         `;
 
-        document.getElementById('res-aliados-titulo').innerText = resultado.animal.compatibilidade.titulo;
-        document.getElementById('res-aliados-desc').innerHTML = resultado.animal.compatibilidade.desc;
-        document.getElementById('res-inimigo-titulo').innerText = `O Conflito com: ${resultado.animal.conflito.animal}`;
-        document.getElementById('res-inimigo-desc').innerText = resultado.animal.conflito.motivo;
+        document.getElementById('loading-screen').style.display = 'none';
     }
 
-    // --- 3. FIREBASE: ATUALIZA SE ACHAR DADOS ---
+    // --- 5. AUTH ---
+    const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
+    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const auth = firebase.auth();
     const db = firebase.firestore();
 
     auth.onAuthStateChanged(user => {
-        if(user) {
+        if(user){
             db.collection("usuarios").doc(user.uid).get().then(doc => {
-                if(doc.exists && doc.data().dataNascimento) {
-                    atualizarTela(doc.data().dataNascimento);
-                }
+                const d = doc.exists ? doc.data() : {};
+                const nome = d.nome || "Iniciado";
+                // Compatibilidade de dados
+                const dataStr = d.dataNascimento || d.nascimento || "2000-01-01";
+                const ano = parseInt(dataStr.split('-')[0]);
+                
+                document.getElementById('user-info').innerText = `${nome} • Nascido em ${ano}`;
+                renderizar(ano);
+            }).catch(e => {
+                renderizar(2000); // Fallback Dragão de Metal
             });
+        } else {
+            window.location.href = 'index.html';
         }
     });
 </script>
