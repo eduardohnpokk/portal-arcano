@@ -3,19 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Arcano | Área do Iniciado</title>
+    <title>Portal Arcano | Hub</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-
-    <script>
-        // 1. Bloqueia a visão imediatamente
-        const styleBlock = document.createElement('style');
-        styleBlock.id = 'security-blind';
-        styleBlock.innerHTML = 'body { display: none !important; background-color: #050505 !important; }';
-        document.head.appendChild(styleBlock);
-    </script>
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -23,8 +15,18 @@
     <style>
         :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
         
+        /* GARANTIA: O corpo é visível imediatamente. Nada de tela branca. */
         body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 18px; }
         
+        /* TELA DE LOADING (Cobre tudo enquanto verifica) */
+        #verificacao-seguranca {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .spinner { font-size: 4em; color: var(--gold); animation: spin 2s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
         /* HEADER */
         .premium-header {
             text-align: center; padding: 60px 20px;
@@ -64,6 +66,11 @@
 </head>
 <body>
 
+<div id="verificacao-seguranca">
+    <i class="fas fa-compass spinner"></i>
+    <p style="color:#666; font-family:'Cinzel';">Validando Credenciais...</p>
+</div>
+
 <div class="premium-header">
     <div class="user-welcome" id="user-name">Bem-vindo, Iniciado</div>
     <h1 class="portal-title">PORTAL ARCANO</h1>
@@ -72,24 +79,25 @@
 
 <div class="container">
     <div class="modules-grid">
+        
         <div class="module-card" onclick="irPara('premium-mapa.html')">
             <div class="card-icon"><i class="fas fa-star"></i></div>
             <h3 class="card-title">Mapa Astral</h3>
-            <p class="card-desc">Sua essência solar, lunar e ascendente decodificada.</p>
+            <p class="card-desc">Sua tríade astrológica: Sol, Lua e Ascendente.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
 
         <div class="module-card" onclick="irPara('premium-numerologia.html')">
             <div class="card-icon"><i class="fas fa-sort-numeric-up-alt"></i></div>
             <h3 class="card-title">Numerologia</h3>
-            <p class="card-desc">Sua missão de alma através dos números.</p>
+            <p class="card-desc">Missão de vida e destino.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
 
         <div class="module-card" onclick="irPara('premium-oraculo.html')">
             <div class="card-icon"><i class="fas fa-eye"></i></div>
             <h3 class="card-title">Oráculo</h3>
-            <p class="card-desc">Consulte o Tarô para obter respostas imediatas.</p>
+            <p class="card-desc">Respostas do Tarô para o momento.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
 
@@ -103,14 +111,14 @@
         <div class="module-card" onclick="irPara('premium-chines.html')">
             <div class="card-icon"><i class="fas fa-dragon"></i></div>
             <h3 class="card-title">Zodíaco Chinês</h3>
-            <p class="card-desc">Sabedoria ancestral do calendário lunar.</p>
+            <p class="card-desc">Seu animal interior e elemento.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
 
         <div class="module-card" onclick="irPara('premium-banhos.html')">
             <div class="card-icon"><i class="fas fa-mortar-pestle"></i></div>
             <h3 class="card-title">Rituais</h3>
-            <p class="card-desc">Banhos e magias para limpeza e atração.</p>
+            <p class="card-desc">Alquimia para prosperidade e amor.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
     </div>
@@ -127,26 +135,28 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // 2. VERIFICAÇÃO DE SEGURANÇA E LIBERAÇÃO DA TELA
+    // 2. LÓGICA DE LIBERAÇÃO
     auth.onAuthStateChanged(user => {
         if (user) {
-            // Verifica se é Premium no Banco
+            // Verifica se é Premium
             db.collection("usuarios").doc(user.uid).get().then(doc => {
-                const dados = doc.exists ? doc.data() : {};
-                const status = (dados.status || "").toLowerCase();
-                const plano = (dados.plano || "").toLowerCase();
+                const d = doc.exists ? doc.data() : {};
+                const status = (d.status || "").toLowerCase();
+                const plano = (d.plano || "").toLowerCase();
 
                 if (status === "premium" || plano === "premium") {
-                    // SUCESSO: Libera a visão
-                    liberarVisao(dados.nome || "Iniciado");
+                    // É PREMIUM: Remove o loading
+                    document.getElementById('user-name').innerText = `Bem-vindo, ${d.nome || "Iniciado"}`;
+                    document.getElementById('verificacao-seguranca').style.display = 'none';
                 } else {
-                    // NÃO PAGO: Manda de volta
-                    alert("Acesso negado. Plano Gratuito detectado.");
+                    // NÃO É PREMIUM
+                    alert("Acesso Negado. Sua conta é Gratuita.");
                     window.location.href = "index.html";
                 }
-            }).catch(() => {
-                // Erro de rede? Tenta liberar se for admin, senão sai
-                window.location.href = "index.html";
+            }).catch(erro => {
+                // Erro de rede? Remove loading pra não travar (assume boa fé ou mostra erro)
+                console.log(erro);
+                document.getElementById('verificacao-seguranca').style.display = 'none';
             });
         } else {
             // Não logado
@@ -154,26 +164,8 @@
         }
     });
 
-    function liberarVisao(nomeUsuario) {
-        document.getElementById('user-name').innerText = `Bem-vindo, ${nomeUsuario}`;
-        
-        // Remove o bloqueio visual
-        const blind = document.getElementById('security-blind');
-        if(blind) blind.remove();
-        
-        // Garante display block
-        document.body.style.display = 'block';
-    }
-
-    function irPara(url) {
-        window.location.href = url;
-    }
-
-    function logout() {
-        auth.signOut().then(() => {
-            window.location.href = 'index.html';
-        });
-    }
+    function irPara(pagina) { window.location.href = pagina; }
+    function logout() { auth.signOut().then(() => window.location.href = 'index.html'); }
 </script>
 </body>
 </html>
