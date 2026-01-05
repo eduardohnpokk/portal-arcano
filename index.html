@@ -13,8 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
-        
+        :root { --gold: #d4af37; --bg-dark: #050505; }
         body { margin: 0; font-family: 'Cormorant Garamond', serif; background: url('https://www.transparenttextures.com/patterns/stardust.png'), var(--bg-dark); color: #e0e0e0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
         
         .login-container {
@@ -27,46 +26,26 @@
         .portal-logo { font-family: 'Cinzel'; font-size: 2.5em; color: var(--gold); margin-bottom: 10px; text-shadow: 0 0 20px rgba(212,175,55,0.5); }
         .portal-sub { color: #888; margin-bottom: 30px; letter-spacing: 2px; text-transform: uppercase; font-size: 0.8em; }
 
-        /* FORMULÁRIOS */
         .input-group { margin-bottom: 15px; text-align: left; }
         .input-group label { display: block; color: var(--gold); font-family: 'Cinzel'; margin-bottom: 5px; font-size: 0.9em; }
+        .form-control { width: 94%; padding: 12px; background: #000; border: 1px solid #333; color: #fff; border-radius: 4px; }
         
-        .form-control { 
-            width: 94%; padding: 12px; background: #000; border: 1px solid #333; color: #fff; 
-            font-family: sans-serif; font-size: 1em; border-radius: 4px; transition: 0.3s;
-        }
-        .form-control:focus { border-color: var(--gold); outline: none; }
-
         .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 
-        .btn-main { 
-            background: linear-gradient(45deg, #d4af37, #b8860b); color: #000; border: none; 
-            padding: 15px; width: 100%; font-family: 'Cinzel'; font-weight: bold; font-size: 1.1em; 
-            cursor: pointer; border-radius: 4px; margin-top: 10px; transition: 0.3s;
-        }
-        .btn-main:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--gold); }
-
+        .btn-main { background: linear-gradient(45deg, #d4af37, #b8860b); color: #000; border: none; padding: 15px; width: 100%; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border-radius: 4px; margin-top: 10px; }
         .toggle-link { margin-top: 20px; font-size: 0.9em; color: #666; cursor: pointer; text-decoration: underline; }
-        .toggle-link:hover { color: var(--gold); }
-
-        .error-msg { color: #ff4444; font-size: 0.9em; margin-top: 15px; display: none; background: rgba(255,0,0,0.1); padding: 10px; border: 1px solid #ff4444; border-radius: 4px; }
-
-        /* LOADING */
+        
         #loading-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); display: flex; flex-direction: column;
             align-items: center; justify-content: center; z-index: 10; display: none; border-radius: 8px;
         }
-        
-        /* PAYWALL */
-        #paywall-view { display: none; }
-        .lock-icon { font-size: 4em; color: var(--gold); margin-bottom: 20px; }
+        .error-msg { color: #ff4444; font-size: 0.9em; margin-top: 15px; display: none; }
     </style>
 </head>
 <body>
 
 <div class="login-container">
-    
     <div id="loading-overlay">
         <i class="fas fa-compass fa-spin" style="font-size:3em; color:var(--gold);"></i>
         <p style="margin-top:20px; color:#fff; font-family:'Cinzel';" id="loading-text">Conectando...</p>
@@ -76,103 +55,45 @@
     <p class="portal-sub">Acesso aos Mistérios</p>
 
     <div id="login-form">
-        <div class="input-group">
-            <label>E-mail</label>
-            <input type="email" id="login-email" class="form-control" placeholder="seu@email.com">
-        </div>
-        <div class="input-group">
-            <label>Senha</label>
-            <input type="password" id="login-pass" class="form-control" placeholder="••••••••">
-        </div>
-        
+        <div class="input-group"><label>E-mail</label><input type="email" id="login-email" class="form-control"></div>
+        <div class="input-group"><label>Senha</label><input type="password" id="login-pass" class="form-control"></div>
         <button class="btn-main" onclick="fazerLogin()">ENTRAR NO TEMPLO</button>
         <p class="error-msg" id="login-error"></p>
-        
         <div class="toggle-link" onclick="alternarForm('cadastro')">Não possui cadastro? Criar Conta</div>
     </div>
 
     <div id="register-form" style="display:none;">
         <h3 style="color:#fff; font-family:'Cinzel'; margin-top:0;">Registro de Iniciado</h3>
-        
-        <div class="input-group">
-            <label>Nome Completo</label>
-            <input type="text" id="reg-nome" class="form-control">
-        </div>
-
-        <div class="input-group">
-            <label>E-mail</label>
-            <input type="email" id="reg-email" class="form-control">
-        </div>
-
-        <div class="input-group">
-            <label>Senha</label>
-            <input type="password" id="reg-pass" class="form-control">
-        </div>
-
+        <div class="input-group"><label>Nome Completo</label><input type="text" id="reg-nome" class="form-control"></div>
+        <div class="input-group"><label>E-mail</label><input type="email" id="reg-email" class="form-control"></div>
+        <div class="input-group"><label>Senha</label><input type="password" id="reg-pass" class="form-control"></div>
         <div class="row-2">
-            <div class="input-group">
-                <label>Data de Nascimento</label>
-                <input type="date" id="reg-nasc" class="form-control">
-            </div>
-            <div class="input-group">
-                <label>Hora (Opcional)</label>
-                <input type="time" id="reg-hora" class="form-control">
-            </div>
+            <div class="input-group"><label>Nascimento</label><input type="date" id="reg-nasc" class="form-control"></div>
+            <div class="input-group"><label>Hora</label><input type="time" id="reg-hora" class="form-control"></div>
         </div>
-
         <div class="row-2">
-            <div class="input-group">
-                <label>Cidade</label>
-                <input type="text" id="reg-cidade" class="form-control">
-            </div>
-            <div class="input-group">
-                <label>Estado (UF)</label>
-                <input type="text" id="reg-uf" class="form-control" maxlength="2" placeholder="SP">
-            </div>
+            <div class="input-group"><label>Cidade</label><input type="text" id="reg-cidade" class="form-control"></div>
+            <div class="input-group"><label>Estado (UF)</label><input type="text" id="reg-uf" class="form-control" maxlength="2"></div>
         </div>
-
-        <div class="input-group">
-            <label>Celular / WhatsApp</label>
-            <input type="tel" id="reg-tel" class="form-control">
-        </div>
-
+        <div class="input-group"><label>Telefone</label><input type="tel" id="reg-tel" class="form-control"></div>
         <button class="btn-main" onclick="criarConta()">FINALIZAR CADASTRO</button>
         <p class="error-msg" id="reg-error"></p>
-        
         <div class="toggle-link" onclick="alternarForm('login')">Já possui conta? Fazer Login</div>
     </div>
-
-    <div id="paywall-view">
-        <i class="fas fa-lock lock-icon"></i>
-        <h3 style="font-family:'Cinzel'; color:#fff; margin:0 0 15px 0;">MAPA BLOQUEADO</h3>
-        <p style="color:#ccc; line-height:1.6; font-size:0.95em; margin-bottom:20px;">
-            Sua conta consta como <strong>Gratuita</strong>. Para acessar o Mapa Astral Completo, Zodíaco Chinês e Rituais, é necessário o acesso Premium.
-        </p>
-        
-        <div style="background:#220; color:yellow; padding:10px; font-size:0.8em; border:1px dashed yellow; margin-bottom:15px; text-align:left;">
-            <strong>DEBUG:</strong> Seu status no banco é "gratuito".<br>
-            Acesse o Firebase e mude o campo <em>plano</em> ou <em>status</em> para "premium".
-        </div>
-
-        <button class="btn-main" onclick="location.reload()">JÁ PAGUEI / ATUALIZAR</button>
-        <div class="toggle-link" onclick="logout()">Sair</div>
-    </div>
-
 </div>
 
 <script>
-    // 1. FIREBASE INIT
     const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
     try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // 2. MONITOR DE LOGIN
+    // --- ROTEAMENTO INTELIGENTE ---
     auth.onAuthStateChanged(user => {
         if (user) {
-            mostrarLoading("Verificando sua alma...");
+            mostrarLoading("Verificando destino...");
             
-            // Força a leitura do servidor para evitar Cache antigo
+            // Busca dados e decide para onde ir
             db.collection("usuarios").doc(user.uid).get({ source: 'server' })
             .then(doc => {
                 if (doc.exists) {
@@ -181,26 +102,19 @@
                     const plano = (d.plano || "").toLowerCase();
 
                     if (status === "premium" || plano === "premium") {
+                        // VAI PARA A TELA PREMIUM
                         window.location.href = "dashboard-premium.html";
                     } else {
-                        esconderLoading();
-                        mostrarPaywall();
+                        // VAI PARA A TELA FREE
+                        window.location.href = "dashboard.html";
                     }
                 } else {
-                    // Se o usuário existe no Auth mas não no Firestore (Erro raro), cria o doc básico
+                    // Se o doc sumiu, recria como free e manda pro dashboard free
                     recriarDocPerdido(user);
                 }
             }).catch(err => {
-                console.log(err);
-                // Se der erro de rede, tenta cache
-                db.collection("usuarios").doc(user.uid).get().then(doc => {
-                    if(doc.exists && (doc.data().status === 'premium' || doc.data().plano === 'premium')) {
-                        window.location.href = "dashboard-premium.html";
-                    } else {
-                        esconderLoading();
-                        mostrarPaywall();
-                    }
-                });
+                // Erro? Tenta dashboard free por segurança
+                window.location.href = "dashboard.html";
             });
         } else {
             esconderLoading();
@@ -208,130 +122,71 @@
         }
     });
 
-    // 3. LOGIN
     function fazerLogin() {
         const email = document.getElementById('login-email').value;
         const pass = document.getElementById('login-pass').value;
-        const err = document.getElementById('login-error');
-
-        if(!email || !pass) return mostrarErro(err, "Preencha e-mail e senha.");
-
-        mostrarLoading("Abrindo os portais...");
-        auth.signInWithEmailAndPassword(email, pass).catch(error => {
+        if(!email || !pass) return alert("Preencha tudo.");
+        mostrarLoading("Entrando...");
+        auth.signInWithEmailAndPassword(email, pass).catch(e => {
             esconderLoading();
-            let msg = "Erro ao entrar.";
-            if(error.code === 'auth/user-not-found') msg = "Usuário não encontrado.";
-            if(error.code === 'auth/wrong-password') msg = "Senha incorreta.";
-            mostrarErro(err, msg);
+            document.getElementById('login-error').innerText = e.message;
+            document.getElementById('login-error').style.display = 'block';
         });
     }
 
-    // 4. CRIAR CONTA (COMPLETO E SEGURO)
     function criarConta() {
-        const nome = document.getElementById('reg-nome').value;
+        // (Lógica de cadastro igual à anterior)
         const email = document.getElementById('reg-email').value;
         const pass = document.getElementById('reg-pass').value;
-        const nasc = document.getElementById('reg-nasc').value;
-        const hora = document.getElementById('reg-hora').value;
-        const cidade = document.getElementById('reg-cidade').value;
-        const uf = document.getElementById('reg-uf').value;
-        const tel = document.getElementById('reg-tel').value;
-        const err = document.getElementById('reg-error');
-
-        if(!nome || !email || !pass || !nasc) {
-            return mostrarErro(err, "Preencha todos os campos obrigatórios.");
-        }
-
-        mostrarLoading("Escrevendo seu destino...");
-
-        // BACKDOOR PARA VOCÊ: SE O EMAIL FOR O SEU, CRIA COMO PREMIUM AUTOMÁTICO
-        let statusInicial = "free";
-        let planoInicial = "gratuito";
+        const nome = document.getElementById('reg-nome').value;
+        // ... (Pegar outros campos) ...
         
+        // BACKDOOR: Se for seu email, vira Premium
+        let planoInicial = "gratuito";
+        let statusInicial = "free";
         if (email.toLowerCase().includes("eduardo.pokk")) {
-            statusInicial = "premium";
-            planoInicial = "premium";
+            planoInicial = "premium"; statusInicial = "premium";
         }
 
-        auth.createUserWithEmailAndPassword(email, pass)
-            .then(cred => {
-                // SUCESSO NO AUTH -> SALVAR NO FIRESTORE
-                // Usamos o UID para garantir que seja único
-                return db.collection("usuarios").doc(cred.user.uid).set({
-                    nome: nome,
-                    email: email,
-                    dataNascimento: nasc,
-                    horaNascimento: hora || "12:00",
-                    cidade: cidade,
-                    estado: uf,
-                    telefone: tel,
-                    plano: planoInicial, 
-                    status: statusInicial,
-                    data_cadastro: new Date().toISOString()
-                });
-            })
-            .then(() => {
-                // Tudo certo, o onAuthStateChanged vai redirecionar automaticamente
-                console.log("Conta criada com sucesso!");
-            })
-            .catch(error => {
-                esconderLoading();
-                let msg = "Erro ao criar conta: " + error.message;
-                if (error.code === 'auth/email-already-in-use') {
-                    msg = "Este e-mail já está cadastrado. Tente fazer login.";
-                }
-                if (error.code === 'auth/weak-password') {
-                    msg = "A senha deve ter pelo menos 6 caracteres.";
-                }
-                mostrarErro(err, msg);
-            });
-    }
+        if(!email || !pass || !nome) return alert("Preencha os campos obrigatórios.");
+        mostrarLoading("Criando conta...");
 
-    // Função de Emergência: Se o usuário logar mas não tiver dados no banco
-    function recriarDocPerdido(user) {
-        db.collection("usuarios").doc(user.uid).set({
-            email: user.email,
-            plano: "gratuito",
-            status: "free",
-            recuperado: true
-        }).then(() => {
+        auth.createUserWithEmailAndPassword(email, pass).then(cred => {
+            return db.collection("usuarios").doc(cred.user.uid).set({
+                nome: nome,
+                email: email,
+                dataNascimento: document.getElementById('reg-nasc').value,
+                horaNascimento: document.getElementById('reg-hora').value || "12:00",
+                cidade: document.getElementById('reg-cidade').value,
+                estado: document.getElementById('reg-uf').value,
+                telefone: document.getElementById('reg-tel').value,
+                plano: planoInicial,
+                status: statusInicial,
+                data_cadastro: new Date().toISOString()
+            });
+        }).catch(e => {
             esconderLoading();
-            mostrarPaywall();
+            document.getElementById('reg-error').innerText = e.message;
+            document.getElementById('reg-error').style.display = 'block';
         });
     }
 
-    function logout() { auth.signOut().then(() => location.reload()); }
+    function recriarDocPerdido(user) {
+        db.collection("usuarios").doc(user.uid).set({
+            email: user.email, plano: "gratuito", status: "free", recuperado: true
+        }).then(() => window.location.href = "dashboard.html");
+    }
 
-    // UTILITÁRIOS DE TELA
     function alternarForm(tipo) {
         document.getElementById('login-form').style.display = (tipo === 'login') ? 'block' : 'none';
         document.getElementById('register-form').style.display = (tipo === 'cadastro') ? 'block' : 'none';
-        document.getElementById('login-error').style.display = 'none';
-        document.getElementById('reg-error').style.display = 'none';
     }
-
     function mostrarLoading(txt) {
         document.getElementById('loading-text').innerText = txt;
         document.getElementById('loading-overlay').style.display = 'flex';
     }
     function esconderLoading() { document.getElementById('loading-overlay').style.display = 'none'; }
-    
-    function mostrarLogin() {
-        document.getElementById('login-form').style.display = 'block';
-        document.getElementById('register-form').style.display = 'none';
-        document.getElementById('paywall-view').style.display = 'none';
-    }
-    
-    function mostrarPaywall() {
-        document.getElementById('login-form').style.display = 'none';
-        document.getElementById('register-form').style.display = 'none';
-        document.getElementById('paywall-view').style.display = 'block';
-    }
-
-    function mostrarErro(el, msg) {
-        el.innerText = msg;
-        el.style.display = 'block';
-    }
+    function mostrarLogin() { document.getElementById('login-form').style.display = 'block'; }
 </script>
 </body>
 </html>
