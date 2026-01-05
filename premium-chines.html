@@ -15,7 +15,7 @@
     <style>
         :root { --gold: #d4af37; --bg-dark: #050505; --red: #8a1c1c; }
         
-        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; line-height: 1.6; }
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; line-height: 1.8; }
         
         /* LOADING */
         #loading-screen {
@@ -43,7 +43,7 @@
             border-radius: 8px; margin-bottom: 50px; text-align: justify; border-left: 3px solid var(--red);
         }
         .intro-title { color: var(--gold); font-family: 'Cinzel'; font-size: 1.2em; margin-bottom: 15px; text-transform: uppercase; }
-        .intro-text { font-size: 1em; color: #ccc; line-height: 1.7; }
+        .intro-text { font-size: 1.05em; color: #ccc; }
 
         /* CARTÃO DO RESULTADO */
         .china-card {
@@ -62,10 +62,14 @@
         }
 
         /* REPORT DETALHADO */
-        .report-section { margin-top: 50px; display: grid; grid-template-columns: 1fr; gap: 30px; }
-        .report-block { background: rgba(255,255,255,0.03); padding: 30px; border-radius: 4px; border: 1px solid #222; }
-        .block-head { color: var(--gold); font-family: 'Cinzel'; font-size: 1.4em; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .block-text { color: #ccc; text-align: justify; font-size: 1.05em; }
+        .report-section { margin-top: 50px; display: flex; flex-direction: column; gap: 40px; }
+        
+        .report-block { 
+            background: rgba(20, 20, 20, 0.8); padding: 40px; border-radius: 4px; border: 1px solid #333; 
+            border-left: 4px solid var(--gold);
+        }
+        .block-head { color: var(--gold); font-family: 'Cinzel'; font-size: 1.6em; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .block-text { color: #ccc; text-align: justify; font-size: 1.1em; }
         .highlight { color: #fff; font-weight: bold; }
 
         @media print { .btn-back, .btn-print, .intro-box { display: none; } body { background: #fff; color: #000; } .china-card, .report-block { border: 1px solid #000; color: #000; background: #fff; } }
@@ -75,25 +79,24 @@
 
 <div id="loading-screen">
     <i class="fas fa-compass spinner"></i>
-    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Calculando Ciclos Lunares...</p>
+    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Calculando Ciclos Ancestrais...</p>
 </div>
 
 <div class="container">
     <div class="nav-bar">
         <div onclick="window.location.href='dashboard-premium.html'" class="btn-back">← Voltar ao Hub</div>
-        <button onclick="window.print()" class="btn-print"><i class="fas fa-print"></i> Imprimir</button>
+        <button onclick="window.print()" class="btn-print"><i class="fas fa-print"></i> Imprimir Dossiê</button>
     </div>
 
     <h1 class="header-title">ZODÍACO CHINÊS (SHENG XIAO)</h1>
     <div class="user-details" id="user-info">...</div>
 
     <div class="intro-box">
-        <div class="intro-title">Como Funciona este Sistema?</div>
+        <div class="intro-title">A Sabedoria dos Ancestrais</div>
         <div class="intro-text">
-            Diferente da astrologia ocidental, baseada nos meses solares, o Zodíaco Chinês baseia-se em um ciclo lunar de 12 anos. Cada ano é regido por um animal arquétipo.
+            Diferente da astrologia ocidental, baseada no sol, o Zodíaco Chinês é um complexo sistema baseado nos ciclos lunares e na rotação de Júpiter. Ele não define apenas sua personalidade, mas o seu destino social e kármico.
             <br><br>
-            Porém, o animal é apenas metade da história. Existe também um ciclo de 10 anos dos <strong>5 Elementos</strong> (Metal, Água, Madeira, Fogo, Terra). 
-            A combinação do seu Animal com seu Elemento de nascimento cria sua identidade única entre 60 possibilidades. Abaixo, revelamos a sua combinação exata.
+            Você é regido por um dos 12 Animais Sagrados, que define a "forma" do seu espírito, e por um dos 5 Elementos (Metal, Água, Madeira, Fogo, Terra), que define a "matéria" da qual você é feito. A combinação exata (ex: Dragão de Metal) ocorre apenas uma vez a cada 60 anos. Abaixo está o seu dossiê completo.
         </div>
     </div>
 
@@ -111,100 +114,100 @@
     // --- 1. FAILSAFE ---
     setTimeout(() => { document.getElementById('loading-screen').style.display = 'none'; }, 3000);
 
-    // --- 2. DADOS DENSOS ---
+    // --- 2. DADOS EXPANDIDOS E DENSOS ---
     const ANIMAIS_DATA = {
         "Rato": {
             icon: "fas fa-mouse",
-            arq: "O Estrategista",
-            desc: "Inteligente, engenhoso e versátil. O Rato é o primeiro signo do ciclo, representando inícios e sobrevivência. Você possui uma mente afiada capaz de ver oportunidades onde ninguém mais vê. Seu charme social esconde um observador calculista e prudente.",
-            work: "Excelente em negócios, finanças e qualquer campo que exija adaptação rápida. Você trabalha melhor quando tem autonomia.",
-            love: "Você é dedicado e apaixonado, mas pode ser possessivo. Busca parceiros que ofereçam segurança e lealdade."
+            arq: "O Estrategista Mestre",
+            desc: "Como o primeiro signo do zodíaco, o Rato representa o início, a inteligência rápida e a sobrevivência a qualquer custo. Você possui uma mente afiada, capaz de ver soluções e oportunidades onde outros veem apenas problemas. Você é charmoso, sociável e extremamente perspicaz, muitas vezes usando essa astúcia para garantir seu próprio benefício e o de sua família. Embora possa parecer reservado sobre seus verdadeiros sentimentos, você é profundamente protetor com seu 'clã'. Sua maior força é a adaptabilidade; não importa a situação, o Rato sempre encontra um caminho.",
+            work: "No mundo profissional, você é inigualável em detectar tendências antes que elas aconteçam. Você possui um instinto natural para finanças e acumulação de recursos. Trabalhos que exigem rotina monótona podem te entediar; você brilha em negociações, vendas, estratégias corporativas ou empreendedorismo. Você prefere trabalhar com inteligência do que com força bruta, sempre buscando a rota mais eficiente para o sucesso.",
+            love: "No amor, você é intenso, sentimental e, muitas vezes, possessivo. Você trata seus amados com generosidade extrema, mas espera lealdade absoluta em troca. Por trás do seu charme social, existe uma necessidade profunda de segurança emocional. Você tende a se envolver com pessoas que pode cuidar ou que admiram sua inteligência. O desafio é controlar o ciúme e permitir que o parceiro tenha espaço."
         },
         "Boi": {
-            icon: "fas fa-bullhorn", // Representação visual
-            arq: "O Realizador Silencioso",
-            desc: "Diligente, dependente e forte. O Boi representa a prosperidade alcançada através do trabalho duro. Você não gosta de atalhos. Sua palavra é uma promessa inquebrável. Embora possa parecer teimoso, é apenas sua firmeza de caráter em ação.",
-            work: "Metódico e lógico. Você constrói impérios tijolo por tijolo. É um líder respeitado pela ética, não pelo medo.",
-            love: "Você demora para se abrir, mas quando ama, é para a vida toda. Busca estabilidade acima de aventura."
+            icon: "fas fa-bullhorn", // Visual representativo
+            arq: "O Pilar da Força",
+            desc: "O Boi é o símbolo da prosperidade alcançada através da perseverança. Você não confia na sorte; você confia no esforço. Sua natureza é calma, metódica e inabalável. Uma vez que você toma uma decisão, nada pode desviá-lo do caminho. As pessoas veem em você um líder natural, não porque você grita, mas porque você inspira confiança e estabilidade. Você é honesto, às vezes até demais, e detesta jogos mentais ou manipulação. Sua força reside na sua consistência.",
+            work: "Sua ética de trabalho é lendária. Você é capaz de suportar cargas de responsabilidade que esmagariam outros signos. Você constrói carreiras sólidas, tijolo por tijolo, e geralmente alcança posições de grande autoridade mais tarde na vida. Áreas como engenharia, medicina, agricultura, administração ou qualquer campo que exija precisão e longo prazo são ideais. Você não busca o sucesso rápido, mas o sucesso duradouro.",
+            love: "Você não é do tipo que se apaixona à primeira vista ou se entrega a paixões passageiras. Para você, o amor é um compromisso sério e sagrado. Você demora para se abrir, mas quando o faz, é leal até o fim. Você expressa amor através de atos de serviço e provendo segurança, não necessariamente com palavras poéticas. Busca um parceiro que valorize a família e a tradição tanto quanto você."
         },
         "Tigre": {
             icon: "fas fa-cat",
-            arq: "O Rebelde Corajoso",
-            desc: "Corajoso, confiante e magnético. O Tigre nasceu para liderar e desafiar o status quo. Você é movido pela paixão e pelo instinto. Sua natureza é imprevisível e nobre; você protege ferozmente aqueles que ama, mas não tolera desrespeito.",
-            work: "Precisa de desafios. Ambientes monótonos matam seu espírito. Você brilha em posições de comando ou empreendedorismo arriscado.",
-            love: "Intenso e dominador. Relacionamentos com você são uma aventura emocionante, cheia de altos e baixos."
+            arq: "O Rebelde Nobre",
+            desc: "O Tigre é a encarnação da coragem, da paixão e da imprevisibilidade. Você nasceu para desafiar as regras e liderar revoluções, sejam elas grandes ou pessoais. Sua energia é magnética e intensa; é impossível ignorar sua presença. Você é movido por ideais elevados e um senso de justiça aguçado, muitas vezes defendendo os mais fracos. No entanto, sua natureza impulsiva pode levá-lo a riscos desnecessários. Você vive a vida em cores vibrantes e recusa a mediocridade.",
+            work: "A rotina é veneno para a alma do Tigre. Você precisa de uma carreira que ofereça desafio, risco e a possibilidade de inovação. Você é um líder nato que inspira suas equipes com entusiasmo, embora possa ser impaciente com a lentidão alheia. Gestão, política, artes performáticas ou carreiras militares/policiais atraem sua natureza combativa e dinâmica. O sucesso vem quando você aprende a temperar sua ousadia com estratégia.",
+            love: "Sua vida amorosa é uma montanha-russa de emoções intensas. Você é romântico, sedutor e se entrega totalmente à paixão do momento. No entanto, você também preza sua independência e não suporta parceiros controladores. O desafio para o Tigre é encontrar alguém que possa lidar com sua intensidade sem tentar domesticá-lo. Quando encontra o par certo, você é generoso e ardentemente fiel."
         },
         "Coelho": {
             icon: "fas fa-paw",
-            arq: "O Diplomata Refinado",
-            desc: "Tranquilo, elegante e responsável. O Coelho é o símbolo da longevidade e da sorte. Você detesta conflitos e tem um talento natural para encontrar soluções pacíficas. Sua sensibilidade artística e bom gosto são notáveis. Por trás da gentileza, há uma mente astuta.",
-            work: "Excelente em diplomacia, artes, design e direito. Você avança através de conexões sociais e tato.",
-            love: "Romântico e sensível. Você precisa de um parceiro que entenda sua necessidade de harmonia e evite agressividade."
+            arq: "O Diplomata da Sorte",
+            desc: "O Coelho é considerado um dos signos mais afortunados do zodíaco. Você carrega uma aura de elegância, gentileza e sensibilidade. Sua natureza abomina o conflito; você é um mestre em contornar obstáculos e encontrar soluções pacíficas. Embora pareça frágil ou reservado por fora, você possui uma força interior resiliente e uma astúcia discreta. Você valoriza a beleza, a arte e o conforto, buscando sempre criar um refúgio harmonioso para si e para os seus.",
+            work: "Você não gosta de ambientes de trabalho agressivos ou competitivos demais. Sua inteligência brilha em campos que exigem negociação, detalhe e bom gosto. Diplomacia, design, direito, literatura e terapia são áreas onde o Coelho prospera. Você tem um talento excelente para finanças e raramente toma decisões precipitadas com dinheiro, preferindo a segurança ao risco.",
+            love: "Você é o romântico idealista. No amor, busca ternura, compreensão e conexão intelectual. Você pode ser cauteloso antes de entregar seu coração, analisando se o parceiro é confiável. Evita dramas e cenas de ciúmes. Seu relacionamento ideal é um porto seguro de paz e apoio mútuo. No entanto, sua aversão a confrontos pode fazer com que você guarde ressentimentos em vez de discuti-los."
         },
         "Dragão": {
             icon: "fas fa-dragon",
-            arq: "O Visionário Poderoso",
-            desc: "Poderoso, nobre e sortudo. O Dragão é o único animal mítico do zodíaco, representando poder celestial. Você possui um carisma natural e uma autoconfiança inabalável. Nasceu para deixar um legado e inspirar os outros com sua visão grandiosa.",
-            work: "Visionário. Você não lida bem com detalhes rotineiros; precisa de uma equipe para executar suas grandes ideias.",
-            love: "Você busca alguém que admire sua força, mas que não compita com ela. Precisa de espaço para voar."
+            arq: "O Imperador Visionário",
+            desc: "O Dragão é a única criatura mítica do zodíaco, o que lhe confere um status especial de poder e excentricidade. Você possui um carisma natural, vitalidade inesgotável e uma autoconfiança que beira a arrogância. Você nasceu com um senso de destino grandioso; a vida comum não lhe satisfaz. Você é nobre, direto e espera muito de si mesmo e dos outros. Sua presença inspira respeito, e você frequentemente se vê no centro das atenções, querendo ou não.",
+            work: "Você é um visionário, focado no quadro geral e nas grandes ideias. Detalhes minuciosos e burocracia o entediam. Você precisa de liberdade para criar e comandar. Empreendedorismo, artes, direção criativa, política ou qualquer posição de alta liderança são seus habitats naturais. O Dragão tem sorte com dinheiro, mas deve ter cuidado para não gastar tão rápido quanto ganha.",
+            love: "Você atrai muitos admiradores, mas é seletivo. No amor, você busca alguém que seja forte o suficiente para caminhar ao seu lado sem ser ofuscado, mas que também ofereça o apoio emocional que seu ego secretamente precisa. Você pode ser exigente e autoritário, mas é também extremamente generoso e protetor. Relacionamentos mornos não duram com você; precisa haver fogo e admiração mútua."
         },
         "Serpente": {
             icon: "fas fa-staff-snake",
-            arq: "O Filósofo Enigmático",
-            desc: "Enigmática, inteligente e sábia. A Serpente é o arquétipo do mistério e da intuição profunda. Você não fala muito, mas quando fala, todos ouvem. Possui um sexto sentido apurado para mentiras e situações vantajosas. Sua mente é filosófica e calculista.",
-            work: "Pesquisador, cientista ou estrategista. Você resolve problemas complexos em silêncio e com precisão.",
-            love: "Sedutor e possessivo. Você escolhe parceiros com muito critério e exige lealdade absoluta."
+            arq: "O Sábio Místico",
+            desc: "A Serpente é o signo da sabedoria profunda, do mistério e da intuição psíquica. Você é reservado, observador e raramente revela todas as suas cartas. Por trás de sua postura calma e elegante, sua mente está sempre calculando e analisando. Você possui um gosto refinado e aprecia as coisas boas da vida. Diferente do Dragão que impõe poder, a Serpente seduz e influencia sutilmente. Você confia mais em seus próprios instintos do que na opinião alheia.",
+            work: "Você trabalha melhor sozinho ou em posições onde tem total controle sobre suas tarefas. Sua capacidade de concentração é imensa, permitindo que resolva problemas complexos que outros abandonariam. Pesquisa, ciência, astrologia, psicologia e finanças são áreas fortes. Você tem um faro natural para oportunidades lucrativas e sabe o momento exato de agir (o bote da serpente).",
+            love: "A Serpente é o amante mais sedutor do zodíaco. Você envolve seu parceiro em uma aura de mistério e sensualidade. No entanto, você é possessivo e pode ser extremamente ciumento, embora esconda isso sob uma fachada fria. Você busca uma conexão de almas, profunda e exclusiva. Traição é algo que uma Serpente jamais esquece ou perdoa facilmente."
         },
         "Cavalo": {
             icon: "fas fa-horse",
-            arq: "O Espírito Livre",
-            desc: "Animado, ativo e enérgico. O Cavalo ama a liberdade acima de tudo. Você é a alma da festa, otimista e comunicativo. Sua mente é rápida, mas pode ser impaciente. Você galopa pela vida buscando novas experiências e detesta se sentir amarrado.",
-            work: "Vendas, comunicação e viagens. Você precisa de movimento e interação social constante.",
-            love: "Apaixona-se rápido e intensamente, mas pode perder o interesse se a rotina se instalar. Precisa de um parceiro independente."
+            arq: "O Aventureiro Incansável",
+            desc: "Liberdade é a sua religião. O Cavalo é enérgico, popular, falante e vive em movimento constante. Você tem uma mente rápida e absorve informações velozmente, embora possa perder o interesse com a mesma rapidez. Sua natureza é otimista e independente; você detesta se sentir amarrado ou controlado. Você é honesto e direto, às vezes até rude sem intenção, mas seu coração é generoso e você perdoa rápido.",
+            work: "Você precisa de uma carreira que permita movimento, viagens ou interação constante com pessoas. Ficar preso em um escritório das 9 às 17h é tortura para você. Vendas, jornalismo, turismo, esporte e comunicação são excelentes. Você tem muitas ideias brilhantes e inicia muitos projetos, mas seu desafio é ter a disciplina para terminá-los.",
+            love: "Você se apaixona fácil e intensamente, entregando-se à paixão do momento. O Cavalo é um conquistador nato. Porém, quando a fase da novidade passa, você pode sentir a necessidade de pastos mais verdes. Para manter um Cavalo, o parceiro deve ser independente, estimulante e nunca tentar colocar rédeas em sua liberdade. A amizade é a base do seu amor."
         },
         "Cabra": {
-            icon: "fas fa-bacon", // Placeholder approx
-            arq: "O Artista Compassivo",
-            desc: "Calma, gentil e simpática. A Cabra é o signo da arte e da beleza. Você é sonhador e tem um coração enorme, sempre preocupado com o bem-estar alheio. Evita confrontos diretos e prefere persuadir pela gentileza. Sua criatividade é sua maior arma.",
-            work: "Artes, cura e assistência social. Você precisa de um ambiente harmonioso e sem pressão excessiva.",
-            love: "Carente e carinhoso. Você precisa de proteção e estabilidade emocional em um relacionamento."
+            icon: "fas fa-bacon", // Placeholder approximation
+            arq: "O Sonhador Criativo",
+            desc: "A Cabra (ou Ovelha) é o signo da arte, da paz e da compaixão. Você tem uma alma gentil, criativa e muitas vezes tímida. A agressividade do mundo o perturba; você busca refúgio na beleza e na imaginação. Você é extremamente empático e muitas vezes absorve as emoções dos outros. Embora pareça dócil, você tem uma resistência passiva incrível: você não confronta, mas também não faz o que não quer, vencendo pela insistência silenciosa.",
+            work: "Você não foi feito para a competição corporativa feroz. Seu talento floresce em ambientes harmoniosos onde sua criatividade pode fluir. Artes visuais, música, design de interiores, cura holística e educação infantil são caminhos ideais. Você trabalha melhor em equipe ou com parceiros que lidem com a parte 'dura' dos negócios enquanto você cria.",
+            love: "Você precisa ser amado, protegido e mimado. No amor, você é carinhoso, dedicado e muito romântico. A segurança emocional é fundamental para você. Você tende a se preocupar muito com o relacionamento e precisa de um parceiro forte e estável que ofereça o porto seguro que sua natureza sensível necessita."
         },
         "Macaco": {
             icon: "fas fa-atom", // Intellect
-            arq: "O Inovador Ágil",
-            desc: "Afiado, inteligente e curioso. O Macaco é o solucionador de problemas do zodíaco. Não há desafio que sua mente ágil não possa desvendar. Você é brincalhão, às vezes travesso, e possui uma capacidade de aprendizado acelerada.",
-            work: "Inovação, tecnologia e engenharia. Você prospera em ambientes caóticos onde precisa improvisar.",
-            love: "Divertido e estimulante. Você precisa de um parceiro intelectualmente desafiador para não ficar entediado."
+            arq: "O Gênio Improvisador",
+            desc: "O Macaco é o signo mais inteligente, travesso e ágil do zodíaco. Sua mente é uma máquina de resolver problemas. Você é curioso, inovador e tem um senso de humor afiado. Não há desafio que você não possa superar com criatividade e improviso. Você pode ser visto como manipulador ou oportunista por alguns, mas na verdade você está apenas jogando o jogo da vida com regras que você entende melhor que ninguém. O tédio é seu inimigo.",
+            work: "Você é capaz de fazer qualquer coisa que se proponha. Seus talentos são múltiplos. Engenharia, tecnologia, mercado financeiro, advocacia ou qualquer campo que exija raciocínio rápido e estratégia. Você prospera no caos e na mudança. O desafio é a consistência; você tende a pular para a próxima novidade antes de consolidar a anterior.",
+            love: "Você busca um parceiro que seja mentalmente estimulante. A beleza física é importante, mas se a conversa for chata, você perde o interesse. Você pode ser inconstante na juventude, buscando a emoção da conquista. Com a maturidade, se encontrar alguém que acompanhe seu ritmo mental e respeite sua necessidade de diversão, torna-se um parceiro leal e fascinante."
         },
         "Galo": {
             icon: "fas fa-crow",
-            arq: "O Perfeccionista",
-            desc: "Observador, trabalhador e corajoso. O Galo é o signo da franqueza e da organização. Você gosta de estar no comando e de aparecer, sempre impecável. Sua atenção aos detalhes é lendária, embora possa ser crítico demais consigo mesmo e com os outros.",
-            work: "Administração, finanças e moda. Você organiza o caos e garante que tudo esteja perfeito.",
-            love: "Leal e protetor. Você gosta de cuidar do parceiro, mas exige que ele atenda aos seus altos padrões."
+            arq: "O Guardião da Ordem",
+            desc: "O Galo é o signo da franqueza, da precisão e da aparência. Você é confiante, organizado e não tem medo de dizer a verdade, doa a quem doer. Você possui um talento natural para administração (financeira e de pessoas). Gosta de ser notado e apreciado, cuidando muito bem de sua imagem. Por trás da vaidade, existe um coração leal e trabalhador que realmente quer ajudar os outros a melhorarem.",
+            work: "Você é o mestre da eficiência. Ninguém organiza uma planilha, um evento ou um departamento melhor que um Galo. Contabilidade, medicina, administração pública e crítica (de arte ou gastronomia) são áreas fortes. Você é muito crítico consigo mesmo e com os outros, buscando a perfeição. Cuidado para não se perder nos detalhes e esquecer o todo.",
+            love: "Você é leal e dedicado, muitas vezes fazendo muito pelo parceiro na prática (arrumando a casa, organizando as finanças). Você busca um relacionamento estável e tradicional. No entanto, sua língua afiada e suas críticas constantes podem ferir parceiros mais sensíveis. Você precisa de alguém seguro de si que entenda que sua crítica é sua forma de demonstrar cuidado."
         },
         "Cão": {
             icon: "fas fa-dog",
-            arq: "O Guardião Leal",
-            desc: "Leal, honesto e prudente. O Cão é o signo da justiça. Você tem um radar moral inabalável e luta pelos oprimidos. É o melhor amigo que alguém pode ter, sempre alerta e fiel. Tende a se preocupar demais, mas isso vem do seu desejo de proteger.",
-            work: "Justiça, segurança e serviço social. Você trabalha por uma causa, não apenas por dinheiro.",
-            love: "Fiel até o fim. Você demora para confiar, mas uma vez que entrega seu coração, é para sempre."
+            arq: "O Protetor Leal",
+            desc: "O Cão é o signo da honestidade, da lealdade e da justiça. Você possui um radar moral interno que não pode ser desligado; a injustiça o enfurece. Você é o melhor amigo que alguém pode ter: sempre alerta, sempre fiel, sempre pronto para ouvir. Você tende a ser pessimista ou ansioso, preocupando-se com perigos que ainda não aconteceram, mas isso vem do seu profundo instinto de proteção para com os seus amados.",
+            work: "Você não trabalha apenas por dinheiro; precisa de um propósito. Carreiras em serviço social, medicina, direito, segurança pública, ONGs ou educação atraem você. Você é um funcionário valioso e discreto, que coloca o bem do grupo acima do ego pessoal. Líderes Cães são justos e amados por suas equipes.",
+            love: "Você demora para confiar. O amor é coisa séria e a traição é imperdoável para você. Uma vez que você entrega seu coração, é para sempre. Você pode não ser o mais romântico no sentido tradicional, mas é o mais constante e presente. Você precisa de um parceiro que lhe dê segurança e que seja tão honesto quanto você. Jogos emocionais o afastam imediatamente."
         },
         "Porco": {
             icon: "fas fa-piggy-bank",
-            arq: "O Filantropo Hedonista",
-            desc: "Compassivo, generoso e diligente. O Porco fecha o ciclo com sabedoria e prazer. Você ama as coisas boas da vida e gosta de compartilhar. É ingênuo por escolha, preferindo ver o lado bom das pessoas. Sua força interior é imensa, suportando fardos sem reclamar.",
-            work: "Qualquer área onde possa ajudar ou entreter. Você trabalha duro para poder desfrutar depois.",
-            love: "Afetuoso e sensual. Você se entrega totalmente e busca uma conexão profunda e confortável."
+            arq: "O Filantropo Nobre",
+            desc: "O Porco fecha o ciclo do zodíaco com generosidade, compaixão e prazer. Você é uma alma nobre, honesta (às vezes ingênua) e que acredita no melhor das pessoas. Você ama o conforto, a boa comida e o luxo, e adora compartilhar isso com os amigos. Sua força interior é surpreendente; você suporta dificuldades com uma resiliência silenciosa. Você evita conflitos e busca a harmonia universal.",
+            work: "Você é trabalhador e diligente quando tem um objetivo. Não gosta de competir agressivamente; prefere colaborar. Áreas relacionadas a hospitalidade, culinária, medicina, caridade e entretenimento são ótimas. Você tem sorte natural com dinheiro, mas deve ter cuidado com pessoas que tentam se aproveitar da sua generosidade excessiva.",
+            love: "Você é o amante mais afetuoso e sensual do zodíaco. Você se doa completamente e cria um mundo de conforto para o parceiro. Você é tolerante e perdoa falhas facilmente, o que às vezes o mantém em relacionamentos desequilibrados. Você busca uma união profunda, doméstica e cheia de carinho físico. Traição destrói seu mundo idealista."
         }
     };
 
     const ELEMENTOS_DATA = {
-        "Metal": "O Metal traz rigidez, determinação e ambição. Torna você mais focado no sucesso, independente e às vezes inflexível. Sua mente é cortante como uma espada.",
-        "Água": "A Água traz fluidez, intuição e diplomacia. Torna você mais adaptável, comunicativo e capaz de influenciar os outros sutilmente, infiltrando-se como a maré.",
-        "Madeira": "A Madeira traz crescimento, criatividade e cooperação. Torna você mais ético, expansivo e interessado no progresso comunitário. Você busca criar raízes.",
-        "Fogo": "O Fogo traz paixão, dinamismo e liderança. Torna você mais impulsivo, carismático e aventureiro. Você queima com um desejo de ação e reconhecimento.",
-        "Terra": "A Terra traz estabilidade, praticidade e cautela. Torna você mais confiável, pé no chão e focado em resultados tangíveis e segurança a longo prazo."
+        "Metal": "<strong>A Influência do Metal (Firmeza e Ambição):</strong><br>O elemento Metal traz rigidez, determinação e autossuficiência. Combinado com seu animal, ele torna você mais ambicioso, focado e às vezes inflexível. Você busca o sucesso com uma mente cortante e lógica. Pode ter dificuldade em expressar emoções, preferindo a ação prática. Sua vontade é de ferro.",
+        "Água": "<strong>A Influência da Água (Intuição e Fluidez):</strong><br>A Água traz adaptabilidade, diplomacia e profundidade emocional. Ela suaviza a natureza do seu animal, tornando-o mais comunicativo, persuasivo e intuitivo. Você tem o dom de contornar obstáculos sem confronto direto, infiltrando-se como a maré. Cuidado com a tendência a ser passivo ou manipulador.",
+        "Madeira": "<strong>A Influência da Madeira (Crescimento e Ética):</strong><br>A Madeira representa expansão, criatividade e cooperação social. Este elemento torna você mais interessado no progresso coletivo, na ética e no aprendizado. Você é flexível como um bambu e busca criar raízes sólidas. Tende a ser mais otimista e generoso, mas pode se sobrecarregar querendo fazer tudo.",
+        "Fogo": "<strong>A Influência do Fogo (Paixão e Liderança):</strong><br>O Fogo traz dinamismo, carisma e impulsividade. Ele acende a natureza do seu animal, tornando-o mais visível, agressivo na busca de objetivos e apaixonado. Você nasceu para liderar e inspirar, mas deve cuidar da impaciência e do temperamento explosivo. Você queima com um desejo de reconhecimento.",
+        "Terra": "<strong>A Influência da Terra (Estabilidade e Realismo):</strong><br>A Terra traz pragmatismo, responsabilidade e cautela. Ela 'aterra' o seu animal, tornando-o mais confiável, trabalhador e focado em resultados tangíveis. Você valoriza a segurança e o longo prazo acima de riscos. É o elemento da nutrição e da construção sólida, embora possa faltar um pouco de imaginação."
     };
 
     // --- 3. LÓGICA DE CÁLCULO ---
@@ -243,25 +246,25 @@
             </div>
 
             <div class="report-block">
-                <div class="block-head">A INFLUÊNCIA DO ELEMENTO ${res.elemento.toUpperCase()}</div>
+                <div class="block-head">A ALQUIMIA DO ELEMENTO ${res.elemento.toUpperCase()}</div>
                 <div class="block-text">
-                    Você não é apenas um ${res.animal}, você é um <strong>${res.animal} de ${res.elemento}</strong>. 
+                    No sistema chinês, o animal é o corpo e o elemento é o sangue que corre nele. 
                     <br><br>
                     ${textoElemento}
                     <br><br>
-                    Essa combinação molda sua personalidade de forma única, diferenciando você de pessoas do mesmo signo nascidas em anos diferentes.
+                    Essa combinação cria uma variante única. Por exemplo, um Dragão de Fogo é muito diferente de um Dragão de Água. O seu elemento define <strong>como</strong> você persegue os objetivos do seu animal.
                 </div>
             </div>
 
             <div class="report-block">
-                <div class="block-head">CARREIRA E DINHEIRO</div>
+                <div class="block-head">CAMINHO DA CARREIRA E FORTUNA</div>
                 <div class="block-text">
                     ${dataAnimal.work}
                 </div>
             </div>
 
             <div class="report-block">
-                <div class="block-head">AMOR E RELACIONAMENTOS</div>
+                <div class="block-head">VIDA AMOROSA E COMPATIBILIDADE</div>
                 <div class="block-text">
                     ${dataAnimal.love}
                 </div>
