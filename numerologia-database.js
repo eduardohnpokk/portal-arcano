@@ -1,8 +1,7 @@
 // numerologia-database.js
-// MOTOR DE CÁLCULO CABALÍSTICO & INTERPRETAÇÃO
+// MOTOR DE CÁLCULO CABALÍSTICO & INTERPRETAÇÃO (VERSÃO FINAL CORRIGIDA)
 
 // 1. TABELA DE GEMATRIA (CABALÍSTICA)
-// A=1, B=2, C=3, D=4, E=5, F=8, G=3, H=5, I=1, J=1, K=2, L=3, M=4, N=5, O=7, P=8, Q=1, R=2, S=3, T=4, U=6, V=6, W=5, X=6, Y=1, Z=7
 const TABELA_CABALA = {
     'A': 1, 'J': 1, 'S': 3,
     'B': 2, 'K': 2, 'T': 4,
@@ -15,10 +14,7 @@ const TABELA_CABALA = {
     'I': 1, 'R': 2
 };
 
-// ACENTOS (Cabalística considera acentos como valores adicionais ou letras base alteradas)
-// Para simplificação robusta neste nível, normalizamos para a letra base,
-// mas em sistemas ultra-complexos, o acento agudo soma +2. 
-// AQUI: Usaremos a letra base para garantir funcionamento universal inicial.
+// ACENTOS (Normalização para Cabalística Web)
 const MAPA_ACENTOS = {
     'Á': 'A', 'Ã': 'A', 'Â': 'A', 'É': 'E', 'Ê': 'E', 'Í': 'I', 'Ó': 'O', 'Ô': 'O', 'Õ': 'O', 'Ú': 'U', 'Ç': 'C'
 };
@@ -138,21 +134,16 @@ function calcularNome(nomeCompleto) {
     let somaConsoantes = 0;
     
     const VOGAIS = ['A', 'E', 'I', 'O', 'U'];
-    // Y e W podem ser vogais ou consoantes dependendo da fonética.
-    // Na Cabalística Simplificada para Web: Y é considerado vogal se não tiver outra vogal na sílaba (difícil detectar).
-    // Padrão Geral: Y como consoante e W como consoante, exceto regras específicas.
-    // AQUI: Usaremos Y como Vogal (som de I) e W como Consoante (som de V) na maioria dos nomes PT-BR.
-    // Ajuste fino pode ser feito depois.
+    // Na Cabalística Web Simplificada: Y como Vogal e W como Consoante
     
     for (let char of nomeLimpo) {
         // Trata acentos
         if (MAPA_ACENTOS[char]) char = MAPA_ACENTOS[char];
         
         const valor = TABELA_CABALA[char];
-        if (!valor) continue; // Ignora espaços
+        if (!valor) continue; 
 
-        // Verifica Vogal ou Consoante
-        if (VOGAIS.includes(char) || char === 'Y') { // Y considerado vogal aqui
+        if (VOGAIS.includes(char) || char === 'Y') { 
             somaVogais += valor;
         } else {
             somaConsoantes += valor;
@@ -167,13 +158,11 @@ function calcularNome(nomeCompleto) {
 }
 
 function calcularDestino(dataNasc) {
-    // dataNasc formato YYYY-MM-DD
     const partes = dataNasc.split('-');
     const ano = parseInt(partes[0]);
     const mes = parseInt(partes[1]);
     const dia = parseInt(partes[2]);
 
-    // Soma direta de todos os dígitos (Método Cabalístico Direto)
     let total = 0;
     String(ano).split('').forEach(n => total += parseInt(n));
     String(mes).split('').forEach(n => total += parseInt(n));
@@ -182,45 +171,67 @@ function calcularDestino(dataNasc) {
     return reduzir(total);
 }
 
-// 4. FUNÇÃO GERADORA DE TEXTO (LIGA O MOTOR AOS DADOS)
+// 4. FUNÇÃO GERADORA DE TEXTO (CORRIGIDA - SEM DUPLICIDADE)
 function gerarAnaliseNumerologica(tipo, numero) {
     const info = TEXTOS_NUMEROS[String(numero)];
-    if (!info) return "<p>Número em análise especial.</p>";
-
-    let interpretacaoEspecifica = "";
     
+    // Se for um número que não está no banco (ex: 0 ou erro de cálculo), retorna vazio ou aviso
+    if (!info) return `<div class="num-content"><p>Número ${numero} em análise especial.</p></div>`;
+
+    let htmlConteudo = "";
+    let tituloCard = "";
+    let subtituloCard = "";
+
     if (tipo === 'motivacao') {
-        interpretacaoEspecifica = `
-            <p><strong>Motivação (Alma):</strong> ${info.motiva}</p>
-            <p>Este número revela o "porquê" de suas ações. É o seu desejo interno mais profundo, aquilo que você faria mesmo se não fosse pago para isso.</p>
+        tituloCard = "MOTIVAÇÃO (ALMA)";
+        subtituloCard = "O QUE SUA ALMA DESEJA";
+        htmlConteudo = `
+            <p><strong>Análise:</strong> ${info.motiva}</p>
+            <p style="margin-top:15px; font-size:0.9em; color:#888;">
+                <em>Nota do Astrólogo: Este número representa seus desejos mais íntimos, aqueles que você teria mesmo se ninguém estivesse olhando.</em>
+            </p>
         `;
-    } else if (tipo === 'impressao') {
-        interpretacaoEspecifica = `
-            <p><strong>Impressão (Ego):</strong> ${info.impres}</p>
-            <p>Este número revela como os outros te percebem à primeira vista. É a sua "roupa social" e a fantasia que você veste para interagir com o mundo.</p>
+    } 
+    else if (tipo === 'impressao') {
+        tituloCard = "IMPRESSÃO (EGO)";
+        subtituloCard = "COMO O MUNDO TE VÊ";
+        htmlConteudo = `
+            <p><strong>Análise:</strong> ${info.impres}</p>
+            <p style="margin-top:15px; font-size:0.9em; color:#888;">
+                <em>Nota do Astrólogo: É a sua "roupa social". Muitas vezes, descreve sua aparência física ou a primeira impressão que você causa em estranhos.</em>
+            </p>
         `;
-    } else if (tipo === 'expressao') {
-        interpretacaoEspecifica = `
-            <p><strong>Expressão (Destino da Personalidade):</strong> A combinação de sua Alma e seu Ego cria sua Expressão. Como um ${info.titulo}, você expressa seus talentos no mundo. ${info.desc}</p>
+    } 
+    else if (tipo === 'expressao') {
+        tituloCard = "EXPRESSÃO (PERSONALIDADE)";
+        subtituloCard = "QUEM VOCÊ É NA ÍNTEGRA";
+        htmlConteudo = `
+            <p><strong>Análise:</strong> ${info.desc}</p>
+            <p>Como um <strong>${info.titulo}</strong>, você expressa seus talentos combinando seus desejos internos com sua imagem externa. É a soma total do seu potencial.</p>
         `;
-    } else if (tipo === 'destino') {
-        interpretacaoEspecifica = `
-            <p><strong>Caminho de Destino:</strong> ${info.destino}</p>
-            <p>O Destino é o caminho que a vida preparou para você caminhar. Diferente da Expressão (que é quem você é), o Destino é o que você veio aprender e viver.</p>
+    } 
+    else if (tipo === 'destino') {
+        tituloCard = "DESTINO (CAMINHO DE VIDA)";
+        subtituloCard = "O QUE VOCÊ VEIO APRENDER";
+        htmlConteudo = `
+            <p><strong>Análise:</strong> ${info.destino}</p>
+            <p style="margin-top:15px; font-size:0.9em; color:#888;">
+                <em>Nota do Astrólogo: Diferente da Expressão (quem você é), o Destino é a estrada que a vida colocou na sua frente. É a sua missão.</em>
+            </p>
         `;
     }
 
+    // Retorna o HTML limpo
     return `
         <div class="num-header">
             <span class="num-big">${numero}</span>
             <div class="num-meta">
-                <h4>${info.titulo}</h4>
-                <small>${info.arquetipo}</small>
+                <h4>${tituloCard}</h4>
+                <small>${subtituloCard}</small>
             </div>
         </div>
         <div class="num-content">
-            ${interpretacaoEspecifica}
-            <p><strong>A Vibração do ${numero}:</strong> ${info.desc}</p>
+            ${htmlConteudo}
         </div>
     `;
 }
