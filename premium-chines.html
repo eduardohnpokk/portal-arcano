@@ -9,6 +9,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
+    <script src="auth-guard.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -22,14 +24,13 @@
         .header-title { font-family: 'Cinzel'; color: var(--gold); text-align: center; margin-top: 40px; font-size: 2.8em; letter-spacing: 2px; }
         .header-sub { text-align: center; color: #888; font-family: sans-serif; margin-bottom: 30px; }
 
-        /* INTRODUÇÃO */
         .intro-box {
             background: rgba(20, 20, 20, 0.9); border: 1px solid var(--gold);
             padding: 30px; margin-bottom: 40px; border-radius: 8px; text-align: center;
         }
         .intro-box p { margin: 0; color: #ccc; line-height: 1.6; }
 
-        /* ÁREA DE RESULTADO (Sempre Visível) */
+        /* RESULTADO - Sempre visível para evitar loading infinito, o Guard já protegeu a entrada */
         #result-area { display: block; animation: fadeIn 0.5s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
@@ -51,7 +52,6 @@
         .desc-text p { margin-bottom: 20px; }
         .desc-text strong { color: #fff; }
 
-        /* RELACIONAMENTOS */
         .relations-grid { display: grid; grid-template-columns: 1fr; gap: 30px; margin-top: 40px; }
         @media(min-width: 700px) { .relations-grid { grid-template-columns: 1fr 1fr; } }
 
@@ -93,7 +93,6 @@
     </div>
 
     <div id="result-area">
-        
         <div class="main-card">
             <div class="animal-icon" id="res-icon"></div>
             <h2 class="animal-title" id="res-animal"></h2>
@@ -132,114 +131,16 @@
 <button class="btn-float" onclick="window.print()"><i class="fas fa-file-pdf"></i> SALVAR LEITURA</button>
 
 <script>
-    // --- 1. BANCO DE DADOS EMBUTIDO (ZERO FALHAS) ---
-    const LUNAR_DATES = {
-        1930: "01-30", 1931: "02-17", 1932: "02-06", 1933: "01-26", 1934: "02-14", 1935: "02-04", 1936: "01-24", 1937: "02-11", 1938: "01-31", 1939: "02-19",
-        1940: "02-08", 1941: "01-27", 1942: "02-15", 1943: "02-05", 1944: "01-25", 1945: "02-13", 1946: "02-02", 1947: "01-22", 1948: "02-10", 1949: "01-29",
-        1950: "02-17", 1951: "02-06", 1952: "01-27", 1953: "02-14", 1954: "02-03", 1955: "01-24", 1956: "02-12", 1957: "01-31", 1958: "02-18", 1959: "02-08",
-        1960: "01-28", 1961: "02-15", 1962: "02-05", 1963: "01-25", 1964: "02-13", 1965: "02-02", 1966: "01-21", 1967: "02-09", 1968: "01-30", 1969: "02-17",
-        1970: "02-06", 1971: "01-27", 1972: "02-15", 1973: "02-03", 1974: "01-23", 1975: "02-11", 1976: "01-31", 1977: "02-18", 1978: "02-07", 1979: "01-28",
-        1980: "02-16", 1981: "02-05", 1982: "01-25", 1983: "02-13", 1984: "02-02", 1985: "02-20", 1986: "02-09", 1987: "01-29", 1988: "02-17", 1989: "02-06",
-        1990: "01-27", 1991: "02-15", 1992: "02-04", 1993: "01-23", 1994: "02-10", 1995: "01-31", 1996: "02-19", 1997: "02-07", 1998: "01-28", 1999: "02-16",
-        2000: "02-05", 2001: "01-24", 2002: "02-12", 2003: "02-01", 2004: "01-22", 2005: "02-09", 2006: "01-29", 2007: "02-18", 2008: "02-07", 2009: "01-26",
-        2010: "02-14", 2011: "02-03", 2012: "01-23", 2013: "02-10", 2014: "01-31", 2015: "02-19", 2016: "02-08", 2017: "01-28", 2018: "02-16", 2019: "02-05",
-        2020: "01-25", 2021: "02-12", 2022: "02-01", 2023: "01-22", 2024: "02-10", 2025: "01-29", 2026: "02-17", 2027: "02-06", 2028: "01-26", 2029: "02-13"
-    };
-
-    const ELEMENTOS_CHINESES = {
-        0: { nome: "Metal", qualidade: "Traz determinação, inflexibilidade e ambição cortante. O Metal refina o caráter, mas pode torná-lo rígido." },
-        1: { nome: "Metal", qualidade: "Traz determinação, inflexibilidade e ambição cortante. O Metal refina o caráter, mas pode torná-lo rígido." },
-        2: { nome: "Água", qualidade: "Traz fluidez, diplomacia e intuição profunda. A Água torna o signo mais adaptável e comunicativo." },
-        3: { nome: "Água", qualidade: "Traz fluidez, diplomacia e intuição profunda. A Água torna o signo mais adaptável e comunicativo." },
-        4: { nome: "Madeira", qualidade: "Traz crescimento, criatividade e idealismo. A Madeira expande os horizontes e favorece o planejamento." },
-        5: { nome: "Madeira", qualidade: "Traz crescimento, criatividade e idealismo. A Madeira expande os horizontes e favorece o planejamento." },
-        6: { nome: "Fogo", qualidade: "Traz paixão, liderança e dinamismo. O Fogo acende o carisma, mas pode aumentar a impaciência." },
-        7: { nome: "Fogo", qualidade: "Traz paixão, liderança e dinamismo. O Fogo acende o carisma, mas pode aumentar a impaciência." },
-        8: { nome: "Terra", qualidade: "Traz estabilidade, pragmatismo e responsabilidade. A Terra ancora os sonhos na realidade." },
-        9: { nome: "Terra", qualidade: "Traz estabilidade, pragmatismo e responsabilidade. A Terra ancora os sonhos na realidade." }
-    };
-
-    const ANIMAIS_CHINESES = [
-        {
-            nome: "Rato", arquetipo: "O Estrategista Mestre", icone: "fas fa-mouse",
-            perfil: `<p>O Rato é o signo da genialidade estratégica e da sobrevivência. Você possui uma mente afiada que detecta oportunidades onde ninguém mais vê. Seu charme é sua arma; você sabe como envolver as pessoas para alcançar seus objetivos.</p><p><strong>No Amor:</strong> Você é sentimental e protetor com a família, mas exige lealdade absoluta. Ama intensamente, mas pode ser ciumento.</p><p><strong>Na Carreira:</strong> Excelente em negócios e finanças. Você sabe acumular riqueza e raramente entra em um barco furado.</p>`,
-            compatibilidade: { titulo: "Os Realizadores (Rato, Dragão, Macaco)", desc: "Este é o triângulo da Ação e da Inteligência. O <strong>Dragão</strong> traz a força e a visão grandiosa que você admira. O <strong>Macaco</strong> traz a engenhosidade para resolver os problemas complexos." },
-            conflito: { animal: "Cavalo", motivo: "O Cavalo preza a liberdade absoluta e a honestidade brutal, o que choca com sua natureza estratégica, reservada e, por vezes, calculista." }
-        },
-        {
-            nome: "Boi", arquetipo: "O Pilar da Terra", icone: "fas fa-bullhorn",
-            perfil: `<p>O Boi representa a prosperidade alcançada através da perseverança. Você não conta com a sorte; você constrói seu destino tijolo por tijolo. Sua força de caráter inspira confiança. Você é aquele em quem todos se apoiam quando a tempestade chega.</p><p><strong>No Amor:</strong> Lento para se apaixonar, mas fiel até a morte. Você não gosta de joguinhos emocionais.</p><p><strong>Na Carreira:</strong> Incansável e metódico. Você lidera pelo exemplo, não pelo grito.</p>`,
-            compatibilidade: { titulo: "Os Intelectuais (Boi, Serpente, Galo)", desc: "Este triângulo valoriza o planejamento. A <strong>Serpente</strong> oferece a sabedoria e a estratégia. O <strong>Galo</strong> traz a precisão e o detalhismo." },
-            conflito: { animal: "Cabra", motivo: "A Cabra é sonhadora e emocional, o que irrita profundamente seu senso prático e realista." }
-        },
-        {
-            nome: "Tigre", arquetipo: "O Guerreiro Nobre", icone: "fas fa-paw",
-            perfil: `<p>O Tigre é a encarnação da coragem e da imprevisibilidade. Você nasceu para comandar, não para obedecer. Possui um magnetismo natural que atrai seguidores, mas seu temperamento explosivo exige autocontrole.</p><p><strong>No Amor:</strong> Apaixonado, romântico e intenso.</p><p><strong>Na Carreira:</strong> Líder nato. Odeia rotina e burocracia. Precisa de desafios constantes.</p>`,
-            compatibilidade: { titulo: "Os Idealistas (Tigre, Cavalo, Cão)", desc: "Este triângulo é movido por honra. O <strong>Cavalo</strong> compartilha seu amor pela liberdade. O <strong>Cão</strong> compartilha seu senso de justiça." },
-            conflito: { animal: "Macaco", motivo: "O Macaco é brincalhão demais para o seu gosto. Você o acha leviano; ele te acha sério demais." }
-        },
-        {
-            nome: "Coelho", arquetipo: "O Diplomata Refinado", icone: "fas fa-carrot",
-            perfil: `<p>O Coelho é o signo da virtude, da prudência e da elegância. Você detesta o confronto direto e sempre encontrará uma maneira sofisticada de contornar obstáculos. Possui um gosto impecável e uma intuição forte para evitar perigos.</p><p><strong>No Amor:</strong> Sensível e carinhoso. Precisa de um ambiente de paz e segurança.</p><p><strong>Na Carreira:</strong> Excelente em diplomacia e artes.</p>`,
-            compatibilidade: { titulo: "Os Emocionais (Coelho, Cabra, Porco)", desc: "Este grupo prioriza a beleza e a sensibilidade. A <strong>Cabra</strong> compartilha seu amor pelo conforto. O <strong>Porco</strong> oferece a generosidade e o apoio emocional." },
-            conflito: { animal: "Galo", motivo: "O Galo é crítico e direto, ferindo sua sensibilidade. O estilo barulhento dele perturba sua paz." }
-        },
-        {
-            nome: "Dragão", arquetipo: "O Imperador Mítico", icone: "fas fa-dragon",
-            perfil: `<p>O único animal mítico do zodíaco. Você carrega uma aura de poder, sorte e autoridade natural. Não nasceu para o medíocre; sua alma exige grandiosidade. Você é carismático e cheio de vitalidade, mas deve cuidar com a arrogância.</p><p><strong>No Amor:</strong> Você busca alguém que admire sua grandeza, mas que não compita com ela.</p><p><strong>Na Carreira:</strong> Visionário. Você pensa grande e inspira equipes.</p>`,
-            compatibilidade: { titulo: "Os Realizadores (Dragão, Rato, Macaco)", desc: "A união do Poder. O <strong>Rato</strong> fornece a astúcia e a gestão financeira para seus impérios. O <strong>Macaco</strong> traz a inovação." },
-            conflito: { animal: "Cão", motivo: "O Cão é pessimista e realista demais para seus voos altos. Ele questiona seus sonhos e aponta falhas." }
-        },
-        {
-            nome: "Serpente", arquetipo: "O Sábio Enigmático", icone: "fas fa-staff-snake",
-            perfil: `<p>A Serpente é o signo da sabedoria profunda e do mistério. Você não se abre facilmente; observa, analisa e calcula antes de dar o bote. Possui um sexto sentido apurado e uma atração pelo oculto.</p><p><strong>No Amor:</strong> Sedutor e possessivo. Você envolve o parceiro completamente.</p><p><strong>Na Carreira:</strong> Estrategista frio. Trabalha bem sob pressão e resolve problemas impossíveis.</p>`,
-            compatibilidade: { titulo: "Os Intelectuais (Serpente, Boi, Galo)", desc: "Uma aliança mental. O <strong>Boi</strong> oferece a estabilidade sólida que acalma sua mente desconfiada. O <strong>Galo</strong> admira sua elegância." },
-            conflito: { animal: "Porco", motivo: "O Porco é ingênuo e honesto demais para sua natureza complexa. Você o acha simplório; ele te acha secreta." }
-        },
-        {
-            nome: "Cavalo", arquetipo: "O Espírito Livre", icone: "fas fa-horse",
-            perfil: `<p>O Cavalo é a energia pura em movimento. Independente, alegre e popular, você precisa de espaço como precisa de ar. Rotinas te matam. Você tem a capacidade de trabalhar duro, mas apenas naquilo que te apaixona.</p><p><strong>No Amor:</strong> Apaixona-se rápido e intensamente, mas pode perder o interesse se sentir-se preso.</p><p><strong>Na Carreira:</strong> Ótimo comunicador e vendedor.</p>`,
-            compatibilidade: { titulo: "Os Idealistas (Cavalo, Tigre, Cão)", desc: "A união da Liberdade. O <strong>Tigre</strong> entende sua necessidade de aventura. O <strong>Cão</strong> oferece a lealdade sem tentar te prender." },
-            conflito: { animal: "Rato", motivo: "O Rato é calculista e econômico, enquanto você é impulsivo. O choque de valores é inevitável." }
-        },
-        {
-            nome: "Cabra", arquetipo: "O Sonhador Criativo", icone: "fas fa-cloud-meatball",
-            perfil: `<p>A Cabra é o signo da arte, da gentileza e da paz. Você detesta pressão e competição agressiva. Sua força reside na sua criatividade. Você é empático e, muitas vezes, psíquico.</p><p><strong>No Amor:</strong> Romântico e dependente. Precisa de proteção e carinho constante.</p><p><strong>Na Carreira:</strong> Brilha nas artes e profissões de cura.</p>`,
-            compatibilidade: { titulo: "Os Emocionais (Cabra, Coelho, Porco)", desc: "A aliança da Sensibilidade. O <strong>Coelho</strong> aprecia seu gosto refinado. O <strong>Porco</strong> oferece o otimismo e a força emocional." },
-            conflito: { animal: "Boi", motivo: "O Boi exige disciplina e realismo, coisas que sufocam sua natureza artística." }
-        },
-        {
-            nome: "Macaco", arquetipo: "O Inventor Brilhante", icone: "fas fa-lightbulb",
-            perfil: `<p>O Macaco é o signo mais versátil e inteligente do zodíaco. Não há problema que você não possa resolver com improviso e astúcia. Você é brincalhão, curioso e mestre em adaptar-se. A vida é um jogo e você joga para ganhar.</p><p><strong>No Amor:</strong> Charmoso e divertido, mas pode ter dificuldade com compromissos sérios.</p><p><strong>Na Carreira:</strong> Inovador. Resolve crises complexas em segundos.</p>`,
-            compatibilidade: { titulo: "Os Realizadores (Macaco, Rato, Dragão)", desc: "A aliança da Inteligência. O <strong>Rato</strong> fascina você com sua astúcia mental. O <strong>Dragão</strong> oferece o palco para suas invenções." },
-            conflito: { animal: "Tigre", motivo: "O Tigre exige respeito e seriedade, e você não leva nada a sério. Ele vê suas brincadeiras como desrespeito." }
-        },
-        {
-            nome: "Galo", arquetipo: "O Administrador Perfeito", icone: "fas fa-feather",
-            perfil: `<p>O Galo é o signo da precisão, da ordem e da franqueza. Você vê os detalhes que todos ignoram. É trabalhador, organizado e gosta de manter as aparências impecáveis. Sua honestidade é brutal.</p><p><strong>No Amor:</strong> Leal e dedicado, mas crítico.</p><p><strong>Na Carreira:</strong> Mestre das finanças e da administração. Nada escapa ao seu olhar crítico.</p>`,
-            compatibilidade: { titulo: "Os Intelectuais (Galo, Serpente, Boi)", desc: "A aliança da Eficiência. A <strong>Serpente</strong> admira sua mente analítica. O <strong>Boi</strong> valoriza sua ética de trabalho e oferece estabilidade." },
-            conflito: { animal: "Coelho", motivo: "O Coelho é diplomático e detesta confronto; você diz a verdade na cara, doa a quem doer." }
-        },
-        {
-            nome: "Cão", arquetipo: "O Guardião Leal", icone: "fas fa-dog",
-            perfil: `<p>O Cão é o signo da justiça, da lealdade e da ansiedade. Você possui uma bússola moral inquebrável e luta pelos oprimidos. É o amigo mais fiel do zodíaco, mas tende a se preocupar excessivamente.</p><p><strong>No Amor:</strong> Fiel, protetor e companheiro. Demora a confiar, mas quando confia, é para sempre.</p><p><strong>Na Carreira:</strong> Trabalha bem em equipe e em posições de confiança.</p>`,
-            compatibilidade: { titulo: "Os Idealistas (Cão, Tigre, Cavalo)", desc: "A aliança da Ética. O <strong>Tigre</strong> luta as batalhas que você acredita serem justas. O <strong>Cavalo</strong> traz o otimismo que falta à sua natureza preocupada." },
-            conflito: { animal: "Dragão", motivo: "O Dragão busca poder e glória pessoal; você busca justiça coletiva. Vocês não concordam nos objetivos." }
-        },
-        {
-            nome: "Porco", arquetipo: "O Filantropo Generoso", icone: "fas fa-piggy-bank",
-            perfil: `<p>O Porco é o signo da generosidade, da honestidade e do prazer. Você acredita na bondade humana. Gosta de boa comida, conforto e luxo, e adora compartilhar tudo isso com os amigos.</p><p><strong>No Amor:</strong> Afetuoso, sensual e ingênuo. Entrega-se de corpo e alma.</p><p><strong>Na Carreira:</strong> Trabalhador diligente, mas sem a ambição de derrubar os outros.</p>`,
-            compatibilidade: { titulo: "Os Emocionais (Porco, Coelho, Cabra)", desc: "A aliança da Harmonia. O <strong>Coelho</strong> traz a paz doméstica que você ama. A <strong>Cabra</strong> desperta seu lado protetor." },
-            conflito: { animal: "Serpente", motivo: "A Serpente é desconfiada e secreta; você é um livro aberto. A astúcia dela te assusta." }
-        }
-    ];
+    // --- 1. BANCO DE DADOS EMBUTIDO (ZERO ERROS DE CARREGAMENTO) ---
+    const LUNAR_DATES={1930:"01-30",1931:"02-17",1932:"02-06",1933:"01-26",1934:"02-14",1935:"02-04",1936:"01-24",1937:"02-11",1938:"01-31",1939:"02-19",1940:"02-08",1941:"01-27",1942:"02-15",1943:"02-05",1944:"01-25",1945:"02-13",1946:"02-02",1947:"01-22",1948:"02-10",1949:"01-29",1950:"02-17",1951:"02-06",1952:"01-27",1953:"02-14",1954:"02-03",1955:"01-24",1956:"02-12",1957:"01-31",1958:"02-18",1959:"02-08",1960:"01-28",1961:"02-15",1962:"02-05",1963:"01-25",1964:"02-13",1965:"02-02",1966:"01-21",1967:"02-09",1968:"01-30",1969:"02-17",1970:"02-06",1971:"01-27",1972:"02-15",1973:"02-03",1974:"01-23",1975:"02-11",1976:"01-31",1977:"02-18",1978:"02-07",1979:"01-28",1980:"02-16",1981:"02-05",1982:"01-25",1983:"02-13",1984:"02-02",1985:"02-20",1986:"02-09",1987:"01-29",1988:"02-17",1989:"02-06",1990:"01-27",1991:"02-15",1992:"02-04",1993:"01-23",1994:"02-10",1995:"01-31",1996:"02-19",1997:"02-07",1998:"01-28",1999:"02-16",2000:"02-05",2001:"01-24",2002:"02-12",2003:"02-01",2004:"01-22",2005:"02-09",2006:"01-29",2007:"02-18",2008:"02-07",2009:"01-26",2010:"02-14",2011:"02-03",2012:"01-23",2013:"02-10",2014:"01-31",2015:"02-19",2016:"02-08",2017:"01-28",2018:"02-16",2019:"02-05",2020:"01-25",2021:"02-12",2022:"02-01",2023:"01-22",2024:"02-10",2025:"01-29",2026:"02-17",2027:"02-06",2028:"01-26",2029:"02-13"};
+    const ELEMENTOS_CHINESES={0:{nome:"Metal",qualidade:"Traz determinação, inflexibilidade e ambição cortante. O Metal refina o caráter, mas pode torná-lo rígido."},1:{nome:"Metal",qualidade:"Traz determinação, inflexibilidade e ambição cortante. O Metal refina o caráter, mas pode torná-lo rígido."},2:{nome:"Água",qualidade:"Traz fluidez, diplomacia e intuição profunda. A Água torna o signo mais adaptável e comunicativo."},3:{nome:"Água",qualidade:"Traz fluidez, diplomacia e intuição profunda. A Água torna o signo mais adaptável e comunicativo."},4:{nome:"Madeira",qualidade:"Traz crescimento, criatividade e idealismo. A Madeira expande os horizontes e favorece o planejamento."},5:{nome:"Madeira",qualidade:"Traz crescimento, criatividade e idealismo. A Madeira expande os horizontes e favorece o planejamento."},6:{nome:"Fogo",qualidade:"Traz paixão, liderança e dinamismo. O Fogo acende o carisma, mas pode aumentar a impaciência."},7:{nome:"Fogo",qualidade:"Traz paixão, liderança e dinamismo. O Fogo acende o carisma, mas pode aumentar a impaciência."},8:{nome:"Terra",qualidade:"Traz estabilidade, pragmatismo e responsabilidade. A Terra ancora os sonhos na realidade."},9:{nome:"Terra",qualidade:"Traz estabilidade, pragmatismo e responsabilidade. A Terra ancora os sonhos na realidade."}};
+    const ANIMAIS_CHINESES=[{nome:"Rato",arquetipo:"O Estrategista Mestre",icone:"fas fa-mouse",perfil:`<p>O Rato é o signo da genialidade estratégica e da sobrevivência...</p>`,compatibilidade:{titulo:"Os Realizadores (Rato, Dragão, Macaco)",desc:"Este é o triângulo da Ação e da Inteligência..."},conflito:{animal:"Cavalo",motivo:"O Cavalo preza a liberdade absoluta e a honestidade brutal..."}},{nome:"Boi",arquetipo:"O Pilar da Terra",icone:"fas fa-bullhorn",perfil:`<p>O Boi representa a prosperidade alcançada através da perseverança...</p>`,compatibilidade:{titulo:"Os Intelectuais (Boi, Serpente, Galo)",desc:"Este triângulo valoriza o planejamento..."},conflito:{animal:"Cabra",motivo:"A Cabra é sonhadora e emocional, o que irrita profundamente..."}},{nome:"Tigre",arquetipo:"O Guerreiro Nobre",icone:"fas fa-paw",perfil:`<p>O Tigre é a encarnação da coragem e da imprevisibilidade...</p>`,compatibilidade:{titulo:"Os Idealistas (Tigre, Cavalo, Cão)",desc:"Este triângulo é movido por honra..."},conflito:{animal:"Macaco",motivo:"O Macaco é brincalhão demais para o seu gosto..."}},{nome:"Coelho",arquetipo:"O Diplomata Refinado",icone:"fas fa-carrot",perfil:`<p>O Coelho é o signo da virtude, da prudência e da elegância...</p>`,compatibilidade:{titulo:"Os Emocionais (Coelho, Cabra, Porco)",desc:"Este grupo prioriza a beleza e a sensibilidade..."},conflito:{animal:"Galo",motivo:"O Galo é crítico e direto, ferindo sua sensibilidade..."}},{nome:"Dragão",arquetipo:"O Imperador Mítico",icone:"fas fa-dragon",perfil:`<p>O único animal mítico do zodíaco. Você carrega uma aura de poder...</p>`,compatibilidade:{titulo:"Os Realizadores (Dragão, Rato, Macaco)",desc:"A união do Poder..."},conflito:{animal:"Cão",motivo:"O Cão é pessimista e realista demais..."}},{nome:"Serpente",arquetipo:"O Sábio Enigmático",icone:"fas fa-staff-snake",perfil:`<p>A Serpente é o signo da sabedoria profunda e do mistério...</p>`,compatibilidade:{titulo:"Os Intelectuais (Serpente, Boi, Galo)",desc:"Uma aliança mental..."},conflito:{animal:"Porco",motivo:"O Porco é ingênuo e honesto demais..."}},{nome:"Cavalo",arquetipo:"O Espírito Livre",icone:"fas fa-horse",perfil:`<p>O Cavalo é a energia pura em movimento...</p>`,compatibilidade:{titulo:"Os Idealistas (Cavalo, Tigre, Cão)",desc:"A união da Liberdade..."},conflito:{animal:"Rato",motivo:"O Rato é calculista e econômico..."}},{nome:"Cabra",arquetipo:"O Sonhador Criativo",icone:"fas fa-cloud-meatball",perfil:`<p>A Cabra é o signo da arte, da gentileza e da paz...</p>`,compatibilidade:{titulo:"Os Emocionais (Cabra, Coelho, Porco)",desc:"A aliança da Sensibilidade..."},conflito:{animal:"Boi",motivo:"O Boi exige disciplina e realismo..."}},{nome:"Macaco",arquetipo:"O Inventor Brilhante",icone:"fas fa-lightbulb",perfil:`<p>O Macaco é o signo mais versátil e inteligente do zodíaco...</p>`,compatibilidade:{titulo:"Os Realizadores (Macaco, Rato, Dragão)",desc:"A aliança da Inteligência..."},conflito:{animal:"Tigre",motivo:"O Tigre exige respeito e seriedade..."}},{nome:"Galo",arquetipo:"O Administrador Perfeito",icone:"fas fa-feather",perfil:`<p>O Galo é o signo da precisão, da ordem e da franqueza...</p>`,compatibilidade:{titulo:"Os Intelectuais (Galo, Serpente, Boi)",desc:"A aliança da Eficiência..."},conflito:{animal:"Coelho",motivo:"O Coelho é diplomático e detesta confronto..."}},{nome:"Cão",arquetipo:"O Guardião Leal",icone:"fas fa-dog",perfil:`<p>O Cão é o signo da justiça, da lealdade e da ansiedade...</p>`,compatibilidade:{titulo:"Os Idealistas (Cão, Tigre, Cavalo)",desc:"A aliança da Ética..."},conflito:{animal:"Dragão",motivo:"O Dragão busca poder e glória pessoal..."}},{nome:"Porco",arquetipo:"O Filantropo Generoso",icone:"fas fa-piggy-bank",perfil:`<p>O Porco é o signo da generosidade, da honestidade e do prazer...</p>`,compatibilidade:{titulo:"Os Emocionais (Porco, Coelho, Cabra)",desc:"A aliança da Harmonia..."},conflito:{animal:"Serpente",motivo:"A Serpente é desconfiada e secreta..."}}];
 
     function calcularSignoChines(dataNascimento) {
         const [anoStr, mesStr, diaStr] = dataNascimento.split('-');
         let ano = parseInt(anoStr);
         const mes = parseInt(mesStr);
         const dia = parseInt(diaStr);
-
         const dataLimite = LUNAR_DATES[ano];
         let ehAnoAnterior = false;
         if (dataLimite) {
@@ -247,31 +148,21 @@
             if (mes < limiteMes || (mes === limiteMes && dia < limiteDia)) { ehAnoAnterior = true; }
         }
         if (ehAnoAnterior) ano = ano - 1;
-
         const offset = (ano - 1900) % 12;
         const index = offset < 0 ? offset + 12 : offset; 
-        const animal = ANIMAIS_CHINESES[index];
-        const ultimoDigito = ano % 10;
-        const elemento = ELEMENTOS_CHINESES[ultimoDigito];
-
-        return { animal, elemento, anoReal: ano };
+        return { animal: ANIMAIS_CHINESES[index], elemento: ELEMENTOS_CHINESES[ano % 10], anoReal: ano };
     }
 
     // --- 2. LÓGICA DE EXIBIÇÃO INSTANTÂNEA ---
-    
-    // Mostra o resultado IMEDIATAMENTE com data padrão (Sem esperar Firebase)
     const DATA_PADRAO = "1978-05-01";
     atualizarTela(DATA_PADRAO);
 
     function atualizarTela(dataNasc) {
         const resultado = calcularSignoChines(dataNasc);
-        
-        // Animal
         document.getElementById('res-animal').innerText = resultado.animal.nome.toUpperCase();
         document.getElementById('res-icon').innerHTML = `<i class="${resultado.animal.icone}"></i>`;
         document.getElementById('res-elemento').innerText = resultado.elemento.nome.toUpperCase();
         
-        // Descrição
         document.getElementById('res-desc').innerHTML = `
             <div style="background:#111; padding:15px; border-left:3px solid var(--gold); margin-bottom:20px;">
                 <strong>Arquétipo:</strong> ${resultado.animal.arquetipo}
@@ -284,7 +175,6 @@
             </div>
         `;
 
-        // Relacionamentos
         document.getElementById('res-aliados-titulo').innerText = resultado.animal.compatibilidade.titulo;
         document.getElementById('res-aliados-desc').innerHTML = resultado.animal.compatibilidade.desc;
         document.getElementById('res-inimigo-titulo').innerText = `O Conflito com: ${resultado.animal.conflito.animal}`;
@@ -292,8 +182,6 @@
     }
 
     // --- 3. FIREBASE: ATUALIZA SE ACHAR DADOS ---
-    const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
-    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const auth = firebase.auth();
     const db = firebase.firestore();
 
@@ -301,8 +189,6 @@
         if(user) {
             db.collection("usuarios").doc(user.uid).get().then(doc => {
                 if(doc.exists && doc.data().dataNascimento) {
-                    // Se achou data real, atualiza a tela
-                    console.log("Atualizando com data real...");
                     atualizarTela(doc.data().dataNascimento);
                 }
             });

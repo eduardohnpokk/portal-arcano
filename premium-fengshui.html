@@ -9,224 +9,111 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     
-    <script src="fengshui-database.js"></script>
+    <script src="auth-guard.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
         :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
-        
         body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; padding-bottom: 100px; }
-        
         .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        .header-title { font-family: 'Cinzel'; color: var(--gold); text-align: center; margin-top: 40px; font-size: 2.8em; }
+        .intro-box { background: rgba(20, 20, 20, 0.9); border: 1px solid var(--gold); padding: 30px; margin-bottom: 40px; text-align: center; }
         
-        .header-title { font-family: 'Cinzel'; color: var(--gold); text-align: center; margin-top: 40px; font-size: 2.8em; letter-spacing: 2px; }
-        .header-sub { text-align: center; color: #888; font-family: sans-serif; margin-bottom: 30px; }
-
-        /* INTRODUÇÃO TEÓRICA */
-        .concept-section {
-            border-bottom: 1px solid #333; padding-bottom: 30px; margin-bottom: 30px; text-align: justify;
-        }
-        .concept-section h3 { font-family: 'Cinzel'; color: var(--gold); margin-bottom: 15px; font-size: 1.5em; }
-        .concept-section p { line-height: 1.8; color: #ccc; margin-bottom: 15px; }
-
-        /* FORMULÁRIO */
-        .precision-form { 
-            background: #111; padding: 30px; border-radius: 8px; border: 1px solid #333;
-            display: grid; gap: 20px; max-width: 500px; margin: 0 auto 50px auto;
-        }
-        .form-group label { display: block; color: var(--gold); font-family: 'Cinzel'; margin-bottom: 10px; }
-        .form-control { 
-            width: 100%; padding: 12px; background: #000; border: 1px solid #444; color: #fff; 
-            border-radius: 4px; font-family: 'Cormorant Garamond'; font-size: 1.1em;
-        }
-        .btn-calc { 
-            background: var(--gold); color: #000; border: none; padding: 15px; width: 100%; 
-            font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border-radius: 4px; margin-top: 10px; transition: 0.3s;
-        }
-        .btn-calc:hover { background: #fff; }
-
-        /* --- ESTILOS DO RELATÓRIO RICO --- */
-        #result-area { display: none; }
-
-        /* Header do Elemento */
-        .kua-header { 
-            display: flex; gap: 30px; margin-bottom: 40px; background: #0f0f0f; 
-            padding: 30px; border-radius: 8px; border: 1px solid #333; align-items: flex-start;
-        }
-        .kua-badge { text-align: center; min-width: 120px; }
-        .kua-label { display: block; font-family: sans-serif; font-size: 0.8em; color: #666; letter-spacing: 2px; }
-        .kua-number { font-family: 'Cinzel'; font-size: 5em; color: var(--gold); line-height: 1; display: block; }
-        
-        .kua-info h3 { margin: 0 0 15px 0; font-size: 1.8em; color: #fff; font-family: 'Cinzel'; }
-        .element-desc p { color: #ccc; line-height: 1.7; margin-bottom: 10px; font-size: 1em; text-align: justify; }
-        .color-palette { margin-top: 15px; padding-top: 15px; border-top: 1px solid #333; color: #888; font-size: 0.9em; }
-
-        .section-divider { 
-            text-align: center; font-family: 'Cinzel'; color: var(--gold); 
-            margin: 40px 0 30px 0; font-size: 1.2em; border-bottom: 1px solid #333; line-height: 0.1em; 
-        }
-        .section-divider span { background:#050505; padding:0 10px; }
-
-        /* Grid de Direções */
+        .kua-header { display: flex; gap: 30px; margin-bottom: 40px; background: #0f0f0f; padding: 30px; border: 1px solid #333; }
+        .kua-number { font-family: 'Cinzel'; font-size: 5em; color: var(--gold); }
         .directions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .direction-card { padding: 25px; border: 1px solid #333; background: #0a0a0a; border-radius: 8px; }
+        .direction-card h4 { color: #fff; font-family: 'Cinzel'; margin: 0 0 10px 0; }
+        .direction-card p { color: #aaa; margin: 0; font-size: 0.9em; }
         
-        .direction-card { 
-            padding: 25px; border-radius: 8px; border: 1px solid #333; background: #0a0a0a;
-            display: flex; gap: 20px; align-items: flex-start;
-        }
-        
-        .card-icon { 
-            font-size: 1.5em; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;
-            background: #111; border-radius: 50%; color: #fff; flex-shrink: 0;
-        }
-        
-        .card-content h4 { font-family: 'Cinzel'; margin: 0 0 5px 0; color: #fff; font-size: 1.1em; }
-        .dir-badge { 
-            display: inline-block; background: #222; color: var(--gold); font-size: 0.75em; 
-            padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;
-        }
-        .card-content p { color: #aaa; font-size: 0.95em; line-height: 1.6; margin: 0; text-align: justify; }
+        .success { border-left: 4px solid #4caf50; }
+        .health { border-left: 4px solid #d4af37; }
+        .love { border-left: 4px solid #ff69b4; }
+        .stability { border-left: 4px solid #888; }
+        .warning-box { margin-top: 30px; padding: 20px; border: 1px solid #ff4444; background: rgba(50,0,0,0.3); color: #ffcccc; text-align: center; }
 
-        /* Cores Temáticas */
-        .success .card-icon { color: #4caf50; border: 1px solid #4caf50; }
-        .health .card-icon { color: #d4af37; border: 1px solid #d4af37; }
-        .love .card-icon { color: #ff69b4; border: 1px solid #ff69b4; }
-        .stability .card-icon { color: #888; border: 1px solid #888; }
-
-        /* Aviso de Azar */
-        .warning-box { 
-            margin-top: 30px; padding: 20px; background: rgba(50, 0, 0, 0.5); 
-            border: 1px solid #ff4444; color: #ffcccc; border-radius: 4px;
-            display: flex; gap: 20px; align-items: center;
-        }
-        .warn-icon { font-size: 2em; color: #ff4444; }
-        .warn-text strong { display: block; margin-bottom: 5px; color: #ff4444; font-family: 'Cinzel'; }
-        .warn-text p { margin: 0; font-size: 0.9em; }
-
-        /* Guia Final */
-        .detailed-guide { margin-top: 60px; background: #0f0f0f; padding: 40px; border-top: 4px solid var(--gold); }
-        .detailed-guide h3 { font-family: 'Cinzel'; color: var(--gold); font-size: 1.6em; margin-top: 0; }
-        .guide-block { margin-bottom: 20px; }
-        .guide-block h4 { color: #fff; margin-bottom: 10px; font-size: 1.1em; }
-        .guide-block p { color: #aaa; text-align: justify; line-height: 1.7; }
-
-        .btn-float { position: fixed; bottom: 30px; right: 30px; background: var(--gold); color: #000; padding: 15px 35px; border-radius: 50px; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border: none; z-index: 100; font-size: 1.1em; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .btn-float { position: fixed; bottom: 30px; right: 30px; background: var(--gold); color: #000; padding: 15px 35px; border-radius: 50px; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border: none; }
         .btn-back { cursor: pointer; color: #888; text-transform: uppercase; font-size: 0.8em; margin-bottom: 20px; display: inline-block; }
-
-        @media print {
-            .precision-form, .btn-float, .btn-back, .concept-section { display: none !important; }
-            #result-area, #detailed-guide-area { display: block !important; }
-            body { background: #fff; color: #000; }
-            .kua-header { background: #fff; border: 1px solid #000; color: #000; }
-            .kua-number, .kua-meta h3, .detailed-guide h3, .guide-block h4, .kua-info h3 { color: #000 !important; text-shadow: none; }
-            .element-desc p, .card-content p, .guide-block p { color: #000; }
-            .direction-card { background: #fff !important; border: 1px solid #000; page-break-inside: avoid; }
-            .warning-box { background: #fff; border: 2px solid #000; color: #000; }
-            .warn-text strong { color: #000; }
-            .detailed-guide { border: none; border-top: 2px solid #000; background: #fff; }
-        }
-        @media(max-width: 700px) { 
-            .directions-grid { grid-template-columns: 1fr; } 
-            .kua-header { flex-direction: column; text-align: center; } 
-            .kua-info { text-align: center; }
-        }
+        @media print { .btn-float, .btn-back { display: none; } body { background: #fff; color: #000; } .direction-card { border: 1px solid #000; background: #fff; color: #000; } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div onclick="window.location.href='dashboard-premium.html'" class="btn-back">← Voltar ao Hub</div>
-    
+    <div onclick="window.location.href='dashboard-premium.html'" class="btn-back">← VOLTAR AO HUB</div>
     <h1 class="header-title">FENG SHUI: KUA</h1>
-    <p class="header-sub">Arquitetura Energética Pessoal</p>
-
-    <div class="concept-section">
-        <h3>A Acupuntura do Espaço</h3>
-        <p>O Feng Shui não é meramente decoração; é uma ciência milenar chinesa que estuda como a energia vital (Chi) flui. Utilizamos o método clássico <strong>Ba Zhai</strong> para calcular seu <strong>Número Kua</strong>, que revela sua "assinatura magnética" e como sua biologia interage com o campo magnético da Terra.</p>
-    </div>
-
-    <div class="precision-form" id="input-area">
-        <div style="text-align:center; color:#888; margin-bottom:20px; font-size:0.9em;">
-            Confirme seus dados para o cálculo solar preciso:
-        </div>
-        <div class="form-group">
-            <label>Ano de Nascimento</label>
-            <input type="number" id="anoInput" class="form-control" placeholder="Ex: 1985">
-        </div>
-        <div class="form-group">
-            <label>Gênero</label>
-            <select id="generoInput" class="form-control">
-                <option value="masculino">Masculino</option>
-                <option value="feminino">Feminino</option>
-            </select>
-        </div>
-        <div class="form-group" style="display:flex; align-items:center; gap:10px;">
-            <input type="checkbox" id="checkFev">
-            <label for="checkFev" style="margin:0; font-size:0.9em; color:#aaa;">Nasci antes de 4 de Fevereiro?</label>
-        </div>
-        <button class="btn-calc" onclick="calcularAgora()">REVELAR MEU MAPA</button>
+    
+    <div class="intro-box">
+        <p>O <strong>Número Kua</strong> revela sua assinatura magnética. Ele indica quais direções cardeais fortalecem sua vitalidade e quais a drenam.</p>
     </div>
 
     <div id="result-area"></div>
-
-    <div class="detailed-guide" id="detailed-guide-area" style="display:none;">
-        <h3>Guia de Aplicação Prática</h3>
-        <div class="guide-block">
-            <h4><i class="fas fa-bed"></i> Onde Dormir (Cabeceira)</h4>
-            <p>A posição da cama é o fator mais crítico. Tente apontar o topo da sua cabeça para sua direção de "Saúde Divina" (Tian Yi) para recuperação física, ou "Amor" (Yan Nian) para harmonia conjugal.</p>
-        </div>
-        <div class="guide-block">
-            <h4><i class="fas fa-laptop"></i> Onde Trabalhar (Mesa)</h4>
-            <p>Vire seu rosto (e seu computador) para sua direção de "Sucesso" (Sheng Qi). Isso coloca você em uma posição de comando energético, facilitando a concentração e a autoridade.</p>
-        </div>
-        <div class="guide-block">
-            <h4><i class="fas fa-ban"></i> A Direção Proibida</h4>
-            <p>Evite a todo custo encarar ou dormir apontado para sua direção de Perda Total. Se for inevitável, use objetos de metal ou cabaças douradas para dispersar o Chi negativo.</p>
-        </div>
-    </div>
 </div>
 
-<button class="btn-float" onclick="window.print()"><i class="fas fa-file-pdf"></i> SALVAR MAPA</button>
+<button class="btn-float" onclick="window.print()">SALVAR MAPA</button>
 
 <script>
-    // 1. FIREBASE INIT
-    const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
-    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+    // --- 1. BANCO DE DADOS EMBUTIDO ---
+    const DIRECOES = {"N":"Norte","S":"Sul","L":"Leste","O":"Oeste","NE":"Nordeste","NO":"Noroeste","SE":"Sudeste","SO":"Sudoeste"};
+    const MAPA_KUA = {
+        "1":{elemento:"Água",sheng_qi:{dir:"SE",nome:"Sucesso"},tian_yi:{dir:"L",nome:"Saúde"},yan_nian:{dir:"S",nome:"Amor"},fu_wei:{dir:"N",nome:"Estabilidade"},azar:"SO"},
+        "2":{elemento:"Terra",sheng_qi:{dir:"NE",nome:"Sucesso"},tian_yi:{dir:"O",nome:"Saúde"},yan_nian:{dir:"NO",nome:"Amor"},fu_wei:{dir:"SO",nome:"Estabilidade"},azar:"N"},
+        "3":{elemento:"Madeira",sheng_qi:{dir:"S",nome:"Sucesso"},tian_yi:{dir:"N",nome:"Saúde"},yan_nian:{dir:"SE",nome:"Amor"},fu_wei:{dir:"L",nome:"Estabilidade"},azar:"O"},
+        "4":{elemento:"Madeira",sheng_qi:{dir:"N",nome:"Sucesso"},tian_yi:{dir:"S",nome:"Saúde"},yan_nian:{dir:"L",nome:"Amor"},fu_wei:{dir:"SE",nome:"Estabilidade"},azar:"NE"},
+        "6":{elemento:"Metal",sheng_qi:{dir:"O",nome:"Sucesso"},tian_yi:{dir:"NE",nome:"Saúde"},yan_nian:{dir:"SO",nome:"Amor"},fu_wei:{dir:"NO",nome:"Estabilidade"},azar:"S"},
+        "7":{elemento:"Metal",sheng_qi:{dir:"NO",nome:"Sucesso"},tian_yi:{dir:"SO",nome:"Saúde"},yan_nian:{dir:"NE",nome:"Amor"},fu_wei:{dir:"O",nome:"Estabilidade"},azar:"L"},
+        "8":{elemento:"Terra",sheng_qi:{dir:"SO",nome:"Sucesso"},tian_yi:{dir:"NO",nome:"Saúde"},yan_nian:{dir:"O",nome:"Amor"},fu_wei:{dir:"NE",nome:"Estabilidade"},azar:"SE"},
+        "9":{elemento:"Fogo",sheng_qi:{dir:"L",nome:"Sucesso"},tian_yi:{dir:"SE",nome:"Saúde"},yan_nian:{dir:"N",nome:"Amor"},fu_wei:{dir:"S",nome:"Estabilidade"},azar:"NO"}
+    };
+
+    function calcularKua(ano, genero) {
+        let total = 0; String(ano).split('').forEach(n => total += parseInt(n));
+        while(total > 9) { let t=0; String(total).split('').forEach(n=>t+=parseInt(n)); total=t; }
+        let kua = (genero === 'masculino') ? 11 - total : 4 + total;
+        while(kua > 9) { let t=0; String(kua).split('').forEach(n=>t+=parseInt(n)); kua=t; }
+        if (kua === 5) kua = (genero === 'masculino') ? 2 : 8;
+        return String(kua);
+    }
+
+    function exibirKua(ano, genero) {
+        const kua = calcularKua(ano, genero);
+        const dados = MAPA_KUA[kua];
+        
+        document.getElementById('result-area').innerHTML = `
+            <div class="kua-header">
+                <div><span class="kua-number">${kua}</span></div>
+                <div><h3>Elemento: ${dados.elemento}</h3><p>Este é seu código energético pessoal.</p></div>
+            </div>
+            <div class="directions-grid">
+                <div class="direction-card success"><h4>${dados.sheng_qi.nome} (${DIRECOES[dados.sheng_qi.dir]})</h4><p>Vire sua mesa de trabalho para cá.</p></div>
+                <div class="direction-card health"><h4>${dados.tian_yi.nome} (${DIRECOES[dados.tian_yi.dir]})</h4><p>Posicione a cabeceira da cama aqui.</p></div>
+                <div class="direction-card love"><h4>${dados.yan_nian.nome} (${DIRECOES[dados.yan_nian.dir]})</h4><p>Harmonia familiar e romance.</p></div>
+                <div class="direction-card stability"><h4>${dados.fu_wei.nome} (${DIRECOES[dados.fu_wei.dir]})</h4><p>Meditação e estudos.</p></div>
+            </div>
+            <div class="warning-box"><strong>EVITAR TOTALMENTE: ${DIRECOES[dados.azar]}</strong><p>Não durma com a cabeça apontada para esta direção.</p></div>
+        `;
+    }
+
+    // --- 2. CONEXÃO SEGURA ---
     const auth = firebase.auth();
     const db = firebase.firestore();
+
+    // Inicia com padrão para não ficar vazio
+    exibirKua(1985, 'masculino'); 
 
     auth.onAuthStateChanged(user => {
         if(user) {
             db.collection("usuarios").doc(user.uid).get().then(doc => {
                 if(doc.exists && doc.data().dataNascimento) {
-                    document.getElementById('anoInput').value = doc.data().dataNascimento.split('-')[0];
+                    const ano = doc.data().dataNascimento.split('-')[0];
+                    // Tenta adivinhar genero ou usa padrao (em app real, pediria genero no cadastro)
+                    exibirKua(ano, 'masculino'); 
                 }
             });
         }
     });
-
-    // 2. CÁLCULO
-    function calcularAgora() {
-        const ano = document.getElementById('anoInput').value;
-        const genero = document.getElementById('generoInput').value;
-        const antesFev4 = document.getElementById('checkFev').checked;
-
-        if(!ano) { alert("Por favor, digite o ano."); return; }
-
-        const kua = calcularKua(ano, genero, antesFev4);
-        const htmlRelatorio = gerarRelatorioFengShui(kua);
-
-        const area = document.getElementById('result-area');
-        area.innerHTML = htmlRelatorio;
-        
-        document.getElementById('input-area').style.display = 'none';
-        area.style.display = 'block';
-        document.getElementById('detailed-guide-area').style.display = 'block';
-        
-        area.scrollIntoView({ behavior: 'smooth' });
-    }
 </script>
 </body>
 </html>
