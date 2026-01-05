@@ -153,33 +153,42 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // 2. ORQUESTRADOR AUTOMÁTICO (CORRIGIDO PARA SEMPRE FUNCIONAR)
+    // 2. ORQUESTRADOR AUTOMÁTICO (LÓGICA BLINDADA)
     auth.onAuthStateChanged(user => {
+        // DATA PADRÃO DE SEGURANÇA (Seu Nascimento)
+        const DATA_PADRAO = "1978-05-01";
+
         if(!user) {
-            // SE NÃO TIVER USUÁRIO (ANÔNIMO), USA DATA PADRÃO (VISITANTE)
-            // Isso garante que você nunca veja o formulário em branco ao testar.
-            console.log("Modo Visitante: Usando data padrão.");
-            processarResultado("1978-05-01");
+            // Se não logado (Anônimo), usa padrão imediatamente
+            console.log("Visitante: Usando data padrão.");
+            processarResultado(DATA_PADRAO);
             return;
         }
 
         db.collection("usuarios").doc(user.uid).get().then(doc => {
             if(doc.exists && doc.data().dataNascimento) {
-                // SUCESSO: Tem dados reais
+                // Tem dados: Usa a data do usuário
                 processarResultado(doc.data().dataNascimento);
             } else {
-                // FALHA PARCIAL: Logado mas sem data -> Usa Padrão para não travar
-                processarResultado("1978-05-01");
+                // Logado mas sem dados: Usa padrão (não pergunta nada)
+                console.log("Sem data no perfil: Usando padrão.");
+                processarResultado(DATA_PADRAO);
             }
         }).catch(err => {
-            // ERRO DE REDE -> Usa Padrão
-            console.log("Erro ao buscar dados, usando padrão.");
-            processarResultado("1978-05-01");
+            // Erro de rede: Usa padrão
+            console.log("Erro de conexão: Usando padrão.");
+            processarResultado(DATA_PADRAO);
         });
     });
 
     // 3. PROCESSAMENTO (Core)
     function processarResultado(dataNasc) {
+        // Garante que o banco de dados carregou
+        if (typeof calcularSignoChines !== "function") {
+            alert("Erro: Banco de dados oriental-database.js não carregado.");
+            return;
+        }
+
         // Chama o banco de dados
         const resultado = calcularSignoChines(dataNasc);
         
@@ -208,7 +217,7 @@
         document.getElementById('res-inimigo-titulo').innerText = `O Conflito com: ${resultado.animal.conflito.animal}`;
         document.getElementById('res-inimigo-desc').innerText = resultado.animal.conflito.motivo;
 
-        // Transição de Tela
+        // Transição de Tela (Tira o Loading, Mostra o Resultado)
         document.getElementById('loading-screen').style.display = 'none';
         document.getElementById('intro-box').style.display = 'block';
         document.getElementById('result-area').style.display = 'block';
