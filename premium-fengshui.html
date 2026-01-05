@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Arcano | Feng Shui Kua</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <script src="fengshui-database.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; --success-bg: #1a331a; --love-bg: #331a1a; }
+        
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; padding-bottom: 100px; }
+        
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        
+        .header-title { font-family: 'Cinzel'; color: var(--gold); text-align: center; margin-top: 40px; font-size: 2.8em; letter-spacing: 2px; }
+        .header-sub { text-align: center; color: #888; font-family: sans-serif; margin-bottom: 30px; }
+
+        /* INTRO BOX */
+        .intro-box {
+            background: rgba(20, 20, 20, 0.9); border: 1px solid var(--gold);
+            padding: 30px; margin-bottom: 40px; border-radius: 8px; text-align: center;
+        }
+        .intro-box p { margin: 0; color: #ccc; line-height: 1.6; }
+
+        /* FORMULÁRIO DE PRECISÃO */
+        .precision-form { 
+            background: #111; padding: 30px; border-radius: 8px; border: 1px solid #333;
+            display: grid; gap: 20px; max-width: 500px; margin: 0 auto 50px auto;
+        }
+        .form-group label { display: block; color: var(--gold); font-family: 'Cinzel'; margin-bottom: 10px; }
+        .form-control { 
+            width: 100%; padding: 12px; background: #000; border: 1px solid #444; color: #fff; 
+            border-radius: 4px; font-family: 'Cormorant Garamond'; font-size: 1.1em;
+        }
+        .btn-calc { 
+            background: var(--gold); color: #000; border: none; padding: 15px; width: 100%; 
+            font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border-radius: 4px; margin-top: 10px;
+        }
+
+        /* RESULTADOS */
+        #result-area { display: none; }
+
+        .kua-header { 
+            display: flex; align-items: center; justify-content: center; gap: 30px; 
+            margin-bottom: 50px; border-bottom: 1px solid #333; padding-bottom: 30px;
+        }
+        .kua-number { 
+            font-family: 'Cinzel'; font-size: 6em; color: var(--gold); line-height: 1; 
+            text-shadow: 0 0 30px rgba(212,175,55,0.4);
+        }
+        .kua-meta h3 { margin: 0; font-size: 2em; color: #fff; font-family: 'Cinzel'; }
+        .kua-meta p { color: #888; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* GRID DE DIREÇÕES */
+        .directions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .direction-card { padding: 25px; border-radius: 8px; border: 1px solid #333; position: relative; overflow: hidden; }
+        
+        .direction-card h4 { font-family: 'Cinzel'; margin: 0 0 10px 0; color: #fff; font-size: 1.2em; display: flex; align-items: center; gap: 10px; }
+        .direction-card p { color: #ccc; font-size: 0.95em; line-height: 1.6; margin: 0; }
+
+        /* Cores Específicas */
+        .success { background: linear-gradient(135deg, #0f2027 0%, #203a43 100%); border-left: 4px solid #4caf50; }
+        .health { background: linear-gradient(135deg, #1e130c 0%, #9a8478 100%); border-left: 4px solid #d4af37; } /* Terra */
+        .love { background: linear-gradient(135deg, #2b1313 0%, #4c2626 100%); border-left: 4px solid #ff69b4; }
+        .stability { background: linear-gradient(135deg, #111 0%, #222 100%); border-left: 4px solid #888; }
+
+        .warning-box { margin-top: 30px; padding: 20px; background: #220000; border: 1px solid #ff4444; color: #ffcccc; text-align: center; border-radius: 4px; }
+
+        .btn-float { position: fixed; bottom: 30px; right: 30px; background: var(--gold); color: #000; padding: 15px 35px; border-radius: 50px; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border: none; z-index: 100; font-size: 1.1em; }
+        .btn-back { cursor: pointer; color: #888; text-transform: uppercase; font-size: 0.8em; margin-bottom: 20px; display: inline-block; }
+
+        @media print {
+            .precision-form, .btn-float, .btn-back, .intro-box { display: none !important; }
+            #result-area { display: block !important; }
+            body { background: #fff; color: #000; }
+            .kua-number, .kua-meta h3 { color: #000; text-shadow: none; }
+            .direction-card { background: #fff !important; border: 1px solid #000; color: #000; page-break-inside: avoid; }
+            .direction-card h4, .direction-card p { color: #000; }
+            .warning-box { background: #fff; border: 2px solid #000; color: #000; }
+        }
+        @media(max-width: 600px) { .directions-grid { grid-template-columns: 1fr; } .kua-header { flex-direction: column; text-align: center; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div onclick="window.location.href='dashboard-premium.html'" class="btn-back">← Voltar ao Hub</div>
+    
+    <h1 class="header-title">FENG SHUI: KUA</h1>
+    <p class="header-sub">Arquitetura Energética Pessoal</p>
+
+    <div class="intro-box">
+        <p>O <strong>Número Kua</strong> (Ming Gua) é sua assinatura energética no espaço. Ele revela quais direções cardeais fortalecem sua aura e quais a drenam. Para calcular com precisão de Mestre, precisamos confirmar seus dados biológicos solares.</p>
+    </div>
+
+    <div class="precision-form" id="input-area">
+        <div class="form-group">
+            <label>Ano de Nascimento</label>
+            <input type="number" id="anoInput" class="form-control" placeholder="Ex: 1985">
+        </div>
+        
+        <div class="form-group">
+            <label>Gênero (Cálculo Yin/Yang)</label>
+            <select id="generoInput" class="form-control">
+                <option value="masculino">Masculino</option>
+                <option value="feminino">Feminino</option>
+            </select>
+        </div>
+
+        <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+            <input type="checkbox" id="checkFev">
+            <label for="checkFev" style="margin:0; font-size:0.9em; color:#aaa;">Nasci antes de 4 de Fevereiro?</label>
+        </div>
+
+        <button class="btn-calc" onclick="calcularAgora()">REVELAR MEU MAPA</button>
+    </div>
+
+    <div id="result-area">
+        </div>
+
+</div>
+
+<button class="btn-float" onclick="window.print()"><i class="fas fa-file-pdf"></i> SALVAR MAPA</button>
+
+<script>
+    // 1. FIREBASE INIT (Para pré-carregar dados se houver)
+    const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
+    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Tenta pré-preencher
+    auth.onAuthStateChanged(user => {
+        if(user) {
+            db.collection("usuarios").doc(user.uid).get().then(doc => {
+                if(doc.exists) {
+                    const d = doc.data();
+                    if(d.dataNascimento) {
+                        const ano = d.dataNascimento.split('-')[0];
+                        document.getElementById('anoInput').value = ano;
+                    }
+                }
+            });
+        }
+    });
+
+    // 2. FUNÇÃO DE CÁLCULO E EXIBIÇÃO
+    function calcularAgora() {
+        const ano = document.getElementById('anoInput').value;
+        const genero = document.getElementById('generoInput').value;
+        const antesFev4 = document.getElementById('checkFev').checked;
+
+        if(!ano) { alert("Por favor, digite o ano."); return; }
+
+        // Chama o banco de dados
+        const kua = calcularKua(ano, genero, antesFev4);
+        const htmlRelatorio = gerarRelatorioFengShui(kua);
+
+        // Renderiza
+        const area = document.getElementById('result-area');
+        area.innerHTML = htmlRelatorio;
+        
+        // Efeito de transição
+        document.getElementById('input-area').style.display = 'none';
+        area.style.display = 'block';
+    }
+</script>
+</body>
+</html>
