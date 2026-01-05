@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Templo dos Oráculos | Tarô</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <script src="oraculo-database.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root { --gold: #d4af37; --bg-dark: #050505; --card-back: #1a1a1a; }
+        
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; padding-bottom: 100px; overflow-x: hidden; }
+        
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; text-align: center; }
+        
+        .header-title { font-family: 'Cinzel'; color: var(--gold); font-size: 3em; margin-top: 20px; text-shadow: 0 0 20px rgba(212,175,55,0.3); }
+        .header-sub { color: #888; font-size: 1.1em; margin-bottom: 30px; }
+
+        /* INTRODUÇÃO RITUALÍSTICA (NOVO) */
+        .intro-warning-box {
+            background: rgba(20, 20, 20, 0.9);
+            border: 1px solid var(--gold);
+            padding: 30px;
+            margin: 0 auto 40px auto;
+            max-width: 800px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(212,175,55,0.1);
+        }
+        .intro-warning-box i { font-size: 2em; color: var(--gold); margin-bottom: 15px; }
+        .intro-warning-box p { font-size: 1.1em; line-height: 1.6; color: #ccc; margin: 0; }
+        .intro-warning-box strong { color: #fff; font-family: 'Cinzel'; letter-spacing: 1px; display:block; margin-bottom:10px; font-size: 1.2em; }
+        .step-list { text-align: left; margin-top: 20px; color: #aaa; font-size: 0.95em; display: inline-block; }
+
+        /* MESA DE JOGO */
+        .table-mat { 
+            background: radial-gradient(circle, #222 0%, #000 90%); 
+            border: 2px solid #333; border-radius: 10px; 
+            padding: 40px 20px; min-height: 450px; 
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+            box-shadow: inset 0 0 80px #000; position: relative;
+        }
+
+        /* CARD SLOTS */
+        .spread-container { display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; display: none; }
+        
+        /* A CARTA EM SI (FLIP EFFECT) */
+        .tarot-card {
+            width: 200px; height: 340px;
+            perspective: 1000px; cursor: pointer;
+        }
+        
+        .card-inner {
+            position: relative; width: 100%; height: 100%; text-align: center;
+            transition: transform 0.8s; transform-style: preserve-3d;
+        }
+        
+        .tarot-card.flipped .card-inner { transform: rotateY(180deg); }
+        
+        /* FRENTE E VERSO */
+        .card-front, .card-back {
+            position: absolute; width: 100%; height: 100%;
+            -webkit-backface-visibility: hidden; backface-visibility: hidden;
+            border-radius: 10px; border: 2px solid var(--gold);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        .card-front { 
+            background: #111; color: var(--gold); transform: rotateY(180deg); 
+            background-size: cover; background-position: center;
+        }
+        
+        .card-back { 
+            background: var(--card-back); 
+            background-image: url('https://www.transparenttextures.com/patterns/black-scales.png'); 
+        }
+        .card-back i { font-size: 3em; color: #333; transition: 0.3s; }
+        .tarot-card:hover .card-back i { color: var(--gold); transform: scale(1.1); }
+
+        /* LABEL DAS POSIÇÕES */
+        .pos-label { color: #666; font-family: 'Cinzel'; margin-bottom: 10px; display: block; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* RESULTADOS */
+        .reading-output { text-align: left; margin-top: 50px; display: none; max-width: 800px; margin-left: auto; margin-right: auto; }
+        .reading-block { background: #0a0a0a; border-left: 4px solid var(--gold); padding: 30px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .reading-block h3 { font-family: 'Cinzel'; color: var(--gold); margin: 0 0 15px 0; border-bottom: 1px solid #333; padding-bottom: 10px; font-size: 1.4em; }
+        .reading-text { line-height: 1.8; color: #ccc; font-size: 1.1em; text-align: justify; }
+        .reading-text strong { color: #fff; }
+
+        /* BOTÃO DE AÇÃO */
+        .btn-action { 
+            background: transparent; border: 2px solid var(--gold); color: var(--gold); 
+            padding: 15px 40px; font-family: 'Cinzel'; font-size: 1.1em; cursor: pointer; 
+            transition: 0.3s; margin-top: 20px; letter-spacing: 1px;
+        }
+        .btn-action:hover { background: var(--gold); color: #000; box-shadow: 0 0 30px var(--gold); }
+
+        .btn-back { cursor: pointer; color: #888; text-transform: uppercase; font-size: 0.8em; margin-bottom: 20px; display: inline-block; }
+
+        /* PLACEHOLDER VISUAL NA CARTA */
+        .arcana-num { font-size: 1.5em; margin-bottom: 10px; display: block; font-family: 'Cinzel'; }
+        .arcana-icon { font-size: 4em; margin: 20px 0; display: block; }
+        .arcana-name { font-size: 1.2em; font-family: 'Cinzel'; text-transform: uppercase; letter-spacing: 1px; }
+        
+        /* IMPRESSÃO */
+        @media print {
+            .btn-back, .btn-action, .intro-warning-box, .header-sub, .table-mat { display: none !important; }
+            .reading-output { display: block !important; margin-top: 0; }
+            .reading-block { border: none; border-bottom: 2px solid #000; background: #fff; color: #000; box-shadow: none; }
+            .reading-text { color: #000; }
+            .header-title { color: #000; text-shadow: none; }
+            body { background: #fff; color: #000; }
+        }
+
+        @media(max-width: 700px) { .spread-container { flex-direction: column; align-items: center; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div onclick="window.location.href='dashboard-premium.html'" class="btn-back">← Voltar ao Hub</div>
+    
+    <h1 class="header-title">O ORÁCULO</h1>
+    <p class="header-sub">Tarô de Marselha & Péladan</p>
+
+    <div class="intro-warning-box" id="intro-box">
+        <i class="fas fa-eye"></i>
+        <strong>RITUAL DE PREPARAÇÃO</strong>
+        <p>
+            O Tarô não é um jogo de azar; é um espelho da sua alma. Para que a leitura seja precisa, o universo exige sua conexão total. Siga os passos antes de iniciar:
+        </p>
+        <div class="step-list">
+            1. Respire fundo três vezes e silencie sua mente.<br>
+            2. Formule uma pergunta objetiva (evite "Sim ou Não").<br>
+            3. Visualize a situação que te aflige.<br>
+            4. Somente quando sentir o "chamado", clique para cortar o baralho.
+        </div>
+    </div>
+
+    <div class="table-mat">
+        <div id="start-screen">
+            <i class="fas fa-layer-group" style="font-size: 4em; color:#333; margin-bottom:30px;"></i>
+            <p style="font-size: 1.3em; color: var(--gold); font-family: 'Cinzel'; margin-bottom: 30px;">
+                O baralho está em sua frente.
+            </p>
+            <button class="btn-action" onclick="iniciarLeitura()">CORTAR E DISTRIBUIR</button>
+        </div>
+
+        <div class="spread-container" id="game-table">
+            
+            <div>
+                <span class="pos-label">1. A Situação</span>
+                <div class="tarot-card" onclick="revelar(0)">
+                    <div class="card-inner" id="card-0">
+                        <div class="card-back"><i class="fas fa-sun"></i></div>
+                        <div class="card-front" id="front-0"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <span class="pos-label">2. O Obstáculo</span>
+                <div class="tarot-card" onclick="revelar(1)">
+                    <div class="card-inner" id="card-1">
+                        <div class="card-back"><i class="fas fa-moon"></i></div>
+                        <div class="card-front" id="front-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <span class="pos-label">3. O Conselho</span>
+                <div class="tarot-card" onclick="revelar(2)">
+                    <div class="card-inner" id="card-2">
+                        <div class="card-back"><i class="fas fa-star"></i></div>
+                        <div class="card-front" id="front-2"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="reading-output" id="reading-text">
+        <h2 style="text-align:center; font-family:'Cinzel'; color:#fff; margin-bottom:40px;">A REVELAÇÃO</h2>
+        <div id="output-content"></div>
+        
+        <div style="text-align:center; margin-top:40px;">
+            <button class="btn-action" onclick="window.print()">
+                <i class="fas fa-file-pdf"></i> SALVAR LEITURA
+            </button>
+            <button class="btn-action" onclick="location.reload()" style="margin-left:10px; border-color:#555; color:#888;">
+                NOVA CONSULTA
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // 1. VARIÁVEIS GLOBAIS
+    let cartasSorteadas = [];
+    let cartasReveladas = [false, false, false];
+
+    // 2. FUNÇÃO INICIAR
+    function iniciarLeitura() {
+        // Esconde a intro e o start screen
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('intro-box').style.display = 'none'; // Some com o texto de instrução para limpar a mesa
+        
+        document.getElementById('game-table').style.display = 'flex';
+        
+        // Sorteia 3 cartas do banco de dados
+        if (typeof tirarCartas === "function") {
+            cartasSorteadas = tirarCartas(3);
+        } else {
+            alert("Erro: Banco de dados oraculo-database.js não carregado.");
+            return;
+        }
+        
+        // Prepara HTML das cartas
+        cartasSorteadas.forEach((carta, index) => {
+            const frontEl = document.getElementById(`front-${index}`);
+            frontEl.innerHTML = `
+                <div style="border:1px solid var(--gold); padding:10px; height:90%; width:85%; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                    <span class="arcana-num">${carta.numero}</span>
+                    <i class="${carta.img_placeholder} arcana-icon"></i>
+                    <span class="arcana-name">${carta.nome}</span>
+                </div>
+            `;
+        });
+    }
+
+    // 3. REVELAR CARTA (FLIP)
+    function revelar(index) {
+        if (cartasReveladas[index]) return; 
+
+        const cardEl = document.getElementById(`card-${index}`);
+        cardEl.parentElement.classList.add('flipped');
+        cartasReveladas[index] = true;
+
+        if (cartasReveladas.every(Boolean)) {
+            setTimeout(mostrarInterpretacao, 800);
+        }
+    }
+
+    // 4. MOSTRAR TEXTO FINAL
+    function mostrarInterpretacao() {
+        const area = document.getElementById('reading-text');
+        const content = document.getElementById('output-content');
+        
+        area.style.display = 'block';
+        
+        const c1 = cartasSorteadas[0];
+        const c2 = cartasSorteadas[1];
+        const c3 = cartasSorteadas[2];
+
+        content.innerHTML = `
+            <div class="reading-block">
+                <h3>1. A SITUAÇÃO: ${c1.nome}</h3>
+                <div class="reading-text">
+                    <p><strong>Arquétipo:</strong> ${c1.arquetipo}</p>
+                    <p>${c1.geral}</p>
+                    <p><em>No momento presente, esta carta indica que a energia dominante é a de ${c1.nome.toLowerCase()}. Você está vivenciando este ciclo.</em></p>
+                </div>
+            </div>
+
+            <div class="reading-block">
+                <h3>2. O OBSTÁCULO: ${c2.nome}</h3>
+                <div class="reading-text">
+                    <p><strong>Desafio:</strong> ${c2.arquetipo}</p>
+                    <p>${c2.geral}</p>
+                    <p><em>Como obstáculo, isso sugere que você deve ter cuidado com o aspecto sombra desta carta. O que está travando seu caminho é a energia mal canalizada do ${c2.nome}.</em></p>
+                </div>
+            </div>
+
+            <div class="reading-block">
+                <h3>3. O CONSELHO: ${c3.nome}</h3>
+                <div class="reading-text">
+                    <p><strong>Caminho:</strong> ${c3.conselho}</p>
+                    <p>Para resolver o impasse, o Tarô orienta: <strong>${c3.conselho}</strong></p>
+                    <p><em>Use a virtude do ${c3.nome} como sua ferramenta de solução.</em></p>
+                </div>
+            </div>
+        `;
+
+        area.scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+</body>
+</html>
