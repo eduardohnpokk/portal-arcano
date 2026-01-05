@@ -1,5 +1,5 @@
 // numerologia-database.js
-// MOTOR DE CÁLCULO CABALÍSTICO & INTERPRETAÇÃO (VERSÃO FINAL CORRIGIDA)
+// MOTOR DE CÁLCULO CABALÍSTICO & INTERPRETAÇÃO (VERSÃO FINAL CORRIGIDA - SEM REPETIÇÃO)
 
 // 1. TABELA DE GEMATRIA (CABALÍSTICA)
 const TABELA_CABALA = {
@@ -134,10 +134,8 @@ function calcularNome(nomeCompleto) {
     let somaConsoantes = 0;
     
     const VOGAIS = ['A', 'E', 'I', 'O', 'U'];
-    // Na Cabalística Web Simplificada: Y como Vogal e W como Consoante
     
     for (let char of nomeLimpo) {
-        // Trata acentos
         if (MAPA_ACENTOS[char]) char = MAPA_ACENTOS[char];
         
         const valor = TABELA_CABALA[char];
@@ -175,7 +173,6 @@ function calcularDestino(dataNasc) {
 function gerarAnaliseNumerologica(tipo, numero) {
     const info = TEXTOS_NUMEROS[String(numero)];
     
-    // Se for um número que não está no banco (ex: 0 ou erro de cálculo), retorna vazio ou aviso
     if (!info) return `<div class="num-content"><p>Número ${numero} em análise especial.</p></div>`;
 
     let htmlConteudo = "";
@@ -185,10 +182,11 @@ function gerarAnaliseNumerologica(tipo, numero) {
     if (tipo === 'motivacao') {
         tituloCard = "MOTIVAÇÃO (ALMA)";
         subtituloCard = "O QUE SUA ALMA DESEJA";
+        // AQUI: Só insere a motivação uma vez.
         htmlConteudo = `
             <p><strong>Análise:</strong> ${info.motiva}</p>
             <p style="margin-top:15px; font-size:0.9em; color:#888;">
-                <em>Nota do Astrólogo: Este número representa seus desejos mais íntimos, aqueles que você teria mesmo se ninguém estivesse olhando.</em>
+                <em>Nota do Astrólogo: Este número representa seus desejos mais íntimos.</em>
             </p>
         `;
     } 
@@ -198,7 +196,7 @@ function gerarAnaliseNumerologica(tipo, numero) {
         htmlConteudo = `
             <p><strong>Análise:</strong> ${info.impres}</p>
             <p style="margin-top:15px; font-size:0.9em; color:#888;">
-                <em>Nota do Astrólogo: É a sua "roupa social". Muitas vezes, descreve sua aparência física ou a primeira impressão que você causa em estranhos.</em>
+                <em>Nota do Astrólogo: É a sua "roupa social".</em>
             </p>
         `;
     } 
@@ -207,7 +205,7 @@ function gerarAnaliseNumerologica(tipo, numero) {
         subtituloCard = "QUEM VOCÊ É NA ÍNTEGRA";
         htmlConteudo = `
             <p><strong>Análise:</strong> ${info.desc}</p>
-            <p>Como um <strong>${info.titulo}</strong>, você expressa seus talentos combinando seus desejos internos com sua imagem externa. É a soma total do seu potencial.</p>
+            <p>Como um <strong>${info.titulo}</strong>, você expressa seus talentos no mundo.</p>
         `;
     } 
     else if (tipo === 'destino') {
@@ -216,7 +214,7 @@ function gerarAnaliseNumerologica(tipo, numero) {
         htmlConteudo = `
             <p><strong>Análise:</strong> ${info.destino}</p>
             <p style="margin-top:15px; font-size:0.9em; color:#888;">
-                <em>Nota do Astrólogo: Diferente da Expressão (quem você é), o Destino é a estrada que a vida colocou na sua frente. É a sua missão.</em>
+                <em>Nota do Astrólogo: É a estrada que a vida colocou na sua frente.</em>
             </p>
         `;
     }
