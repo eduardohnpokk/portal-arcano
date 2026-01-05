@@ -3,115 +3,305 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Arcano | Feng Shui Kua</title>
+    <title>Portal Arcano | Feng Shui Pessoal</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    
-    <script src="auth-guard.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
-        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; padding-bottom: 100px; }
-        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
-        .header-title { font-family: 'Cinzel'; color: var(--gold); text-align: center; margin-top: 40px; font-size: 2.8em; }
-        .intro-box { background: rgba(20, 20, 20, 0.9); border: 1px solid var(--gold); padding: 30px; margin-bottom: 40px; text-align: center; }
+        :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; --wood: #4caf50; --fire: #f44336; --earth: #795548; --metal: #9e9e9e; --water: #2196f3; }
         
-        .kua-header { display: flex; gap: 30px; margin-bottom: 40px; background: #0f0f0f; padding: 30px; border: 1px solid #333; }
-        .kua-number { font-family: 'Cinzel'; font-size: 5em; color: var(--gold); }
-        .directions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .direction-card { padding: 25px; border: 1px solid #333; background: #0a0a0a; border-radius: 8px; }
-        .direction-card h4 { color: #fff; font-family: 'Cinzel'; margin: 0 0 10px 0; }
-        .direction-card p { color: #aaa; margin: 0; font-size: 0.9em; }
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; line-height: 1.6; }
         
-        .success { border-left: 4px solid #4caf50; }
-        .health { border-left: 4px solid #d4af37; }
-        .love { border-left: 4px solid #ff69b4; }
-        .stability { border-left: 4px solid #888; }
-        .warning-box { margin-top: 30px; padding: 20px; border: 1px solid #ff4444; background: rgba(50,0,0,0.3); color: #ffcccc; text-align: center; }
+        /* LOADING */
+        #loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .spinner { font-size: 4em; color: var(--gold); animation: spin 2s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .btn-float { position: fixed; bottom: 30px; right: 30px; background: var(--gold); color: #000; padding: 15px 35px; border-radius: 50px; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border: none; }
-        .btn-back { cursor: pointer; color: #888; text-transform: uppercase; font-size: 0.8em; margin-bottom: 20px; display: inline-block; }
-        @media print { .btn-float, .btn-back { display: none; } body { background: #fff; color: #000; } .direction-card { border: 1px solid #000; background: #fff; color: #000; } }
+        /* CONTAINER */
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px 20px 100px 20px; }
+        
+        .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .btn-back { cursor: pointer; color: #666; text-transform: uppercase; font-size: 0.8em; letter-spacing: 2px; border-bottom: 1px solid transparent; transition:0.3s; }
+        .btn-back:hover { color: var(--gold); border-color: var(--gold); }
+        .btn-print { background: var(--gold); color: #000; border: none; padding: 8px 15px; border-radius: 4px; font-family: 'Cinzel'; cursor: pointer; font-weight: bold; }
+
+        .page-header { text-align: center; margin-bottom: 40px; }
+        .page-title { font-family: 'Cinzel'; color: var(--gold); font-size: 2.8em; margin: 0; text-shadow: 0 0 20px rgba(212,175,55,0.3); }
+        .page-sub { color: #888; font-size: 1.1em; margin-top: 10px; }
+
+        /* CONTROLE DE GÊNERO (NECESSÁRIO PARA KUA) */
+        .gender-toggle { display: flex; justify-content: center; gap: 10px; margin-bottom: 40px; }
+        .g-btn { background: #111; border: 1px solid #333; color: #666; padding: 10px 20px; cursor: pointer; font-family: 'Cinzel'; transition: 0.3s; }
+        .g-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
+
+        /* KUA CARD PRINCIPAL */
+        .kua-hero {
+            background: radial-gradient(circle, #1a1a1a 0%, #000 100%); border: 1px solid var(--gold);
+            padding: 40px; text-align: center; border-radius: 8px; margin-bottom: 50px;
+            box-shadow: 0 0 40px rgba(212,175,55,0.15);
+        }
+        .kua-number { font-family: 'Cinzel'; font-size: 6em; line-height: 1; color: var(--gold); text-shadow: 0 0 30px rgba(212,175,55,0.4); margin-bottom: 10px; }
+        .kua-element { text-transform: uppercase; letter-spacing: 4px; font-size: 1.2em; margin-bottom: 20px; color: #fff; }
+        .kua-desc { max-width: 700px; margin: 0 auto; color: #ccc; font-size: 1.1em; text-align: justify; }
+
+        /* GRID DE DIREÇÕES */
+        .directions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        
+        .dir-card { 
+            background: #111; border: 1px solid #333; padding: 30px; border-radius: 8px; 
+            border-left: 4px solid #333; transition: 0.3s;
+        }
+        .dir-card:hover { transform: translateY(-5px); border-color: var(--gold); }
+        
+        .dir-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 10px; }
+        .dir-type { font-family: 'Cinzel'; font-size: 1.4em; color: #fff; }
+        .dir-compass { font-family: 'Cinzel'; font-size: 1.2em; color: var(--gold); font-weight: bold; background: rgba(212,175,55,0.1); padding: 5px 15px; border-radius: 20px; }
+        
+        .dir-text { color: #ccc; font-size: 1em; text-align: justify; margin-bottom: 15px; }
+        .dir-action { font-size: 0.9em; color: #888; font-style: italic; }
+        .highlight { color: var(--gold); font-weight: bold; }
+
+        /* CORES POR TIPO DE DIREÇÃO */
+        .card-shengchi { border-left-color: #4caf50; } /* Sucesso */
+        .card-tienyi { border-left-color: #ff9800; } /* Saúde */
+        .card-yannian { border-left-color: #e91e63; } /* Amor */
+        .card-fuwei { border-left-color: #2196f3; } /* Paz */
+
+        @media(max-width: 768px) { .directions-grid { grid-template-columns: 1fr; } }
+        @media print { .btn-back, .btn-print, .gender-toggle { display: none; } body { background: #fff; color: #000; } .kua-hero, .dir-card { border: 1px solid #000; background: #fff; color: #000; } }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div onclick="window.location.href='dashboard-premium.html'" class="btn-back">← VOLTAR AO HUB</div>
-    <h1 class="header-title">FENG SHUI: KUA</h1>
-    
-    <div class="intro-box">
-        <p>O <strong>Número Kua</strong> revela sua assinatura magnética. Ele indica quais direções cardeais fortalecem sua vitalidade e quais a drenam.</p>
-    </div>
-
-    <div id="result-area"></div>
+<div id="loading-screen">
+    <i class="fas fa-compass spinner"></i>
+    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Calculando Bússola Pessoal...</p>
 </div>
 
-<button class="btn-float" onclick="window.print()">SALVAR MAPA</button>
+<div class="container">
+    <div class="nav-bar">
+        <div onclick="window.location.href='dashboard-premium.html'" class="btn-back">← Voltar ao Hub</div>
+        <button onclick="window.print()" class="btn-print"><i class="fas fa-print"></i> Imprimir Guia</button>
+    </div>
+
+    <div class="page-header">
+        <h1 class="page-title">FENG SHUI PESSOAL</h1>
+        <div class="page-sub" id="user-info">...</div>
+    </div>
+
+    <div class="gender-toggle">
+        <button class="g-btn active" id="btn-male" onclick="mudarGenero('male')">Energia Masculina (Yang)</button>
+        <button class="g-btn" id="btn-female" onclick="mudarGenero('female')">Energia Feminina (Yin)</button>
+    </div>
+
+    <div class="kua-hero">
+        <div class="kua-number" id="val-kua">-</div>
+        <div class="kua-element" id="val-element">-</div>
+        <div class="kua-desc" id="val-desc">...</div>
+    </div>
+
+    <h2 style="text-align:center; color:var(--gold); font-family:'Cinzel'; margin-bottom:30px;">Suas Direções de Poder</h2>
+    
+    <div class="directions-grid">
+        
+        <div class="dir-card card-shengchi">
+            <div class="dir-header">
+                <div class="dir-type"><i class="fas fa-crown"></i> Sucesso</div>
+                <div class="dir-compass" id="dir-shengchi">...</div>
+            </div>
+            <p class="dir-text">
+                <span class="highlight">Energia Sheng Chi (Gerador de Vida).</span> Esta é a sua direção mais poderosa para prosperidade financeira, avanço na carreira e autoridade. É a energia do crescimento contínuo e da vitalidade.
+            </p>
+            <div class="dir-action">
+                <strong>Aplicação Prática:</strong> Posicione sua mesa de trabalho de frente para esta direção. Se tiver uma reunião importante, sente-se olhando para cá. É a direção ideal para a porta de entrada da sua casa ou escritório.
+            </div>
+        </div>
+
+        <div class="dir-card card-tienyi">
+            <div class="dir-header">
+                <div class="dir-type"><i class="fas fa-medkit"></i> Saúde</div>
+                <div class="dir-compass" id="dir-tienyi">...</div>
+            </div>
+            <p class="dir-text">
+                <span class="highlight">Energia Tien Yi (Médico Celestial).</span> Esta direção atrai cura, vitalidade física e ajuda de mentores. É uma energia restauradora que limpa bloqueios e fortalece o sistema imunológico.
+            </p>
+            <div class="dir-action">
+                <strong>Aplicação Prática:</strong> A cabeceira da sua cama deve apontar para esta direção para garantir um sono reparador. Se estiver doente, passe tempo em um cômodo localizado neste setor da casa.
+            </div>
+        </div>
+
+        <div class="dir-card card-yannian">
+            <div class="dir-header">
+                <div class="dir-type"><i class="fas fa-heart"></i> Relacionamentos</div>
+                <div class="dir-compass" id="dir-yannian">...</div>
+            </div>
+            <p class="dir-text">
+                <span class="highlight">Energia Yan Nian (Longevidade).</span> Focada na harmonia social, amor romântico e networking. Esta energia suaviza conflitos, atrai parceiros compatíveis e melhora a comunicação familiar.
+            </p>
+            <div class="dir-action">
+                <strong>Aplicação Prática:</strong> Ideal para o quarto de casal ou sala de estar. Coloque fotos de família ou símbolos de amor (pares) neste setor da sua casa. Ao negociar parcerias, olhe para esta direção.
+            </div>
+        </div>
+
+        <div class="dir-card card-fuwei">
+            <div class="dir-header">
+                <div class="dir-type"><i class="fas fa-shield-alt"></i> Estabilidade</div>
+                <div class="dir-compass" id="dir-fuwei">...</div>
+            </div>
+            <p class="dir-text">
+                <span class="highlight">Energia Fu Wei (Estabilidade).</span> É a direção da paz mental, meditação e desenvolvimento pessoal. Representa o "retorno à base". É uma energia calma, ideal para estudos e autoconhecimento.
+            </p>
+            <div class="dir-action">
+                <strong>Aplicação Prática:</strong> Perfeita para seu altar, local de meditação ou biblioteca. Se você se sente ansioso ou disperso, sente-se voltado para esta direção para se reconectar consigo mesmo.
+            </div>
+        </div>
+
+    </div>
+</div>
 
 <script>
-    // --- 1. BANCO DE DADOS EMBUTIDO ---
-    const DIRECOES = {"N":"Norte","S":"Sul","L":"Leste","O":"Oeste","NE":"Nordeste","NO":"Noroeste","SE":"Sudeste","SO":"Sudoeste"};
-    const MAPA_KUA = {
-        "1":{elemento:"Água",sheng_qi:{dir:"SE",nome:"Sucesso"},tian_yi:{dir:"L",nome:"Saúde"},yan_nian:{dir:"S",nome:"Amor"},fu_wei:{dir:"N",nome:"Estabilidade"},azar:"SO"},
-        "2":{elemento:"Terra",sheng_qi:{dir:"NE",nome:"Sucesso"},tian_yi:{dir:"O",nome:"Saúde"},yan_nian:{dir:"NO",nome:"Amor"},fu_wei:{dir:"SO",nome:"Estabilidade"},azar:"N"},
-        "3":{elemento:"Madeira",sheng_qi:{dir:"S",nome:"Sucesso"},tian_yi:{dir:"N",nome:"Saúde"},yan_nian:{dir:"SE",nome:"Amor"},fu_wei:{dir:"L",nome:"Estabilidade"},azar:"O"},
-        "4":{elemento:"Madeira",sheng_qi:{dir:"N",nome:"Sucesso"},tian_yi:{dir:"S",nome:"Saúde"},yan_nian:{dir:"L",nome:"Amor"},fu_wei:{dir:"SE",nome:"Estabilidade"},azar:"NE"},
-        "6":{elemento:"Metal",sheng_qi:{dir:"O",nome:"Sucesso"},tian_yi:{dir:"NE",nome:"Saúde"},yan_nian:{dir:"SO",nome:"Amor"},fu_wei:{dir:"NO",nome:"Estabilidade"},azar:"S"},
-        "7":{elemento:"Metal",sheng_qi:{dir:"NO",nome:"Sucesso"},tian_yi:{dir:"SO",nome:"Saúde"},yan_nian:{dir:"NE",nome:"Amor"},fu_wei:{dir:"O",nome:"Estabilidade"},azar:"L"},
-        "8":{elemento:"Terra",sheng_qi:{dir:"SO",nome:"Sucesso"},tian_yi:{dir:"NO",nome:"Saúde"},yan_nian:{dir:"O",nome:"Amor"},fu_wei:{dir:"NE",nome:"Estabilidade"},azar:"SE"},
-        "9":{elemento:"Fogo",sheng_qi:{dir:"L",nome:"Sucesso"},tian_yi:{dir:"SE",nome:"Saúde"},yan_nian:{dir:"N",nome:"Amor"},fu_wei:{dir:"S",nome:"Estabilidade"},azar:"NO"}
-    };
+    // --- 1. FAILSAFE ---
+    setTimeout(() => { document.getElementById('loading-screen').style.display = 'none'; }, 3000);
 
-    function calcularKua(ano, genero) {
-        let total = 0; String(ano).split('').forEach(n => total += parseInt(n));
-        while(total > 9) { let t=0; String(total).split('').forEach(n=>t+=parseInt(n)); total=t; }
-        let kua = (genero === 'masculino') ? 11 - total : 4 + total;
-        while(kua > 9) { let t=0; String(kua).split('').forEach(n=>t+=parseInt(n)); kua=t; }
-        if (kua === 5) kua = (genero === 'masculino') ? 2 : 8;
-        return String(kua);
-    }
-
-    function exibirKua(ano, genero) {
-        const kua = calcularKua(ano, genero);
-        const dados = MAPA_KUA[kua];
-        
-        document.getElementById('result-area').innerHTML = `
-            <div class="kua-header">
-                <div><span class="kua-number">${kua}</span></div>
-                <div><h3>Elemento: ${dados.elemento}</h3><p>Este é seu código energético pessoal.</p></div>
-            </div>
-            <div class="directions-grid">
-                <div class="direction-card success"><h4>${dados.sheng_qi.nome} (${DIRECOES[dados.sheng_qi.dir]})</h4><p>Vire sua mesa de trabalho para cá.</p></div>
-                <div class="direction-card health"><h4>${dados.tian_yi.nome} (${DIRECOES[dados.tian_yi.dir]})</h4><p>Posicione a cabeceira da cama aqui.</p></div>
-                <div class="direction-card love"><h4>${dados.yan_nian.nome} (${DIRECOES[dados.yan_nian.dir]})</h4><p>Harmonia familiar e romance.</p></div>
-                <div class="direction-card stability"><h4>${dados.fu_wei.nome} (${DIRECOES[dados.fu_wei.dir]})</h4><p>Meditação e estudos.</p></div>
-            </div>
-            <div class="warning-box"><strong>EVITAR TOTALMENTE: ${DIRECOES[dados.azar]}</strong><p>Não durma com a cabeça apontada para esta direção.</p></div>
-        `;
-    }
-
-    // --- 2. CONEXÃO SEGURA ---
+    const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
+    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // Inicia com padrão para não ficar vazio
-    exibirKua(1985, 'masculino'); 
+    // --- 2. DADOS KUA RICOS ---
+    // Mapeamento: Kua -> {Elemento, Arquétipo, Descrição, Direções}
+    const KUA_DATA = {
+        1: {
+            el: "Água", arq: "O Diplomata Intuitivo",
+            desc: "Como um Kua 1, você é regido pelo elemento Água. Você é adaptável, profundo e possui uma intuição poderosa. Assim como a água contorna obstáculos, você encontra caminhos onde outros veem barreiras. Você tende a ser introspectivo e um excelente comunicador quando necessário. Sua força reside na sabedoria silenciosa.",
+            dirs: { s: "Sudeste", t: "Leste", y: "Sul", f: "Norte" }
+        },
+        2: {
+            el: "Terra", arq: "O Cuidador Paciente",
+            desc: "Regido pela Terra, você é a base sólida onde os outros se apoiam. Kua 2 é o arquétipo da nutrição, do serviço e da paciência. Você valoriza a lealdade e trabalha duro nos bastidores. Sua natureza é receptiva e estável, buscando sempre a harmonia e o consenso.",
+            dirs: { s: "Nordeste", t: "Oeste", y: "Noroeste", f: "Sudoeste" }
+        },
+        3: {
+            el: "Madeira", arq: "O Iniciador Dinâmico",
+            desc: "Regido pela Madeira Trovão, você é o impulso da primavera. Kua 3 representa o crescimento rápido, a ambição e a ação. Você é pioneiro, energético e às vezes impulsivo. Sua missão é iniciar projetos e trazer novas ideias ao mundo com coragem.",
+            dirs: { s: "Sul", t: "Norte", y: "Sudeste", f: "Leste" }
+        },
+        4: {
+            el: "Madeira", arq: "O Conector Harmonioso",
+            desc: "Regido pela Madeira Suave (Vento), você é flexível e persuasivo. Kua 4 é excelente em networking e em criar conexões. Ao contrário do Kua 3 que quebra barreiras, você as contorna com elegância. Você busca crescimento contínuo, mas de forma sustentável e harmoniosa.",
+            dirs: { s: "Norte", t: "Sul", y: "Leste", f: "Sudeste" }
+        },
+        // Kua 5 não existe na prática (vira 2 ou 8), mas deixamos aqui como fallback
+        5: { el: "Terra", arq: "O Centro Estável", desc: "Centro.", dirs: { s: "Nordeste", t: "Oeste", y: "Noroeste", f: "Sudoeste" } }, 
+        6: {
+            el: "Metal", arq: "O Líder Autoritário",
+            desc: "Regido pelo Metal do Céu, você carrega a energia da autoridade e da justiça. Kua 6 é o líder natural, disciplinado e organizado. Você tem altos padrões morais e espera o mesmo dos outros. Sua força é a capacidade de gerir e estruturar o caos.",
+            dirs: { s: "Oeste", t: "Nordeste", y: "Sudoeste", f: "Noroeste" }
+        },
+        7: {
+            el: "Metal", arq: "O Orador Carismático",
+            desc: "Regido pelo Metal do Lago, você brilha com carisma e alegria. Kua 7 é o comunicador, o artista, aquele que traz prazer e beleza. Sua fala é afiada (como metal) e persuasiva. Você possui um magnetismo natural que atrai as pessoas e oportunidades.",
+            dirs: { s: "Noroeste", t: "Sudoeste", y: "Nordeste", f: "Oeste" }
+        },
+        8: {
+            el: "Terra", arq: "A Montanha Sábia",
+            desc: "Regido pela Terra da Montanha, você é inabalável. Kua 8 representa a quietude antes da ação e o acúmulo de sabedoria. Você pode parecer reservado, mas possui uma força interior imensa. Você é confiável, constante e busca a perfeição espiritual e material.",
+            dirs: { s: "Sudoeste", t: "Noroeste", y: "Oeste", f: "Nordeste" }
+        },
+        9: {
+            el: "Fogo", arq: "O Visionário Apaixonado",
+            desc: "Regido pelo Fogo, você é visível, brilhante e inspirador. Kua 9 atrai atenção naturalmente. Você é movido pela paixão e pelo reconhecimento. Sua mente é rápida e esclarecida. Você veio para iluminar o caminho e liderar através da inspiração.",
+            dirs: { s: "Leste", t: "Sudeste", y: "Norte", f: "Sul" }
+        }
+    };
+
+    let userYear = 0;
+    let currentGender = 'male'; // Padrão
+
+    function calcularKua(ano, genero) {
+        let soma = 0;
+        // Soma os dígitos do ano (ex: 1985 -> 22 -> 4)
+        String(ano).split('').forEach(n => soma += parseInt(n));
+        while(soma > 9) {
+            let t = 0; String(soma).split('').forEach(n => t += parseInt(n)); soma = t;
+        }
+
+        let k = 0;
+        if (genero === 'male') {
+            k = 11 - soma;
+        } else {
+            k = soma + 4;
+        }
+
+        // Reduz novamente se passar de 9
+        while(k > 9) {
+            let t = 0; String(k).split('').forEach(n => t += parseInt(n)); k = t;
+        }
+
+        // Exceção do Kua 5 (Centro)
+        if (k === 5) {
+            return (genero === 'male') ? 2 : 8;
+        }
+        return k;
+    }
+
+    function renderizar(kua) {
+        const data = KUA_DATA[kua];
+        
+        document.getElementById('val-kua').innerText = kua;
+        document.getElementById('val-element').innerText = `${data.el} • ${data.arq}`;
+        document.getElementById('val-desc').innerText = data.desc;
+
+        document.getElementById('dir-shengchi').innerText = data.dirs.s;
+        document.getElementById('dir-tienyi').innerText = data.dirs.t;
+        document.getElementById('dir-yannian').innerText = data.dirs.y;
+        document.getElementById('dir-fuwei').innerText = data.dirs.f;
+    }
+
+    function mudarGenero(gen) {
+        currentGender = gen;
+        // Atualiza botões
+        document.getElementById('btn-male').className = gen === 'male' ? 'g-btn active' : 'g-btn';
+        document.getElementById('btn-female').className = gen === 'female' ? 'g-btn active' : 'g-btn';
+        
+        // Recalcula
+        if(userYear > 0) {
+            const novoKua = calcularKua(userYear, currentGender);
+            renderizar(novoKua);
+        }
+    }
 
     auth.onAuthStateChanged(user => {
-        if(user) {
+        if(user){
             db.collection("usuarios").doc(user.uid).get().then(doc => {
-                if(doc.exists && doc.data().dataNascimento) {
-                    const ano = doc.data().dataNascimento.split('-')[0];
-                    // Tenta adivinhar genero ou usa padrao (em app real, pediria genero no cadastro)
-                    exibirKua(ano, 'masculino'); 
-                }
+                const d = doc.exists ? doc.data() : {};
+                const nome = d.nome || "Iniciado";
+                const dataStr = d.dataNascimento || d.nascimento || "2000-01-01";
+                
+                userYear = parseInt(dataStr.split('-')[0]);
+                document.getElementById('user-info').innerText = `${nome} • Nascido em ${userYear}`;
+
+                // Cálculo inicial (Padrão Masculino, usuário troca se quiser)
+                const k = calcularKua(userYear, currentGender);
+                renderizar(k);
+                
+                document.getElementById('loading-screen').style.display = 'none';
+            }).catch(e => {
+                userYear = 2000;
+                renderizar(9);
+                document.getElementById('loading-screen').style.display = 'none';
             });
+        } else {
+            window.location.href = 'index.html';
         }
     });
 </script>
