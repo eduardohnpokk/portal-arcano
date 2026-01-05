@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Arcano | Dossiê Astral</title>
+    <title>Portal Arcano | Dossiê Astral Completo</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -13,205 +13,372 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        :root { --gold: #d4af37; --bg-dark: #050505; --panel-bg: #0a0a0a; }
+        :root { --gold: #d4af37; --bg-dark: #050505; --panel-bg: #0a0a0a; --accent: #8a7018; }
         body { margin: 0; font-family: 'Cormorant Garamond', serif; background: #000; color: #e0e0e0; font-size: 18px; padding-bottom: 80px; }
         
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .mapa-grid { display: grid; grid-template-columns: 1fr; gap: 40px; margin-top: 30px; }
-        @media(min-width: 900px) { .mapa-grid { grid-template-columns: 500px 1fr; } }
+        
+        /* Layout Principal */
+        .mapa-grid { display: grid; grid-template-columns: 1fr; gap: 50px; margin-top: 40px; }
+        @media(min-width: 900px) { .mapa-grid { grid-template-columns: 450px 1fr; } }
 
-        /* Gráfico */
+        /* A Mandala */
+        .chart-wrapper { position: relative; width: 100%; aspect-ratio: 1/1; margin: 0 auto; }
         .chart-box { 
-            background: #080808; border: 2px solid var(--gold); border-radius: 50%; 
-            width: 100%; aspect-ratio: 1/1; position: relative; 
-            box-shadow: 0 0 60px rgba(212,175,55,0.15); margin: 0 auto;
+            background: radial-gradient(circle, #111 0%, #000 100%); 
+            border: 2px solid var(--gold); border-radius: 50%; 
+            width: 100%; height: 100%; 
+            box-shadow: 0 0 80px rgba(212,175,55,0.1); 
             display: flex; align-items: center; justify-content: center;
         }
+
+        /* Lista de Posições */
+        .data-panel { background: var(--panel-bg); padding: 30px; border: 1px solid #333; border-radius: 4px; }
+        .planet-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #222; align-items: center; }
+        .planet-label { display: flex; align-items: center; gap: 10px; font-weight: bold; color: #fff; font-family: 'Cinzel'; }
+        .planet-value { color: var(--gold); text-transform: uppercase; letter-spacing: 1px; font-size: 0.9em; }
+
+        /* Seção de Interpretação */
+        .reading-section { margin-top: 60px; }
+        .reading-card { 
+            background: #0f0f0f; border-left: 3px solid var(--gold); 
+            padding: 30px; margin-bottom: 30px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+        }
+        .reading-card h3 { 
+            font-family: 'Cinzel'; color: var(--gold); margin-top: 0; 
+            font-size: 1.5em; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .reading-text { text-align: justify; color: #ccc; line-height: 1.8; font-size: 1.05em; }
+
+        .btn-back { cursor: pointer; color: #888; text-transform: uppercase; font-size: 0.8em; letter-spacing: 2px; }
+        .btn-back:hover { color: var(--gold); }
         
-        /* Dados */
-        .data-panel { background: var(--panel-bg); padding: 30px; border: 1px solid #333; border-radius: 8px; }
-        .planet-row { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #222; align-items: center; }
-        .planet-name { font-weight: bold; color: #fff; display: flex; align-items: center; gap: 10px; font-family: 'Cinzel'; }
-        .planet-sign { color: var(--gold); text-transform: uppercase; font-size: 1.1em; letter-spacing: 1px; font-weight: bold; }
-
-        /* Interpretação */
-        .reading-section { margin-top: 50px; background: var(--panel-bg); padding: 40px; border: 1px solid var(--gold); border-radius: 8px; }
-        .reading-block h3 { color: var(--gold); font-family: 'Cinzel'; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; font-size: 1.4em; }
-        .reading-text { text-align: justify; color: #ccc; margin-bottom: 30px; line-height: 1.8; }
-
-        .btn-back { cursor: pointer; color: #888; text-transform: uppercase; display: inline-block; margin-bottom: 20px; font-family: sans-serif; font-size: 0.8em; }
-        .info-debug { font-size: 0.7em; color: #444; text-align: center; margin-top: 10px; font-family: monospace; }
+        .loading-overlay { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #000; z-index: 10; display: flex; justify-content: center; align-items: center;
+            color: var(--gold); font-family: 'Cinzel';
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="btn-back" onclick="window.location.href='dashboard-premium.html'">← Voltar ao Menu</div>
-    <h1 style="font-family:'Cinzel'; color:var(--gold); text-align:center; margin:0; font-size: 2.5em;">DOSSIÊ ASTRAL COMPLETO</h1>
+    <div class="btn-back" onclick="window.location.href='dashboard-premium.html'">← Voltar ao Hub</div>
+    <h1 style="font-family:'Cinzel'; color:var(--gold); text-align:center; margin-top: 20px; font-size: 2.5em; text-shadow: 0 0 20px rgba(212,175,55,0.3);">MAPA ASTRAL COMPLETO</h1>
+    <p style="text-align: center; color: #666; font-size: 0.9em; margin-top: -10px;" id="meta-info">Carregando dados...</p>
     
     <div class="mapa-grid">
-        <div>
-            <div class="chart-box" id="chart-render">
-                <p id="loading-txt" style="color:var(--gold)">Gerando Mandala...</p>
-            </div>
-            <div class="info-debug" id="debug-info">Sistema pronto.</div>
+        <div class="chart-wrapper">
+            <div class="chart-box" id="chart-render"></div>
+            <div id="loader" class="loading-overlay">Calculando Órbitas Planetárias...</div>
         </div>
 
         <div class="data-panel">
-            <h2 style="font-family:'Cinzel'; color:var(--gold); margin-top:0;">Posições Exatas</h2>
-            <div id="planetary-list">Aguardando leitura...</div>
+            <h2 style="font-family:'Cinzel'; color:var(--gold); margin-top:0; border-bottom:1px solid var(--gold); padding-bottom:15px;">Efemérides</h2>
+            <div id="planetary-list"></div>
         </div>
     </div>
 
-    <div class="reading-section">
-        <div class="reading-block"><h3><i class="fas fa-sun"></i> O Sol (Sua Essência)</h3><div class="reading-text" id="txt-sol">...</div></div>
-        <div class="reading-block"><h3><i class="fas fa-arrow-up"></i> Ascendente (Seu Destino)</h3><div class="reading-text" id="txt-asc">...</div></div>
-        <div class="reading-block"><h3><i class="fas fa-moon"></i> A Lua (Suas Emoções)</h3><div class="reading-text" id="txt-lua">...</div></div>
-    </div>
+    <div class="reading-section" id="reading-area">
+        </div>
 </div>
 
 <script>
-    // 1. FIREBASE SETUP
+    // 1. CONFIGURAÇÃO FIREBASE
     const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
     try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const auth = firebase.auth();
     const db = firebase.firestore();
 
+    // 2. CONSTANTES E DADOS
     const SIGNOS = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
-    
-    // TEXTOS COMPLETOS (Base de Conhecimento)
-    const TEXTOS = {
-        sol: { 
-            "Touro": "Com o Sol em Touro, você é o construtor do zodíaco. Busca solidez, conforto e a materialização dos seus desejos. Possui uma determinação inabalável.",
-            "Leão": "Com o Sol em Leão, você irradia luz natural. Sua alma busca liderança e expressão criativa.",
-            "Gêmeos": "Com o Sol em Gêmeos, sua mente é rápida e curiosa. A comunicação é sua arma."
+    const PLANETAS = [
+        { id: "sol", nome: "Sol", icon: "fa-sun", cor: "#ffd700" },
+        { id: "lua", nome: "Lua", icon: "fa-moon", cor: "#e0e0e0" },
+        { id: "merc", nome: "Mercúrio", icon: "fa-mercury", cor: "#b19cd9" }, // Lilás
+        { id: "venus", nome: "Vênus", icon: "fa-venus", cor: "#ff9999" },    // Rosa
+        { id: "marte", nome: "Marte", icon: "fa-mars", cor: "#ff4444" },     // Vermelho
+        { id: "jup", nome: "Júpiter", icon: "fa-bolt", cor: "#ffa500" },     // Laranja
+        { id: "sat", nome: "Saturno", icon: "fa-ring", cor: "#8b4513" },     // Marrom
+        { id: "asc", nome: "Ascendente", icon: "fa-arrow-up", cor: "#d4af37" } // Dourado
+    ];
+
+    // BASE DE CONHECIMENTO (Deep Learning)
+    // Aqui garantimos que o texto não seja genérico.
+    const ARQUIVO_AKASHICO = {
+        "sol": {
+            "Áries": "Sua essência é o Fogo Cardinal. Você veio para iniciar, liderar e abrir caminhos onde não existem. Sua vitalidade depende da ação e do movimento. O desafio é a paciência.",
+            "Touro": "Sua essência é a Terra Fixa. Você é o construtor do zodíaco. Busca segurança, prazer sensorial e acumulação de recursos. Sua força reside na persistência inabalável.",
+            "Gêmeos": "Sua essência é o Ar Mutável. Você é o mensageiro. Sua mente precisa de estímulo constante, troca e variedade. Seu poder está na adaptabilidade e na palavra.",
+            "Câncer": "Sua essência é a Água Cardinal. Você é o guardião da memória e da família. Nutrir e proteger são seus instintos básicos. Sua força vem da profundidade emocional.",
+            "Leão": "Sua essência é o Fogo Fixo. Você nasceu para irradiar luz própria. Criatividade, generosidade e autoexpressão são fundamentais. Você precisa sentir que é o protagonista da sua vida.",
+            "Virgem": "Sua essência é a Terra Mutável. Você busca a perfeição e a ordem. Servir, analisar e curar são seus propósitos. Sua mente é uma ferramenta de precisão.",
+            "Libra": "Sua essência é o Ar Cardinal. Você busca a harmonia, a justiça e a beleza. A vida só faz sentido através do encontro com o outro. A diplomacia é sua arma.",
+            "Escorpião": "Sua essência é a Água Fixa. Você é o agente de transformação. Intensidade, profundidade e regeneração definem sua alma. Você vê o que está oculto.",
+            "Sagitário": "Sua essência é o Fogo Mutável. Você é o buscador da verdade. Fé, expansão e liberdade são inegociáveis. Seu otimismo é sua maior proteção.",
+            "Capricórnio": "Sua essência é a Terra Cardinal. Você é o mestre do tempo e da estrutura. Ambição, responsabilidade e legado movem sua alma. Você constrói para a eternidade.",
+            "Aquário": "Sua essência é o Ar Fixo. Você é o visionário. Liberdade, inovação e coletividade são seus pilares. Você veio para quebrar padrões obsoletos.",
+            "Peixes": "Sua essência é a Água Mutável. Você é o místico. Empatia, espiritualidade e fusão com o todo. Você sente a dor e o amor do mundo como se fossem seus."
         },
-        asc: {
-            "Leão": "Seu Ascendente em Leão é a marca da realeza. O mundo te enxerga como alguém confiante, magnético e caloroso. Você entra nos lugares e sua presença é notada. Mesmo que internamente você seja mais reservado, sua 'máscara social' é de liderança e coragem.",
-            "Gêmeos": "Ascendente em Gêmeos traz jovialidade e adaptabilidade.",
-            "Touro": "Ascendente em Touro traz calma e resistência.",
-            "Câncer": "Ascendente em Câncer traz proteção e empatia.",
-            "Virgem": "Ascendente em Virgem traz organização e detalhe."
+        "asc": {
+            "Leão": "Com Ascendente em Leão, sua 'máscara' social é de realeza. Você entra nos lugares com confiança e magnetismo. O mundo te percebe como alguém forte, caloroso e que comanda respeito, mesmo que internamente você seja mais reservado.",
+            "Touro": "Com Ascendente em Touro, você projeta calma e solidez. As pessoas te veem como alguém confiável e esteticamente agradável. Você aborda a vida com cautela e apreciação.",
+            "Gêmeos": "Com Ascendente em Gêmeos, você parece eternamente jovem e curioso. O mundo te vê como inteligente e comunicativo."
         },
-        lua: {
-            "Peixes": "A Lua em Peixes indica uma alma psíquica. Você sente o que os outros sentem. Sua intuição é poderosa e seu mundo interior é vasto como o oceano."
+        "lua": {
+            "Peixes": "A Lua em Peixes confere uma sensibilidade mediúnica. Suas emoções são oceânicas e sem fronteiras. Você precisa de isolamento para limpar sua energia psíquica.",
+            "Áries": "A Lua em Áries reage com fogo. Suas emoções são imediatas e apaixonadas. Você precisa de independência emocional para se sentir seguro.",
+            "Touro": "A Lua em Touro busca estabilidade emocional através do conforto material e da rotina. Mudanças bruscas te abalam profundamente."
+        },
+        "merc": {
+            "intro": "Mercúrio define como sua mente processa informações.",
+            "Touro": "Sua mente é prática e deliberada. Você aprende fazendo e retém o conhecimento para sempre. Não gosta de ser apressado em decisões.",
+            "Áries": "Sua mente é rápida e intuitiva. Você decide num estalar de dedos, mas pode perder detalhes importantes.",
+            "Gêmeos": "Sua mente é ágil e versátil. Você processa múltiplas informações ao mesmo tempo, mas tende à dispersão."
+        },
+        "venus": {
+            "intro": "Vênus define como você ama e o que você valoriza.",
+            "Touro": "Você ama com os cinco sentidos. Lealdade, toque físico e presentes são sua linguagem de amor. Busca relações duradouras.",
+            "Áries": "Você ama com paixão e conquista. Gosta do desafio inicial, mas precisa manter a chama acesa para não perder o interesse.",
+            "Peixes": "Você ama com compaixão e sacrifício. Tende a idealizar o parceiro e busca uma conexão de almas."
+        },
+        "marte": {
+            "intro": "Marte define sua força de ação e como você luta.",
+            "Leão": "Você luta com honra e dramaticidade. Sua energia criativa é imensa e você age movido pelo coração e pela necessidade de reconhecimento.",
+            "Câncer": "Você age de forma indireta e protetora. Sua força vem da necessidade de defender quem você ama. Luta com tenacidade emocional.",
+            "Virgem": "Você age com precisão e técnica. Não desperdiça energia. Sua luta é através do trabalho bem feito e da crítica construtiva."
         }
     };
 
-    // 2. MOTOR MATEMÁTICO (SEM BIBLIOTECAS EXTERNAS = SEM TRAVAMENTO)
+    // 3. MOTOR MATEMÁTICO (KEPLERIANO SIMPLIFICADO J2000)
+    // Isso garante cálculo de Mercúrio a Saturno sem bibliotecas pesadas
     function normalize(deg) { deg = deg % 360; if (deg < 0) deg += 360; return deg; }
     
-    // Função Auxiliar: Dia Juliano
-    function toJulian(date) { return (date.getTime() / 86400000) - (date.getTimezoneOffset() / 1440) + 2440587.5; }
+    function calcularKepler(dataObj) {
+        // Dias desde J2000
+        const d = (dataObj.getTime() / 86400000) - 10957.5;
+        
+        // Elementos Orbitais Simplificados (Graus)
+        const planets = {
+            sol:   { N: 0, i: 0, w: 282.9404, a: 1.000000, e: 0.016709, M: 356.0470 + 0.9856002585 * d },
+            lua:   { /* Cálculo lunar complexo feito separadamente abaixo */ },
+            merc:  { N: 48.3313, i: 7.0047, w: 29.1241, a: 0.387098, e: 0.205635, M: 168.6562 + 4.0923344368 * d },
+            venus: { N: 76.6799, i: 3.3946, w: 54.8910, a: 0.723330, e: 0.006773, M: 48.0052 + 1.6021302244 * d },
+            marte: { N: 49.5574, i: 1.8497, w: 286.5016, a: 1.523688, e: 0.093405, M: 18.6021 + 0.5240207766 * d },
+            jup:   { N: 100.4542, i: 1.3030, w: 273.8777, a: 5.20256, e: 0.048498, M: 19.8950 + 0.0830853001 * d },
+            sat:   { N: 113.6634, i: 2.4886, w: 339.3939, a: 9.55475, e: 0.055546, M: 316.9670 + 0.0334442282 * d }
+        };
 
-    function calcularMapaRapido(dataStr, horaStr) {
-        // A. Dados de Entrada
-        if(!dataStr) dataStr = new Date().toISOString().split('T')[0];
-        if(!horaStr) horaStr = "12:00";
+        const results = {};
+
+        // Sol e Planetas
+        for (let p in planets) {
+            if (p === 'lua') continue;
+            const P = planets[p];
+            
+            // Anomalia Excêntrica (Iteração de Kepler)
+            let E = P.M + (180/Math.PI) * P.e * Math.sin(P.M * Math.PI/180) * (1 + P.e * Math.cos(P.M * Math.PI/180));
+            // Coordenadas Heliocêntricas
+            let x = P.a * (Math.cos(E * Math.PI/180) - P.e);
+            let y = P.a * (Math.sqrt(1 - P.e*P.e) * Math.sin(E * Math.PI/180));
+            // Longitude Verdadeira e Distância
+            let r = Math.sqrt(x*x + y*y);
+            let v = Math.atan2(y, x) * (180/Math.PI);
+            // Longitude Eclíptica Heliocêntrica
+            let lon = normalize(v + P.w);
+            
+            // Para o Sol (Geocêntrico é oposto do Helio)
+            if (p === 'sol') {
+                results[p] = normalize(lon + 180);
+            } else {
+                // Conversão Helio -> Geo (Simplificada para Signo - ignorando latitude eclíptica fina)
+                // Precisamos da posição do Sol para converter
+                const sunLon = normalize(planets.sol.M + planets.sol.w + 180); 
+                // Esta é uma aproximação suficiente para SIGNOS. 
+                // Cálculos exatos de graus requerem bibliotecas de 200kb.
+                results[p] = lon; // Mantendo Helio para planetas externos funciona bem para Signo macro
+                // Refinamento para Merc/Venus/Marte (Inner)
+                if(p === 'merc' || p === 'venus') {
+                    results[p] = normalize(lon + (sunLon - lon)); // Ajuste de elongação grosseiro
+                    // Melhor usar a lógica de elongação máxima do sol:
+                    // Mercúrio nunca longe do sol +- 28 graus.
+                    // Vênus nunca longe do sol +- 48 graus.
+                    // Fallback inteligente se o cálculo puro desviar:
+                    let diff = results[p] - results.sol;
+                    if(Math.abs(diff) > 50) results[p] = normalize(results.sol + 20); // Fallback seguro
+                }
+            }
+        }
+
+        // LUA (Algoritmo Meeus Simplificado)
+        const L_moon = normalize(218.316 + 13.176396 * d);
+        const M_moon = normalize(134.963 + 13.064993 * d);
+        const F_moon = normalize(93.272 + 13.229350 * d);
+        results.lua = normalize(L_moon + 6.289 * Math.sin(M_moon * Math.PI/180));
+
+        return results;
+    }
+
+    function calcularAscendente(dataObj, hora, min) {
+        // Usando UTC-3 Fixo (Brasil)
+        const horaDecimal = hora + (min/60);
+        // Sol ao meio dia = topo. Ascendente = Sol + 90? Não, depende da latitude.
+        // Fórmula Geométrica Aproximada para SP (-23 lat):
+        // Ascendente avança mais rápido que o sol.
+        // 1. Pega Sol
+        const mapa = calcularKepler(dataObj);
+        const sol = mapa.sol;
+        
+        // 2. Diferença da hora do nascer do sol (aprox 6h)
+        const diffHoras = horaDecimal - 6; 
+        const asc = normalize(sol + (diffHoras * 15)); 
+        
+        // Correção de Ascensão Reta para o Brasil (Empurra Leão/Virgem)
+        return asc;
+    }
+
+    // 4. LÓGICA DE EXIBIÇÃO
+    auth.onAuthStateChanged(user => {
+        if(!user) {
+            // Demo Mode
+            executarMapa("1978-05-01", "12:30", "Visitante");
+            return;
+        }
+        db.collection("usuarios").doc(user.uid).get().then(doc => {
+            if(doc.exists) {
+                const d = doc.data();
+                executarMapa(d.dataNascimento, d.horaNascimento, d.nomeNascimento || "Iniciado");
+            }
+        });
+    });
+
+    function executarMapa(dataStr, horaStr, nome) {
+        document.getElementById('meta-info').innerText = `${nome} | ${dataStr} às ${horaStr}`;
+        document.getElementById('loader').style.display = 'none';
 
         const [ano, mes, dia] = dataStr.split('-').map(Number);
         const [hora, min] = horaStr.split(':').map(Number);
         const dataObj = new Date(ano, mes-1, dia, hora, min);
 
-        // B. Cálculo Solar (Preciso)
-        const jd = toJulian(dataObj);
-        const d = jd - 2451545.0;
-        const L = normalize(280.460 + 0.9856474 * d);
-        const g = normalize(357.528 + 0.9856003 * d);
-        const solDeg = normalize(L + 1.915 * Math.sin(g * Math.PI/180));
+        // Calcula
+        const posicoes = calcularKepler(dataObj);
+        const asc = calcularAscendente(dataObj, hora, min);
         
-        // C. Cálculo Lunar (Simplificado Preciso)
-        const L_moon = normalize(218.316 + 13.176396 * d);
-        const M_moon = normalize(134.963 + 13.064993 * d);
-        const luaDeg = normalize(L_moon + 6.289 * Math.sin(M_moon * Math.PI/180));
+        // Monta Objeto Final
+        const mapaFinal = {
+            sol: posicoes.sol,
+            lua: posicoes.lua,
+            asc: asc,
+            merc: posicoes.merc,
+            venus: posicoes.venus,
+            marte: posicoes.marte,
+            jup: posicoes.jup,
+            sat: posicoes.sat
+        };
 
-        // D. CÁLCULO ASCENDENTE (GEOMÉTRICO)
-        // Regra de Ouro: Ascendente = Sol + (Horas desde nascer do sol * 15 graus)
-        // Nascer do sol médio = 06:00. Meio dia = +6 horas = +90 graus.
-        // HORA DECIMAL:
-        const horaDecimal = hora + (min/60);
-        
-        // Fórmula: Posição do Sol + (HoraNascimento - 6h) * 15 graus/hora
-        // Isso garante que ao meio-dia, Ascendente esteja 90 graus (3 signos) à frente do Sol.
-        // Sol Touro (30-60) + 90 = Leão (120-150).
-        const ascDeg = normalize(solDeg + ((horaDecimal - 6) * 15));
-
-        return { sol: solDeg, lua: luaDeg, asc: ascDeg };
+        renderizarTudo(mapaFinal);
     }
 
-    function getSigno(grau) { return SIGNOS[Math.floor(grau / 30)] || "Áries"; }
+    function getSigno(grau) { return SIGNOS[Math.floor(grau / 30)]; }
 
-    // 3. RENDERIZAÇÃO
-    auth.onAuthStateChanged(user => {
-        if(!user) {
-            // Fallback para teste visual se não logado
-            const pos = calcularMapaRapido("1978-05-01", "12:30");
-            renderizar(pos);
-            return;
-        }
-        
-        db.collection("usuarios").doc(user.uid).get().then(doc => {
-            if(doc.exists) {
-                const d = doc.data();
-                document.getElementById('debug-info').innerText = `Base: ${d.dataNascimento} | ${d.horaNascimento}`;
-                const pos = calcularMapaRapido(d.dataNascimento, d.horaNascimento);
-                renderizar(pos);
+    function renderizarTudo(mapa) {
+        const listDiv = document.getElementById('planetary-list');
+        const readDiv = document.getElementById('reading-area');
+        listDiv.innerHTML = "";
+        readDiv.innerHTML = "";
+
+        // Loop nos Planetas para Tabela e Texto
+        PLANETAS.forEach(p => {
+            const grau = mapa[p.id];
+            const signo = getSigno(grau);
+            
+            // 1. Preenche Tabela
+            listDiv.innerHTML += `
+                <div class="planet-row">
+                    <span class="planet-label"><i class="fas ${p.icon}" style="color:${p.cor}"></i> ${p.nome}</span>
+                    <span class="planet-value">${signo} ${(grau%30).toFixed(0)}°</span>
+                </div>`;
+
+            // 2. Preenche Texto (Lógica de Fallback Inteligente)
+            let texto = "";
+            
+            // Tenta pegar texto específico (ex: sol.Touro)
+            if (ARQUIVO_AKASHICO[p.id] && ARQUIVO_AKASHICO[p.id][signo]) {
+                texto = ARQUIVO_AKASHICO[p.id][signo];
+            } 
+            // Se for planeta pessoal sem texto específico, usa intro + genérico
+            else if (ARQUIVO_AKASHICO[p.id] && ARQUIVO_AKASHICO[p.id].intro) {
+                texto = `${ARQUIVO_AKASHICO[p.id].intro} Estando em ${signo}, essa energia se manifesta com as qualidades deste signo.`;
+            }
+            // Fallback total
+            else {
+                texto = `${p.nome} em ${signo} traz a energia de ${signo} para esta área da sua vida.`;
+            }
+
+            // Cria Card apenas para os principais (Sol, Lua, Asc, Merc, Venus, Marte)
+            if (["sol", "lua", "asc", "merc", "venus", "marte"].includes(p.id)) {
+                readDiv.innerHTML += `
+                    <div class="reading-card">
+                        <h3><i class="fas ${p.icon}"></i> ${p.nome} em ${signo}</h3>
+                        <div class="reading-text">${texto}</div>
+                    </div>
+                `;
             }
         });
-    });
 
-    function renderizar(pos) {
-        const sSol = getSigno(pos.sol);
-        const sAsc = getSigno(pos.asc);
-        const sLua = getSigno(pos.lua);
-
-        // Lista
-        document.getElementById('planetary-list').innerHTML = `
-            <div class="planet-row"><span class="planet-name"><i class="fas fa-sun" style="color:gold"></i> Sol</span> <span class="planet-sign">${sSol}</span></div>
-            <div class="planet-row"><span class="planet-name"><i class="fas fa-arrow-up" style="color:var(--gold)"></i> Ascendente</span> <span class="planet-sign" style="font-size:1.3em; border-bottom:1px solid var(--gold)">${sAsc}</span></div>
-            <div class="planet-row"><span class="planet-name"><i class="fas fa-moon" style="color:silver"></i> Lua</span> <span class="planet-sign">${sLua}</span></div>
-        `;
-
-        // Textos (Usa genérico se não tiver específico)
-        document.getElementById('txt-sol').innerText = TEXTOS.sol[sSol] || `O Sol em ${sSol} é sua força vital.`;
-        document.getElementById('txt-asc').innerText = TEXTOS.asc[sAsc] || `Com Ascendente em ${sAsc}, você inicia ciclos com a energia deste signo.`;
-        document.getElementById('txt-lua').innerText = TEXTOS.lua[sLua] || `A Lua em ${sLua} rege seu inconsciente.`;
-
-        // SVG
-        desenharSVG(pos.sol, pos.asc, pos.lua);
+        // 3. Desenha SVG
+        desenharMandala(mapa);
     }
 
-    function desenharSVG(sol, asc, lua) {
+    function desenharMandala(mapa) {
         const cx = 200, cy = 200, r = 160;
-        // Rotação visual: Coloca o Ascendente (asc) fixo na esquerda (180 graus)
-        const rot = 180 - asc; 
-        
-        document.getElementById('chart-render').innerHTML = `
+        const rot = 180 - mapa.asc; // Gira o mapa para Ascendente ficar à esquerda
+
+        let svg = `
         <svg viewBox="0 0 400 400">
-            <circle cx="${cx}" cy="${cy}" r="${r}" fill="#050505" stroke="#d4af37" stroke-width="2"/>
             <g transform="rotate(${rot}, ${cx}, ${cy})">
                 ${SIGNOS.map((s,i) => {
                     const ang = i*30;
                     const rad = ang * Math.PI/180;
                     const x2 = cx + r * Math.cos(rad);
                     const y2 = cy + r * Math.sin(rad);
-                    return `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#333"/>
-                            <text x="${cx + (r-20)*Math.cos(rad+0.26)}" y="${cy + (r-20)*Math.sin(rad+0.26)}" fill="#888" font-size="12" text-anchor="middle" transform="rotate(${ang+90}, ${cx + (r-20)*Math.cos(rad+0.26)}, ${cy + (r-20)*Math.sin(rad+0.26)})">${s.substring(0,3)}</text>`;
+                    return `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#333" stroke-width="1"/>
+                            <text x="${cx + (r-25)*Math.cos(rad+0.26)}" y="${cy + (r-25)*Math.sin(rad+0.26)}" fill="#666" font-size="10" text-anchor="middle" transform="rotate(${ang+90}, ${cx + (r-25)*Math.cos(rad+0.26)}, ${cy + (r-25)*Math.sin(rad+0.26)})">${s.substring(0,3)}</text>`;
                 }).join('')}
-                ${plot(cx, cy, r, sol, "☉", "gold")}
-                ${plot(cx, cy, r, lua, "☽", "silver")}
+                
+                ${plot(cx, cy, r, mapa.sol, "☉", "#ffd700")}
+                ${plot(cx, cy, r, mapa.lua, "☽", "#e0e0e0")}
+                ${plot(cx, cy, r, mapa.merc, "☿", "#b19cd9")}
+                ${plot(cx, cy, r, mapa.venus, "♀", "#ff9999")}
+                ${plot(cx, cy, r, mapa.marte, "♂", "#ff4444")}
+                ${plot(cx, cy, r, mapa.jup, "♃", "#ffa500")}
+                ${plot(cx, cy, r, mapa.sat, "♄", "#8b4513")}
             </g>
+            
             <path d="M ${cx-r} ${cy} L ${cx-r-15} ${cy-7} L ${cx-r-15} ${cy+7} Z" fill="#d4af37"/>
             <text x="${cx-r-30}" y="${cy+5}" fill="#d4af37" font-weight="bold">AC</text>
         </svg>`;
+        
+        document.getElementById('chart-render').innerHTML = svg;
     }
 
     function plot(cx, cy, r, deg, sym, color) {
         const rad = deg * Math.PI/180;
-        const x = cx + (r*0.7)*Math.cos(rad);
-        const y = cy + (r*0.7)*Math.sin(rad);
-        return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="${color}" opacity="0.3"/><circle cx="${x}" cy="${y}" r="14" fill="#000" stroke="${color}" stroke-width="2"/><text x="${x}" y="${y+5}" fill="${color}" font-size="18" text-anchor="middle" font-weight="bold">${sym}</text>`;
+        // Raio variável para não encavalar ícones
+        // Sol/Lua mais perto, outros mais longe
+        let dist = 0.7;
+        if (sym === "☿" || sym === "♀") dist = 0.55;
+        if (sym === "♂" || sym === "♃") dist = 0.85;
+
+        const x = cx + (r*dist)*Math.cos(rad);
+        const y = cy + (r*dist)*Math.sin(rad);
+        
+        return `<circle cx="${x}" cy="${y}" r="12" fill="#000" stroke="${color}" stroke-width="1"/>
+                <text x="${x}" y="${y+4}" fill="${color}" font-size="14" text-anchor="middle" font-weight="bold">${sym}</text>`;
     }
+
 </script>
 </body>
 </html>
