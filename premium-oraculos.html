@@ -3,298 +3,307 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Templo dos Oráculos | Tarô</title>
+    <title>Portal Arcano | Oráculo do Tarot</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    
-    <script src="oraculo-database.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        :root { --gold: #d4af37; --bg-dark: #050505; --card-back: #1a1a1a; }
+        :root { --gold: #d4af37; --bg-dark: #050505; --card-back: #111; }
         
-        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; padding-bottom: 100px; overflow-x: hidden; }
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; line-height: 1.6; }
         
-        .container { max-width: 1000px; margin: 0 auto; padding: 20px; text-align: center; }
-        
-        .header-title { font-family: 'Cinzel'; color: var(--gold); font-size: 3em; margin-top: 20px; text-shadow: 0 0 20px rgba(212,175,55,0.3); }
-        .header-sub { color: #888; font-size: 1.1em; margin-bottom: 30px; }
-
-        /* INTRODUÇÃO RITUALÍSTICA (NOVO) */
-        .intro-warning-box {
-            background: rgba(20, 20, 20, 0.9);
-            border: 1px solid var(--gold);
-            padding: 30px;
-            margin: 0 auto 40px auto;
-            max-width: 800px;
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: 0 0 30px rgba(212,175,55,0.1);
+        /* LOADING */
+        #loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-        .intro-warning-box i { font-size: 2em; color: var(--gold); margin-bottom: 15px; }
-        .intro-warning-box p { font-size: 1.1em; line-height: 1.6; color: #ccc; margin: 0; }
-        .intro-warning-box strong { color: #fff; font-family: 'Cinzel'; letter-spacing: 1px; display:block; margin-bottom:10px; font-size: 1.2em; }
-        .step-list { text-align: left; margin-top: 20px; color: #aaa; font-size: 0.95em; display: inline-block; }
+        .spinner { font-size: 4em; color: var(--gold); animation: spin 2s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* MESA DE JOGO */
-        .table-mat { 
-            background: radial-gradient(circle, #222 0%, #000 90%); 
-            border: 2px solid #333; border-radius: 10px; 
-            padding: 40px 20px; min-height: 450px; 
-            display: flex; justify-content: center; align-items: center; flex-direction: column;
-            box-shadow: inset 0 0 80px #000; position: relative;
-        }
-
-        /* CARD SLOTS */
-        .spread-container { display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; display: none; }
+        /* CONTAINER */
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px 20px 100px 20px; text-align: center; }
         
-        /* A CARTA EM SI (FLIP EFFECT) */
-        .tarot-card {
-            width: 200px; height: 340px;
-            perspective: 1000px; cursor: pointer;
+        .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .btn-back { cursor: pointer; color: #666; text-transform: uppercase; font-size: 0.8em; letter-spacing: 2px; border-bottom: 1px solid transparent; transition:0.3s; width: auto; }
+        .btn-back:hover { color: var(--gold); border-color: var(--gold); }
+        .btn-print { background: var(--gold); color: #000; border: none; padding: 8px 15px; border-radius: 4px; font-family: 'Cinzel'; cursor: pointer; font-weight: bold; }
+
+        .header-title { font-family: 'Cinzel'; color: var(--gold); font-size: 2.5em; margin-top: 20px; text-shadow: 0 0 20px rgba(212,175,55,0.3); }
+        .instruction { color: #888; font-style: italic; margin-bottom: 40px; font-size: 1.1em; }
+
+        /* MESA DE CARTAS */
+        .tarot-table { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; margin-top: 40px; margin-bottom: 60px; }
+        
+        /* 3D CARD FLIP */
+        .card-container { perspective: 1000px; width: 220px; height: 350px; cursor: pointer; }
+        .card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.8s; transform-style: preserve-3d; }
+        .card-container.flipped .card-inner { transform: rotateY(180deg); }
+        
+        .card-front, .card-back { 
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 12px; 
+            border: 2px solid var(--gold); display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6); 
         }
         
-        .card-inner {
-            position: relative; width: 100%; height: 100%; text-align: center;
-            transition: transform 0.8s; transform-style: preserve-3d;
-        }
+        .card-front { background: #111; background-image: radial-gradient(circle, #222 10%, #000 90%); }
+        .card-back { background: #0a0a0a; transform: rotateY(180deg); padding: 15px; box-sizing: border-box; border-color: #fff; }
+
+        .card-position { position: absolute; top: 15px; left: 0; width: 100%; text-align: center; color: #666; font-size: 0.8em; text-transform: uppercase; letter-spacing: 3px; font-family: 'Cinzel'; }
+        .card-icon { font-size: 4em; color: var(--gold); margin: 15px 0; text-shadow: 0 0 10px var(--gold); }
+        .card-name { font-family: 'Cinzel'; font-size: 1.4em; color: #fff; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 10px; width: 80%; }
+        .card-keyword { font-size: 0.9em; color: #aaa; font-style: italic; }
+
+        /* RELATÓRIO DENSO */
+        .reading-section { text-align: left; opacity: 0; transition: opacity 1s; }
+        .reading-title { text-align: center; color: var(--gold); font-family: 'Cinzel'; font-size: 2em; margin-bottom: 40px; border-top: 1px solid #333; padding-top: 40px; }
         
-        .tarot-card.flipped .card-inner { transform: rotateY(180deg); }
-        
-        /* FRENTE E VERSO */
-        .card-front, .card-back {
-            position: absolute; width: 100%; height: 100%;
-            -webkit-backface-visibility: hidden; backface-visibility: hidden;
-            border-radius: 10px; border: 2px solid var(--gold);
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        .reading-block { 
+            background: rgba(20, 20, 20, 0.8); border: 1px solid #333; padding: 40px; 
+            border-left: 4px solid var(--gold); border-radius: 4px; margin-bottom: 30px;
+            display: none; /* Começa oculto até virar a carta */
+            animation: slideUp 0.5s ease-out;
         }
-        
-        .card-front { 
-            background: #111; color: var(--gold); transform: rotateY(180deg); 
-            background-size: cover; background-position: center;
-        }
-        
-        .card-back { 
-            background: var(--card-back); 
-            background-image: url('https://www.transparenttextures.com/patterns/black-scales.png'); 
-        }
-        .card-back i { font-size: 3em; color: #333; transition: 0.3s; }
-        .tarot-card:hover .card-back i { color: var(--gold); transform: scale(1.1); }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        /* LABEL DAS POSIÇÕES */
-        .pos-label { color: #666; font-family: 'Cinzel'; margin-bottom: 10px; display: block; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px; }
+        .block-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
+        .block-pos { color: var(--gold); font-family: 'Cinzel'; text-transform: uppercase; letter-spacing: 2px; font-size: 0.9em; }
+        .block-card-name { font-family: 'Cinzel'; font-size: 1.8em; color: #fff; margin: 0; }
+        .block-text { color: #ccc; text-align: justify; font-size: 1.1em; line-height: 1.9; }
+        .highlight { color: #fff; font-weight: bold; }
 
-        /* RESULTADOS */
-        .reading-output { text-align: left; margin-top: 50px; display: none; max-width: 800px; margin-left: auto; margin-right: auto; }
-        .reading-block { background: #0a0a0a; border-left: 4px solid var(--gold); padding: 30px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .reading-block h3 { font-family: 'Cinzel'; color: var(--gold); margin: 0 0 15px 0; border-bottom: 1px solid #333; padding-bottom: 10px; font-size: 1.4em; }
-        .reading-text { line-height: 1.8; color: #ccc; font-size: 1.1em; text-align: justify; }
-        .reading-text strong { color: #fff; }
-
-        /* BOTÃO DE AÇÃO */
-        .btn-action { 
-            background: transparent; border: 2px solid var(--gold); color: var(--gold); 
-            padding: 15px 40px; font-family: 'Cinzel'; font-size: 1.1em; cursor: pointer; 
-            transition: 0.3s; margin-top: 20px; letter-spacing: 1px;
-        }
-        .btn-action:hover { background: var(--gold); color: #000; box-shadow: 0 0 30px var(--gold); }
-
-        .btn-back { cursor: pointer; color: #888; text-transform: uppercase; font-size: 0.8em; margin-bottom: 20px; display: inline-block; }
-
-        /* PLACEHOLDER VISUAL NA CARTA */
-        .arcana-num { font-size: 1.5em; margin-bottom: 10px; display: block; font-family: 'Cinzel'; }
-        .arcana-icon { font-size: 4em; margin: 20px 0; display: block; }
-        .arcana-name { font-size: 1.2em; font-family: 'Cinzel'; text-transform: uppercase; letter-spacing: 1px; }
-        
-        /* IMPRESSÃO */
-        @media print {
-            .btn-back, .btn-action, .intro-warning-box, .header-sub, .table-mat { display: none !important; }
-            .reading-output { display: block !important; margin-top: 0; }
-            .reading-block { border: none; border-bottom: 2px solid #000; background: #fff; color: #000; box-shadow: none; }
-            .reading-text { color: #000; }
-            .header-title { color: #000; text-shadow: none; }
-            body { background: #fff; color: #000; }
-        }
-
-        @media(max-width: 700px) { .spread-container { flex-direction: column; align-items: center; } }
+        @media(max-width: 768px) { .tarot-table { gap: 20px; } .card-container { width: 100%; max-width: 250px; height: 380px; } }
+        @media print { .btn-back, .btn-print, .instruction { display: none; } body { background: #fff; color: #000; } .card-front, .card-back, .reading-block { border: 1px solid #000; color: #000; background: #fff; } .card-icon, .block-pos, .block-card-name { color: #000 !important; } }
     </style>
 </head>
 <body>
 
+<div id="loading-screen">
+    <i class="fas fa-compass spinner"></i>
+    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Embaralhando o Destino...</p>
+</div>
+
 <div class="container">
-    <div onclick="window.location.href='dashboard-premium.html'" class="btn-back">← Voltar ao Hub</div>
+    <div class="nav-bar">
+        <div onclick="window.location.href='dashboard-premium.html'" class="btn-back">← Voltar ao Hub</div>
+        <button onclick="window.print()" class="btn-print"><i class="fas fa-print"></i> Salvar Leitura</button>
+    </div>
     
-    <h1 class="header-title">O ORÁCULO</h1>
-    <p class="header-sub">Tarô de Marselha & Péladan</p>
+    <h1 class="header-title">ORÁCULO DOS ARCANOS</h1>
+    <p class="instruction">Respire fundo e concentre-se. Clique nas cartas para revelar a Jornada do Tempo.</p>
 
-    <div class="intro-warning-box" id="intro-box">
-        <i class="fas fa-eye"></i>
-        <strong>RITUAL DE PREPARAÇÃO</strong>
-        <p>
-            O Tarô não é um jogo de azar; é um espelho da sua alma. Para que a leitura seja precisa, o universo exige sua conexão total. Siga os passos antes de iniciar:
-        </p>
-        <div class="step-list">
-            1. Respire fundo três vezes e silencie sua mente.<br>
-            2. Formule uma pergunta objetiva (evite "Sim ou Não").<br>
-            3. Visualize a situação que te aflige.<br>
-            4. Somente quando sentir o "chamado", clique para cortar o baralho.
-        </div>
-    </div>
-
-    <div class="table-mat">
-        <div id="start-screen">
-            <i class="fas fa-layer-group" style="font-size: 4em; color:#333; margin-bottom:30px;"></i>
-            <p style="font-size: 1.3em; color: var(--gold); font-family: 'Cinzel'; margin-bottom: 30px;">
-                O baralho está em sua frente.
-            </p>
-            <button class="btn-action" onclick="iniciarLeitura()">CORTAR E DISTRIBUIR</button>
-        </div>
-
-        <div class="spread-container" id="game-table">
-            
-            <div>
-                <span class="pos-label">1. A Situação</span>
-                <div class="tarot-card" onclick="revelar(0)">
-                    <div class="card-inner" id="card-0">
-                        <div class="card-back"><i class="fas fa-sun"></i></div>
-                        <div class="card-front" id="front-0"></div>
-                    </div>
+    <div class="tarot-table">
+        <div class="card-container" onclick="virar(this, 0)">
+            <div class="card-inner">
+                <div class="card-front">
+                    <i class="fas fa-star-of-life" style="font-size:3em; color:#333;"></i>
+                    <div style="margin-top:20px; color:#444; font-family:'Cinzel'">PASSADO</div>
                 </div>
+                <div class="card-back" id="c0"></div>
             </div>
-
-            <div>
-                <span class="pos-label">2. O Obstáculo</span>
-                <div class="tarot-card" onclick="revelar(1)">
-                    <div class="card-inner" id="card-1">
-                        <div class="card-back"><i class="fas fa-moon"></i></div>
-                        <div class="card-front" id="front-1"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <span class="pos-label">3. O Conselho</span>
-                <div class="tarot-card" onclick="revelar(2)">
-                    <div class="card-inner" id="card-2">
-                        <div class="card-back"><i class="fas fa-star"></i></div>
-                        <div class="card-front" id="front-2"></div>
-                    </div>
-                </div>
-            </div>
-
         </div>
-    </div>
-
-    <div class="reading-output" id="reading-text">
-        <h2 style="text-align:center; font-family:'Cinzel'; color:#fff; margin-bottom:40px;">A REVELAÇÃO</h2>
-        <div id="output-content"></div>
         
-        <div style="text-align:center; margin-top:40px;">
-            <button class="btn-action" onclick="window.print()">
-                <i class="fas fa-file-pdf"></i> SALVAR LEITURA
-            </button>
-            <button class="btn-action" onclick="location.reload()" style="margin-left:10px; border-color:#555; color:#888;">
-                NOVA CONSULTA
-            </button>
+        <div class="card-container" onclick="virar(this, 1)">
+            <div class="card-inner">
+                <div class="card-front">
+                    <i class="fas fa-star-of-life" style="font-size:3em; color:#333;"></i>
+                    <div style="margin-top:20px; color:#444; font-family:'Cinzel'">PRESENTE</div>
+                </div>
+                <div class="card-back" id="c1"></div>
+            </div>
+        </div>
+        
+        <div class="card-container" onclick="virar(this, 2)">
+            <div class="card-inner">
+                <div class="card-front">
+                    <i class="fas fa-star-of-life" style="font-size:3em; color:#333;"></i>
+                    <div style="margin-top:20px; color:#444; font-family:'Cinzel'">FUTURO</div>
+                </div>
+                <div class="card-back" id="c2"></div>
+            </div>
         </div>
     </div>
 
+    <div class="reading-section" id="reading-area">
+        <h2 class="reading-title">INTERPRETAÇÃO DO MESTRE</h2>
+        
+        <div class="reading-block" id="read-0"></div>
+        <div class="reading-block" id="read-1"></div>
+        <div class="reading-block" id="read-2"></div>
+    </div>
 </div>
 
 <script>
-    // 1. VARIÁVEIS GLOBAIS
-    let cartasSorteadas = [];
-    let cartasReveladas = [false, false, false];
+    // --- 1. FAILSAFE ---
+    setTimeout(() => { document.getElementById('loading-screen').style.display = 'none'; }, 2000);
 
-    // 2. FUNÇÃO INICIAR
-    function iniciarLeitura() {
-        // Esconde a intro e o start screen
-        document.getElementById('start-screen').style.display = 'none';
-        document.getElementById('intro-box').style.display = 'none'; // Some com o texto de instrução para limpar a mesa
-        
-        document.getElementById('game-table').style.display = 'flex';
-        
-        // Sorteia 3 cartas do banco de dados
-        if (typeof tirarCartas === "function") {
-            cartasSorteadas = tirarCartas(3);
-        } else {
-            alert("Erro: Banco de dados oraculo-database.js não carregado.");
-            return;
+    // --- 2. DADOS RICOS (TEXTOS DENSOS) ---
+    const ARCANOS = [
+        {
+            n: "O Louco", i: "fas fa-feather", k: "O Salto de Fé",
+            d: "O Louco representa o potencial infinito antes da forma. É a energia do caos criativo, da inocência e da confiança absoluta no universo. Ele não planeja, ele simplesmente vai. Esta carta sugere que você está diante de um abismo, mas não para cair, e sim para voar. É o momento de zerar o carma e começar algo totalmente novo, sem medo do ridículo ou do fracasso."
+        },
+        {
+            n: "O Mago", i: "fas fa-magic", k: "Manifestação e Poder",
+            d: "O Mago é o arquétipo da ação consciente. Ele tem todos os elementos (fogo, terra, ar e água) sobre a mesa e sabe como combiná-los para criar realidade. Esta carta indica que você não precisa de mais recursos externos; você já tem tudo o que precisa. O momento exige foco, força de vontade e a compreensão de que você é um co-criador da sua realidade."
+        },
+        {
+            n: "A Papisa", i: "fas fa-book-open", k: "Intuição e Mistério",
+            d: "A Papisa (ou Sacerdotisa) é a guardiã do véu entre os mundos. Ela representa a sabedoria que não é falada, mas sentida. Enquanto o Mago age, a Papisa espera e intui. Esta carta pede que você confie nos seus sonhos, nos seus pressentimentos e no silêncio. A resposta que você busca não está fora, no barulho do mundo, mas dentro, na quietude da sua alma."
+        },
+        {
+            n: "A Imperatriz", i: "fas fa-leaf", k: "Fertilidade e Abundância",
+            d: "A Imperatriz é a Mãe Natureza em sua forma mais benevolente. Ela representa a criatividade materializada, o nascimento de projetos, filhos ou ideias. É uma carta de prazer sensorial, beleza e nutrição. Sua presença indica um período fértil onde as coisas crescem sem esforço excessivo, desde que sejam cuidadas com amor."
+        },
+        {
+            n: "O Imperador", i: "fas fa-chess-king", k: "Estrutura e Autoridade",
+            d: "O Imperador traz ordem ao caos. Ele é a estrutura, a lei e a estabilidade necessária para que a vida prospere. Esta carta fala sobre assumir o controle, estabelecer limites claros e usar a lógica acima da emoção. É o momento de ser o líder da sua própria vida, construindo fundações sólidas e impenetráveis."
+        },
+        {
+            n: "O Hierofante", i: "fas fa-church", k: "Tradição e Ensino",
+            d: "O Hierofante é a ponte entre o divino e o humano através da tradição. Ele representa sistemas de crenças, educação formal e conformidade social. Esta carta sugere que a resposta pode estar em caminhos já trilhados, em buscar um mentor ou em se conectar com uma sabedoria ancestral, em vez de tentar reinventar a roda sozinho."
+        },
+        {
+            n: "Os Amantes", i: "fas fa-heart", k: "Escolha e União",
+            d: "Os Amantes representam não apenas o amor romântico, mas a alquimia de opostos e a necessidade de fazer uma escolha moral. É o momento de alinhar seus valores com suas ações. Esta carta indica uma encruzilhada onde você deve escolher não pelo que é mais fácil, mas pelo que faz seu coração vibrar em integridade."
+        },
+        {
+            n: "O Carro", i: "fas fa-car-side", k: "Vontade e Vitória",
+            d: "O Carro é a vitória através do controle da vontade. Representa o herói que domina as bestas opostas (instintos e razão) e as faz puxar na mesma direção. Não é uma vitória fácil; exige foco laser e determinação férrea. O sucesso está garantido se você não largar as rédeas."
+        },
+        {
+            n: "A Força", i: "fas fa-hand-rock", k: "Compaixão e Coragem",
+            d: "A verdadeira Força não é bruta, é suave. Esta carta mostra uma mulher domando um leão não com chicotes, mas com carinho. Indica que você deve dominar seus 'demônios' internos (medo, raiva, desejo) através da aceitação e da paciência, não da repressão. É a coragem do coração."
+        },
+        {
+            n: "O Eremita", i: "fas fa-lightbulb", k: "Introspecção e Luz",
+            d: "O Eremita se retira do mundo não por medo, mas para encontrar sua própria luz. É um período de solidão necessária. As respostas sociais não servem mais; você precisa buscar sua verdade pessoal. Indica amadurecimento e a necessidade de guiar a si mesmo antes de guiar os outros."
+        },
+        {
+            n: "A Roda da Fortuna", i: "fas fa-sync", k: "Ciclos e Destino",
+            d: "A única constante é a mudança. A Roda lembra que o destino opera em ciclos; o que está em cima desce, o que está em baixo sobe. Não é algo que você possa controlar, apenas navegar. Se a sorte está a favor, aproveite. Se está contra, espere, pois a roda girará novamente."
+        },
+        {
+            n: "A Justiça", i: "fas fa-balance-scale", k: "Verdade e Causa/Efeito",
+            d: "A Justiça é fria e exata. Você colherá exatamente o que plantou. Esta carta pede honestidade brutal consigo mesmo e a aceitação das consequências de suas ações passadas. Se você agiu com integridade, não tem nada a temer. Se não, é hora de ajustar as contas com o universo."
+        },
+        {
+            n: "O Enforcado", i: "fas fa-user-injured", k: "Sacrifício e Nova Visão",
+            d: "O Enforcado está suspenso por vontade própria. Ele parou o movimento físico para ganhar iluminação espiritual. Esta carta indica um período de espera forçada ou voluntária. Você precisa sacrificar seu ego ou sua necessidade de controle para ver a situação por um ângulo completamente novo."
+        },
+        {
+            n: "A Morte", i: "fas fa-skull", k: "Fim e Renascimento",
+            d: "Não tema. A Morte no Tarot raramente é física; é a morte de uma identidade, de um emprego, de uma relação ou de uma crença. É a carta da transformação inevitável. Algo precisa morrer para que o novo possa nascer. Resistir a esse fim só traz sofrimento; aceitar traz liberação."
+        },
+        {
+            n: "A Temperança", i: "fas fa-glass-martini-alt", k: "Alquimia e Paciência",
+            d: "A Temperança é a arte de misturar opostos para criar uma terceira coisa, mais perfeita. É a carta da moderação, da cura e do tempo certo. Nada acontece rápido aqui. É preciso testar, ajustar e harmonizar as áreas conflitantes da sua vida até encontrar o 'caminho do meio'."
+        },
+        {
+            n: "O Diabo", i: "fas fa-link", k: "Materialismo e Ilusão",
+            d: "O Diabo representa as correntes que nós mesmos forjamos. Vícios, obsessões, materialismo excessivo ou relacionamentos tóxicos. A chave desta carta é perceber que as correntes no pescoço das figuras estão frouxas; elas podem sair quando quiserem. Você é prisioneiro apenas de suas próprias ilusões."
+        },
+        {
+            n: "A Torre", i: "fas fa-gopuram", k: "Ruptura e Revelação",
+            d: "A Torre é o raio que destrói as estruturas construídas sobre falsas premissas. É um evento súbito, chocante, mas libertador. Se você construiu sua vida sobre mentiras ou ego, a Torre virá derrubar. Embora doloroso no momento, é o universo limpando o terreno para que algo verdadeiro possa ser construído."
+        },
+        {
+            n: "A Estrela", i: "fas fa-star", k: "Esperança e Cura",
+            d: "Após a tempestade da Torre, vem a calma da Estrela. É a carta da fé renovada, da inspiração divina e da cura profunda. Você está nu diante do universo, sem defesas, e percebe que é cuidado por ele. É um momento de grande intuição e de seguir sua 'estrela guia' rumo ao futuro."
+        },
+        {
+            n: "A Lua", i: "fas fa-moon", k: "Ilusão e Subconsciente",
+            d: "A Lua é o reino das sombras, onde as coisas não são o que parecem. Medos antigos, ansiedades e ilusões vêm à tona. É um período de confusão mental, mas de grande potencial psíquico. Não tome decisões práticas agora; preste atenção aos seus sonhos e navegue com cautela pela neblina."
+        },
+        {
+            n: "O Sol", i: "fas fa-sun", k: "Alegria e Clareza",
+            d: "A melhor carta do baralho. O Sol queima todas as sombras da Lua. É sucesso, vitalidade, casamento feliz, clareza mental e alegria pura. Tudo o que você tocar sob esta influência prosperará. É o 'Sim' do universo para a sua pergunta. Aproveite este momento de luz absoluta."
+        },
+        {
+            n: "O Julgamento", i: "fas fa-bullhorn", k: "Chamado e Renascer",
+            d: "O Julgamento não é sobre condenar, mas sobre despertar. É o som da trombeta que chama os mortos para a vida nova. Indica um momento decisivo onde você deve deixar o passado morto para trás e aceitar um novo chamado superior. É uma segunda chance, uma absolvição kármica."
+        },
+        {
+            n: "O Mundo", i: "fas fa-globe", k: "Conclusão e Integração",
+            d: "O Mundo é o fim da jornada do Louco. Você completou o ciclo, aprendeu as lições e agora dança em harmonia com o universo. É a realização total, o sucesso final e a sensação de pertencimento. Um capítulo se fecha perfeitamente para que outro, em um nível superior, possa começar."
         }
-        
-        // Prepara HTML das cartas
-        cartasSorteadas.forEach((carta, index) => {
-            const frontEl = document.getElementById(`front-${index}`);
-            frontEl.innerHTML = `
-                <div style="border:1px solid var(--gold); padding:10px; height:90%; width:85%; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-                    <span class="arcana-num">${carta.numero}</span>
-                    <i class="${carta.img_placeholder} arcana-icon"></i>
-                    <span class="arcana-name">${carta.nome}</span>
-                </div>
-            `;
-        });
+    ];
+
+    let jogo = [];
+    const POSICOES = ["O PASSADO (A Raiz)", "O PRESENTE (A Ação)", "O FUTURO (O Resultado)"];
+
+    function embaralhar() {
+        let temp = [...ARCANOS];
+        jogo = [];
+        for(let i=0; i<3; i++) {
+            let idx = Math.floor(Math.random() * temp.length);
+            jogo.push(temp[idx]);
+            temp.splice(idx, 1);
+        }
     }
 
-    // 3. REVELAR CARTA (FLIP)
-    function revelar(index) {
-        if (cartasReveladas[index]) return; 
-
-        const cardEl = document.getElementById(`card-${index}`);
-        cardEl.parentElement.classList.add('flipped');
-        cartasReveladas[index] = true;
-
-        if (cartasReveladas.every(Boolean)) {
-            setTimeout(mostrarInterpretacao, 800);
-        }
-    }
-
-    // 4. MOSTRAR TEXTO FINAL
-    function mostrarInterpretacao() {
-        const area = document.getElementById('reading-text');
-        const content = document.getElementById('output-content');
+    function virar(el, idx) {
+        if(el.classList.contains('flipped')) return;
         
-        area.style.display = 'block';
+        const c = jogo[idx];
         
-        const c1 = cartasSorteadas[0];
-        const c2 = cartasSorteadas[1];
-        const c3 = cartasSorteadas[2];
-
-        content.innerHTML = `
-            <div class="reading-block">
-                <h3>1. A SITUAÇÃO: ${c1.nome}</h3>
-                <div class="reading-text">
-                    <p><strong>Arquétipo:</strong> ${c1.arquetipo}</p>
-                    <p>${c1.geral}</p>
-                    <p><em>No momento presente, esta carta indica que a energia dominante é a de ${c1.nome.toLowerCase()}. Você está vivenciando este ciclo.</em></p>
-                </div>
-            </div>
-
-            <div class="reading-block">
-                <h3>2. O OBSTÁCULO: ${c2.nome}</h3>
-                <div class="reading-text">
-                    <p><strong>Desafio:</strong> ${c2.arquetipo}</p>
-                    <p>${c2.geral}</p>
-                    <p><em>Como obstáculo, isso sugere que você deve ter cuidado com o aspecto sombra desta carta. O que está travando seu caminho é a energia mal canalizada do ${c2.nome}.</em></p>
-                </div>
-            </div>
-
-            <div class="reading-block">
-                <h3>3. O CONSELHO: ${c3.nome}</h3>
-                <div class="reading-text">
-                    <p><strong>Caminho:</strong> ${c3.conselho}</p>
-                    <p>Para resolver o impasse, o Tarô orienta: <strong>${c3.conselho}</strong></p>
-                    <p><em>Use a virtude do ${c3.nome} como sua ferramenta de solução.</em></p>
-                </div>
-            </div>
+        // 1. Atualiza a Carta Visualmente
+        const htmlCarta = `
+            <div class="card-position">${POSICOES[idx].split(' ')[1]}</div>
+            <i class="${c.i} card-icon"></i>
+            <div class="card-name">${c.n}</div>
+            <div class="card-keyword">${c.k}</div>
         `;
+        document.getElementById('c'+idx).innerHTML = htmlCarta;
+        el.classList.add('flipped');
 
-        area.scrollIntoView({ behavior: 'smooth' });
+        // 2. Revela o Texto Denso no Relatório
+        const htmlTexto = `
+            <div class="block-header">
+                <i class="${c.i} block-icon"></i>
+                <div>
+                    <div class="block-pos">${POSICOES[idx]}</div>
+                    <h3 class="block-card-name">${c.n}</h3>
+                </div>
+            </div>
+            <p class="block-text">
+                <span class="highlight">Arquétipo:</span> ${c.d}
+                <br><br>
+                <span class="highlight">Na Posição de ${POSICOES[idx].split(' ')[1]}:</span> 
+                ${getInterpretacaoPosicao(idx, c.n)}
+            </p>
+        `;
+        
+        const readBlock = document.getElementById('read-'+idx);
+        readBlock.innerHTML = htmlTexto;
+        readBlock.style.display = "block"; // Faz aparecer
+        
+        // Mostra a área de leitura se for a primeira carta
+        document.getElementById('reading-area').style.opacity = '1';
     }
+
+    function getInterpretacaoPosicao(idx, nomeCarta) {
+        if(idx === 0) return `Esta carta no passado indica a fundação da sua questão atual. A energia de "${nomeCarta}" foi o evento ou o estado mental que desencadeou tudo o que você vive hoje. Entender isso é a chave para não repetir ciclos.`;
+        if(idx === 1) return `No presente, "${nomeCarta}" é a energia ativa agora. É a ferramenta que você tem em mãos ou o desafio imediato que deve enfrentar. O universo pede que você incorpore as qualidades desta carta neste exato momento.`;
+        if(idx === 2) return `Como resultado futuro, "${nomeCarta}" mostra para onde a correnteza está te levando se você mantiver o curso atual. É a provável conclusão baseada nas suas ações presentes.`;
+    }
+
+    // Inicialização
+    embaralhar();
+
+    const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
+    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+    const auth = firebase.auth();
+    
+    auth.onAuthStateChanged(user => { 
+        if(!user) window.location.href='index.html'; 
+        else document.getElementById('loading-screen').style.display = 'none';
+    });
 </script>
 </body>
 </html>
