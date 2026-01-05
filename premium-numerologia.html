@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Arcano | Numerologia Cabalística</title>
+    <title>Portal Arcano | Dossiê Numerológico</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -22,7 +22,7 @@
         .container { max-width: 900px; margin: 0 auto; padding: 20px; }
         
         /* HEADER */
-        .header-title { font-family: 'Cinzel'; color: var(--gold); text-align: center; margin-top: 40px; font-size: 2.5em; letter-spacing: 2px; text-transform: uppercase; }
+        .header-title { font-family: 'Cinzel'; color: var(--gold); text-align: center; margin-top: 40px; font-size: 2.8em; letter-spacing: 2px; text-transform: uppercase; }
         .header-sub { text-align: center; color: #888; font-family: sans-serif; margin-bottom: 50px; text-transform: uppercase; font-size: 0.9em; letter-spacing: 1px; }
 
         /* TRIÂNGULO DA VIDA (Display Principal) */
@@ -41,12 +41,13 @@
         .t-num { font-family: 'Cinzel'; font-size: 3em; color: var(--gold); display: block; line-height: 1; margin-bottom: 10px; text-shadow: 0 0 10px var(--gold); }
         .t-label { color: #fff; font-weight: bold; text-transform: uppercase; font-size: 0.8em; letter-spacing: 2px; }
 
-        /* SEÇÃO DE TEXTOS */
+        /* RELATÓRIO */
         .report-section { display: flex; flex-direction: column; gap: 40px; }
         
         .report-chapter { 
             background: var(--card-bg); padding: 40px; border-radius: 4px; 
-            border-left: 4px solid var(--gold); border-bottom: 1px solid #222;
+            border-left: 5px solid var(--gold); border-bottom: 1px solid #222;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
         
         /* Estilos internos do HTML gerado pelo Database */
@@ -54,21 +55,40 @@
         .num-big { font-family: 'Cinzel'; font-size: 3.5em; color: var(--gold); line-height: 1; }
         .num-meta h4 { margin: 0; color: #fff; font-size: 1.5em; font-family: 'Cinzel'; }
         .num-meta small { color: var(--gold); text-transform: uppercase; letter-spacing: 1px; }
-        .num-content p { text-align: justify; line-height: 1.8; color: #ccc; margin-bottom: 15px; }
+        .num-content p { text-align: justify; line-height: 1.9; color: #ccc; margin-bottom: 15px; font-size: 1.1em; }
         .num-content strong { color: #fff; }
-
-        .btn-float { position: fixed; bottom: 30px; right: 30px; background: var(--gold); color: #000; padding: 15px 35px; border-radius: 50px; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border: none; z-index: 100; font-size: 1.1em; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         
-        /* PRINT MODE */
+        /* Caixas de Destaque */
+        .intro-box { background: #111; padding: 15px; border-left: 2px solid #555; margin-bottom: 20px; font-style: italic; color: #888; }
+
+        /* BOTÃO CORRIGIDO */
+        .btn-float { 
+            position: fixed; bottom: 30px; right: 30px; 
+            background: linear-gradient(45deg, #d4af37, #f9e29c); color: #000; 
+            padding: 18px 35px; border-radius: 50px; 
+            font-family: 'Cinzel'; font-weight: bold; cursor: pointer; 
+            border: none; z-index: 100; font-size: 1.1em; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6); transition: transform 0.2s;
+        }
+        .btn-float:hover { transform: scale(1.05); }
+        
+        /* PRINT MODE (PDF LIMPO) */
         @media print {
             body { background: #fff; color: #000; }
             .btn-float, .btn-back { display: none !important; }
-            .t-card { border: 1px solid #000; background: #fff !important; box-shadow: none; color: #000; }
+            .container { max-width: 100%; padding: 0; }
+            
+            .header-title { color: #000; text-shadow: none; margin-top: 0; font-size: 24pt; }
+            .header-sub { color: #333; }
+            
+            .t-card { border: 2px solid #000; background: #fff !important; box-shadow: none; color: #000; margin-bottom: 20px; }
             .t-num { color: #000; text-shadow: none; }
             .t-label { color: #000; }
-            .report-chapter { background: #fff; border: none; border-bottom: 1px solid #ccc; padding: 20px 0; page-break-inside: avoid; }
+            
+            .report-chapter { background: #fff; border: none; border-bottom: 2px solid #000; padding: 20px 0; border-left: none; box-shadow: none; page-break-inside: avoid; }
             .num-big, .num-meta h4, .num-meta small { color: #000 !important; }
             .num-content p { color: #000; }
+            .intro-box { background: #f0f0f0; border-left: 2px solid #000; color: #333; }
         }
 
         @media(max-width: 600px) { .triangle-grid { grid-template-columns: 1fr; } }
@@ -77,10 +97,10 @@
 <body>
 
 <div class="container">
-    <div onclick="window.location.href='dashboard-premium.html'" style="cursor:pointer; color:#888; margin-bottom:20px;">← VOLTAR</div>
+    <div onclick="window.location.href='dashboard-premium.html'" style="cursor:pointer; color:#888; margin-bottom:20px;">← VOLTAR AO HUB</div>
     
-    <h1 class="header-title">MAPA NUMEROLÓGICO</h1>
-    <div class="header-sub" id="user-info">Carregando dados...</div>
+    <h1 class="header-title">DOSSIÊ NUMEROLÓGICO</h1>
+    <div class="header-sub" id="user-info">Carregando dados do iniciado...</div>
 
     <div class="triangle-grid">
         <div class="t-card">
@@ -101,7 +121,9 @@
         </div>
 </div>
 
-<button class="btn-float" onclick="window.print()">IMPRIMIR MAPA</button>
+<button class="btn-float" onclick="window.print()">
+    <i class="fas fa-file-pdf"></i> SALVAR DOSSIÊ (PDF)
+</button>
 
 <script>
     // 1. FIREBASE INIT
@@ -113,7 +135,7 @@
     // 2. ORQUESTRADOR
     auth.onAuthStateChanged(user => {
         if (!user) {
-            // Demo Mode
+            // Demo Mode se não logado
             executarAnalise("Eduardo Teste", "1978-05-01");
             return;
         }
@@ -150,14 +172,16 @@
         ];
 
         secoes.forEach(s => {
-            // Chama a função geradora de texto do database
-            const htmlContent = gerarAnaliseNumerologica(s.tipo, s.val);
-            
-            // Cria o card
-            const div = document.createElement('div');
-            div.className = 'report-chapter';
-            div.innerHTML = htmlContent;
-            area.appendChild(div);
+            // Chama a função geradora de texto do database (A FUNÇÃO INTELIGENTE)
+            if (typeof gerarAnaliseNumerologica === "function") {
+                const htmlContent = gerarAnaliseNumerologica(s.tipo, s.val);
+                const div = document.createElement('div');
+                div.className = 'report-chapter';
+                div.innerHTML = htmlContent;
+                area.appendChild(div);
+            } else {
+                area.innerHTML = "<p>Erro: Banco de dados (numerologia-database.js) não carregado.</p>";
+            }
         });
     }
 </script>
