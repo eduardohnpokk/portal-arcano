@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Arcano | Numerologia Cabalística</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <script src="numerologia-database.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
+        
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; padding-bottom: 100px; }
+        
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        
+        /* HEADER */
+        .header-title { font-family: 'Cinzel'; color: var(--gold); text-align: center; margin-top: 40px; font-size: 2.5em; letter-spacing: 2px; text-transform: uppercase; }
+        .header-sub { text-align: center; color: #888; font-family: sans-serif; margin-bottom: 50px; text-transform: uppercase; font-size: 0.9em; letter-spacing: 1px; }
+
+        /* TRIÂNGULO DA VIDA (Display Principal) */
+        .triangle-grid { 
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; 
+            margin-bottom: 60px; text-align: center; 
+        }
+        
+        .t-card { 
+            background: radial-gradient(circle, #111 0%, #000 100%); 
+            border: 1px solid var(--gold); padding: 30px 10px; border-radius: 8px;
+            box-shadow: 0 0 30px rgba(212,175,55,0.1); transition: 0.3s;
+        }
+        .t-card:hover { transform: translateY(-5px); box-shadow: 0 0 50px rgba(212,175,55,0.3); }
+        
+        .t-num { font-family: 'Cinzel'; font-size: 3em; color: var(--gold); display: block; line-height: 1; margin-bottom: 10px; text-shadow: 0 0 10px var(--gold); }
+        .t-label { color: #fff; font-weight: bold; text-transform: uppercase; font-size: 0.8em; letter-spacing: 2px; }
+
+        /* SEÇÃO DE TEXTOS */
+        .report-section { display: flex; flex-direction: column; gap: 40px; }
+        
+        .report-chapter { 
+            background: var(--card-bg); padding: 40px; border-radius: 4px; 
+            border-left: 4px solid var(--gold); border-bottom: 1px solid #222;
+        }
+        
+        /* Estilos internos do HTML gerado pelo Database */
+        .num-header { display: flex; align-items: center; gap: 20px; margin-bottom: 25px; border-bottom: 1px solid #333; padding-bottom: 15px; }
+        .num-big { font-family: 'Cinzel'; font-size: 3.5em; color: var(--gold); line-height: 1; }
+        .num-meta h4 { margin: 0; color: #fff; font-size: 1.5em; font-family: 'Cinzel'; }
+        .num-meta small { color: var(--gold); text-transform: uppercase; letter-spacing: 1px; }
+        .num-content p { text-align: justify; line-height: 1.8; color: #ccc; margin-bottom: 15px; }
+        .num-content strong { color: #fff; }
+
+        .btn-float { position: fixed; bottom: 30px; right: 30px; background: var(--gold); color: #000; padding: 15px 35px; border-radius: 50px; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border: none; z-index: 100; font-size: 1.1em; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        
+        /* PRINT MODE */
+        @media print {
+            body { background: #fff; color: #000; }
+            .btn-float, .btn-back { display: none !important; }
+            .t-card { border: 1px solid #000; background: #fff !important; box-shadow: none; color: #000; }
+            .t-num { color: #000; text-shadow: none; }
+            .t-label { color: #000; }
+            .report-chapter { background: #fff; border: none; border-bottom: 1px solid #ccc; padding: 20px 0; page-break-inside: avoid; }
+            .num-big, .num-meta h4, .num-meta small { color: #000 !important; }
+            .num-content p { color: #000; }
+        }
+
+        @media(max-width: 600px) { .triangle-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div onclick="window.location.href='dashboard-premium.html'" style="cursor:pointer; color:#888; margin-bottom:20px;">← VOLTAR</div>
+    
+    <h1 class="header-title">MAPA NUMEROLÓGICO</h1>
+    <div class="header-sub" id="user-info">Carregando dados...</div>
+
+    <div class="triangle-grid">
+        <div class="t-card">
+            <span class="t-num" id="val-motivacao">-</span>
+            <span class="t-label">Motivação (Alma)</span>
+        </div>
+        <div class="t-card">
+            <span class="t-num" id="val-expressao">-</span>
+            <span class="t-label">Expressão (Nome)</span>
+        </div>
+        <div class="t-card">
+            <span class="t-num" id="val-destino">-</span>
+            <span class="t-label">Destino (Data)</span>
+        </div>
+    </div>
+
+    <div class="report-section" id="report-area">
+        </div>
+</div>
+
+<button class="btn-float" onclick="window.print()">IMPRIMIR MAPA</button>
+
+<script>
+    // 1. FIREBASE INIT
+    const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
+    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // 2. ORQUESTRADOR
+    auth.onAuthStateChanged(user => {
+        if (!user) {
+            // Demo Mode
+            executarAnalise("Eduardo Teste", "1978-05-01");
+            return;
+        }
+        db.collection("usuarios").doc(user.uid).get().then(doc => {
+            if (doc.exists) {
+                const d = doc.data();
+                executarAnalise(d.nomeNascimento || d.nome, d.dataNascimento);
+            }
+        });
+    });
+
+    function executarAnalise(nome, data) {
+        document.getElementById('user-info').innerText = `${nome} | ${data}`;
+
+        // 1. Cálculos (Usa o numerologia-database.js)
+        const nNome = calcularNome(nome);
+        const nDestino = calcularDestino(data);
+
+        // 2. Preencher Triângulo (Display)
+        document.getElementById('val-motivacao').innerText = nNome.motivacao;
+        document.getElementById('val-expressao').innerText = nNome.expressao;
+        document.getElementById('val-destino').innerText = nDestino;
+
+        // 3. Gerar Relatório Longo
+        const area = document.getElementById('report-area');
+        area.innerHTML = "";
+
+        // Ordem de Apresentação
+        const secoes = [
+            { tipo: 'motivacao', val: nNome.motivacao },
+            { tipo: 'impressao', val: nNome.impressao },
+            { tipo: 'expressao', val: nNome.expressao },
+            { tipo: 'destino', val: nDestino }
+        ];
+
+        secoes.forEach(s => {
+            // Chama a função geradora de texto do database
+            const htmlContent = gerarAnaliseNumerologica(s.tipo, s.val);
+            
+            // Cria o card
+            const div = document.createElement('div');
+            div.className = 'report-chapter';
+            div.innerHTML = htmlContent;
+            area.appendChild(div);
+        });
+    }
+</script>
+</body>
+</html>
