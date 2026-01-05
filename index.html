@@ -14,171 +14,128 @@
     
     <style>
         :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
-        
         body { margin: 0; font-family: 'Cormorant Garamond', serif; background: url('https://www.transparenttextures.com/patterns/stardust.png'), var(--bg-dark); color: #e0e0e0; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        
-        .login-container {
-            background: rgba(10, 10, 10, 0.95); border: 1px solid var(--gold);
-            padding: 40px; border-radius: 8px; width: 100%; max-width: 450px;
-            text-align: center; box-shadow: 0 0 50px rgba(212,175,55,0.15);
-            position: relative;
-        }
-
-        .portal-logo { font-family: 'Cinzel'; font-size: 2.5em; color: var(--gold); margin-bottom: 10px; text-shadow: 0 0 20px rgba(212,175,55,0.5); }
-        .portal-sub { color: #888; margin-bottom: 30px; letter-spacing: 2px; text-transform: uppercase; font-size: 0.8em; }
-
+        .login-container { background: rgba(10, 10, 10, 0.95); border: 1px solid var(--gold); padding: 40px; border-radius: 8px; width: 100%; max-width: 450px; text-align: center; position: relative; }
+        .portal-logo { font-family: 'Cinzel'; font-size: 2.5em; color: var(--gold); margin-bottom: 10px; }
         .input-group { margin-bottom: 15px; text-align: left; }
-        .input-group label { display: block; color: var(--gold); font-family: 'Cinzel'; margin-bottom: 5px; font-size: 0.9em; }
-        .form-control { 
-            width: 93%; padding: 12px; background: #000; border: 1px solid #333; color: #fff; 
-            font-family: sans-serif; font-size: 1em; border-radius: 4px; transition: 0.3s;
-        }
-        .form-control:focus { border-color: var(--gold); outline: none; }
-
-        .btn-main { 
-            background: linear-gradient(45deg, #d4af37, #b8860b); color: #000; border: none; 
-            padding: 15px; width: 100%; font-family: 'Cinzel'; font-weight: bold; font-size: 1.1em; 
-            cursor: pointer; border-radius: 4px; margin-top: 10px; transition: 0.3s;
-        }
-        .btn-main:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--gold); }
-
+        .form-control { width: 93%; padding: 12px; background: #000; border: 1px solid #333; color: #fff; border-radius: 4px; }
+        .btn-main { background: linear-gradient(45deg, #d4af37, #b8860b); color: #000; border: none; padding: 15px; width: 100%; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border-radius: 4px; margin-top: 10px; }
         .toggle-link { margin-top: 20px; font-size: 0.9em; color: #666; cursor: pointer; text-decoration: underline; }
-        .toggle-link:hover { color: var(--gold); }
-
-        .error-msg { color: #ff4444; font-size: 0.9em; margin-top: 15px; display: none; }
-
-        /* LOADING */
-        #loading-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); display: flex; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 10; display: none;
-        }
-        .spinner { font-size: 3em; color: var(--gold); animation: spin 2s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* TELA DE BLOQUEIO (FREE) */
+        #loading-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; display: none; }
         #paywall-view { display: none; }
-        .lock-icon { font-size: 4em; color: var(--gold); margin-bottom: 20px; }
+        #debug-console { position: fixed; bottom: 0; left: 0; width: 100%; background: #220; color: #ff0; font-family: monospace; font-size: 12px; padding: 10px; display: none; text-align: left; border-top: 1px solid #ff0; z-index: 9999; }
     </style>
 </head>
 <body>
 
+<div id="debug-console"></div>
+
 <div class="login-container">
-    
     <div id="loading-overlay">
-        <i class="fas fa-compass spinner"></i>
-        <p style="margin-top:20px; color:#fff; font-family:'Cinzel';" id="loading-text">Verificando Credenciais...</p>
+        <i class="fas fa-compass fa-spin" style="font-size:3em; color:var(--gold);"></i>
+        <p style="margin-top:20px; color:#fff;" id="loading-text">Conectando...</p>
     </div>
 
     <div class="portal-logo">PORTAL ARCANO</div>
-    <p class="portal-sub">Acesso aos Mistérios</p>
 
     <div id="login-form">
-        <div class="input-group">
-            <label>E-mail</label>
-            <input type="email" id="login-email" class="form-control">
-        </div>
-        <div class="input-group">
-            <label>Senha</label>
-            <input type="password" id="login-pass" class="form-control">
-        </div>
+        <div class="input-group"><label>E-mail</label><input type="email" id="login-email" class="form-control"></div>
+        <div class="input-group"><label>Senha</label><input type="password" id="login-pass" class="form-control"></div>
         <button class="btn-main" onclick="fazerLogin()">ENTRAR</button>
-        <div class="toggle-link" onclick="alternarForm('cadastro')">Não tem conta? Cadastre-se</div>
-        <p class="error-msg" id="login-error"></p>
+        <div class="toggle-link" onclick="alternarForm('cadastro')">Criar conta</div>
+        <p style="color:red; display:none;" id="login-error"></p>
     </div>
 
     <div id="register-form" style="display:none;">
-        <div class="input-group">
-            <label>Seu Nome</label>
-            <input type="text" id="reg-nome" class="form-control">
-        </div>
-        <div class="input-group">
-            <label>E-mail</label>
-            <input type="email" id="reg-email" class="form-control">
-        </div>
-        <div class="input-group">
-            <label>Senha</label>
-            <input type="password" id="reg-pass" class="form-control">
-        </div>
+        <div class="input-group"><label>Nome</label><input type="text" id="reg-nome" class="form-control"></div>
+        <div class="input-group"><label>E-mail</label><input type="email" id="reg-email" class="form-control"></div>
+        <div class="input-group"><label>Senha</label><input type="password" id="reg-pass" class="form-control"></div>
         <button class="btn-main" onclick="criarConta()">CRIAR CONTA</button>
-        <div class="toggle-link" onclick="alternarForm('login')">Já tem conta? Fazer Login</div>
-        <p class="error-msg" id="reg-error"></p>
+        <div class="toggle-link" onclick="alternarForm('login')">Voltar ao Login</div>
     </div>
 
     <div id="paywall-view">
-        <i class="fas fa-lock lock-icon"></i>
-        <h3 style="font-family:'Cinzel'; color:#fff; margin:0 0 15px 0;">ACESSO RESTRITO</h3>
-        <p style="color:#ccc; line-height:1.6; font-size:0.95em; margin-bottom:20px;">
-            Sua conta atual é <strong>Gratuita</strong>. Para acessar o Mapa Astral, Zodíaco, Oráculos e Rituais, você precisa ser um Iniciado Premium.
-        </p>
-        <button class="btn-main" onclick="alert('Aqui iria para o Checkout (Stripe/Hotmart)')">
-            TORNAR-SE PREMIUM (R$ 29,90)
-        </button>
-        <div class="toggle-link" onclick="logout()">Sair / Trocar Conta</div>
+        <h3 style="color:#fff; font-family:'Cinzel';">ACESSO RESTRITO</h3>
+        <div id="status-debug" style="color:yellow; font-size:0.8em; margin:10px 0; border:1px dashed yellow; padding:5px;"></div>
+        <p style="color:#ccc;">Sua conta consta como Gratuita.</p>
+        <button class="btn-main" onclick="location.reload()">ATUALIZAR STATUS</button>
+        <div class="toggle-link" onclick="logout()">Sair</div>
     </div>
-
 </div>
 
 <script>
-    // 1. FIREBASE INIT
     const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
     try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // 2. MONITORAMENTO DE LOGIN (O GUARDA)
+    function logDebug(msg) {
+        console.log(msg);
+        const el = document.getElementById('debug-console');
+        el.style.display = 'block';
+        el.innerHTML += `> ${msg}<br>`;
+    }
+
     auth.onAuthStateChanged(user => {
         if (user) {
-            // Usuário detectado -> Verificar Status no DB
-            mostrarLoading("Verificando Plano Astral...");
+            document.getElementById('loading-overlay').style.display = 'flex';
+            document.getElementById('loading-text').innerText = "Verificando Banco de Dados...";
             
-            db.collection("usuarios").doc(user.uid).get().then(doc => {
+            logDebug(`Usuário logado: ${user.email}`);
+            logDebug(`UID: ${user.uid}`);
+
+            // FORÇA BUSCA NO SERVIDOR PARA EVITAR CACHE
+            db.collection("usuarios").doc(user.uid).get({ source: 'server' }) // <--- O SEGREDO ESTÁ AQUI
+            .then(doc => {
                 if (doc.exists) {
                     const dados = doc.data();
+                    logDebug(`Dados recebidos: Status=${dados.status}, Plano=${dados.plano}`);
                     
-                    // LÓGICA DE REDIRECIONAMENTO
-                    if (dados.status === "premium" || dados.plano === "premium") {
-                        // É PREMIUM -> Vai pro Hub
+                    // Verificação Flexível (minúscula e sem espaços)
+                    const status = (dados.status || "").toLowerCase().trim();
+                    const plano = (dados.plano || "").toLowerCase().trim();
+
+                    if (status === "premium" || plano === "premium") {
+                        logDebug("PREMIUM CONFIRMADO. Redirecionando...");
                         window.location.href = "dashboard-premium.html";
                     } else {
-                        // É FREE -> Mostra Paywall aqui mesmo
-                        esconderLoading();
-                        document.getElementById('login-form').style.display = 'none';
-                        document.getElementById('register-form').style.display = 'none';
-                        document.getElementById('paywall-view').style.display = 'block';
+                        logDebug("ACESSO NEGADO. Mostrando Paywall.");
+                        mostrarPaywall(status, plano);
                     }
                 } else {
-                    // Erro de cadastro incompleto -> Manda pro Paywall/Free
-                    esconderLoading();
-                    document.getElementById('login-form').style.display = 'none';
-                    document.getElementById('paywall-view').style.display = 'block';
+                    logDebug("Documento do usuário não encontrado no DB.");
+                    mostrarPaywall("N/A", "N/A");
                 }
             }).catch(erro => {
-                console.error(erro);
-                esconderLoading();
+                logDebug("Erro de conexão: " + erro.message);
+                // Se der erro de rede, tenta cache
+                db.collection("usuarios").doc(user.uid).get().then(doc => {
+                    if(doc.exists && doc.data().status === 'premium') window.location.href = "dashboard-premium.html";
+                    else mostrarPaywall("Erro", "Erro");
+                });
             });
-
         } else {
-            // Ninguém logado -> Mostra Login
-            esconderLoading();
+            document.getElementById('loading-overlay').style.display = 'none';
             document.getElementById('login-form').style.display = 'block';
-            document.getElementById('register-form').style.display = 'none';
-            document.getElementById('paywall-view').style.display = 'none';
         }
     });
 
-    // 3. FUNÇÕES DE AÇÃO
+    function mostrarPaywall(status, plano) {
+        document.getElementById('loading-overlay').style.display = 'none';
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('paywall-view').style.display = 'block';
+        document.getElementById('status-debug').innerHTML = `LIDO DO BANCO:<br>Status: "${status}"<br>Plano: "${plano}"`;
+    }
+
     function fazerLogin() {
         const email = document.getElementById('login-email').value;
         const pass = document.getElementById('login-pass').value;
-        const errBox = document.getElementById('login-error');
-
-        if(!email || !pass) return mostrarErro(errBox, "Preencha todos os campos.");
-
-        mostrarLoading("Entrando...");
-        auth.signInWithEmailAndPassword(email, pass).catch(error => {
-            esconderLoading();
-            mostrarErro(errBox, "Erro: " + error.message);
+        if(!email || !pass) return alert("Preencha tudo");
+        
+        document.getElementById('loading-overlay').style.display = 'flex';
+        auth.signInWithEmailAndPassword(email, pass).catch(e => {
+            document.getElementById('loading-overlay').style.display = 'none';
+            alert(e.message);
         });
     }
 
@@ -186,53 +143,27 @@
         const nome = document.getElementById('reg-nome').value;
         const email = document.getElementById('reg-email').value;
         const pass = document.getElementById('reg-pass').value;
-        const errBox = document.getElementById('reg-error');
+        if(!email || !pass) return alert("Preencha tudo");
 
-        if(!nome || !email || !pass) return mostrarErro(errBox, "Preencha tudo.");
-
-        mostrarLoading("Criando sua alma digital...");
-        
+        document.getElementById('loading-overlay').style.display = 'flex';
         auth.createUserWithEmailAndPassword(email, pass).then(cred => {
-            // Cria o documento no DB como GRATUITO por padrão
             return db.collection("usuarios").doc(cred.user.uid).set({
                 nome: nome,
                 email: email,
-                plano: "gratuito", // Começa como free
+                plano: "gratuito",
                 status: "free",
                 data_cadastro: new Date().toISOString()
             });
-        }).then(() => {
-            // O onAuthStateChanged vai pegar o login automático e jogar pro Paywall
-        }).catch(error => {
-            esconderLoading();
-            mostrarErro(errBox, error.message);
+        }).catch(e => {
+            document.getElementById('loading-overlay').style.display = 'none';
+            alert(e.message);
         });
     }
 
-    function logout() {
-        auth.signOut().then(() => location.reload());
-    }
-
-    // 4. UTILITÁRIOS VISUAIS
+    function logout() { auth.signOut().then(() => location.reload()); }
     function alternarForm(tipo) {
         document.getElementById('login-form').style.display = (tipo === 'login') ? 'block' : 'none';
         document.getElementById('register-form').style.display = (tipo === 'cadastro') ? 'block' : 'none';
-        document.getElementById('login-error').style.display = 'none';
-        document.getElementById('reg-error').style.display = 'none';
-    }
-
-    function mostrarLoading(texto) {
-        document.getElementById('loading-text').innerText = texto;
-        document.getElementById('loading-overlay').style.display = 'flex';
-    }
-
-    function esconderLoading() {
-        document.getElementById('loading-overlay').style.display = 'none';
-    }
-
-    function mostrarErro(elemento, msg) {
-        elemento.innerText = msg;
-        elemento.style.display = 'block';
     }
 </script>
 </body>
