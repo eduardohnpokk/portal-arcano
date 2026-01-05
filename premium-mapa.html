@@ -4,95 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dossiê Astral Completo</title>
-    
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    
     <script src="astro-database.js"></script> 
-
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
         :root { --gold: #d4af37; --bg-dark: #050505; }
-        
         body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; padding-bottom: 100px; }
-        
         .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .header-title { font-family: 'Cinzel'; color: var(--gold); text-align: center; margin-top: 30px; font-size: 3em; }
+        .header-sub { text-align: center; color: #888; margin-bottom: 50px; font-family: sans-serif; text-transform: uppercase; font-size: 0.9em; }
         
-        .header-title { font-family: 'Cinzel'; color: var(--gold); text-align: center; margin-top: 30px; font-size: 3em; letter-spacing: 3px; text-transform: uppercase; }
-        .header-sub { text-align: center; color: #888; margin-bottom: 50px; font-family: sans-serif; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9em; }
-
-        /* GRID */
+        /* Grid */
         .mapa-grid { display: grid; grid-template-columns: 1fr; gap: 50px; margin-bottom: 80px; align-items: start; }
         @media(min-width: 900px) { .mapa-grid { grid-template-columns: 1fr 400px; } }
-
+        
         .chart-box { 
             background: radial-gradient(circle at center, #111 0%, #000 100%); 
             border: 2px solid var(--gold); border-radius: 50%; 
             width: 100%; aspect-ratio: 1/1; position: relative; 
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 60px rgba(212,175,55,0.15);
         }
-
+        
         .data-panel { border: 1px solid #333; padding: 30px; border-radius: 8px; background: #0a0a0a; }
-        .data-panel h3 { margin-top: 0; font-family: 'Cinzel'; color: var(--gold); border-bottom: 1px solid var(--gold); padding-bottom: 15px; }
-        .planet-row { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #222; }
-        .planet-label { color: #fff; font-family: 'Cinzel'; font-weight: bold; display: flex; gap: 10px; align-items: center; }
+        .planet-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #222; }
+        .planet-label { color: #fff; font-family: 'Cinzel'; font-weight: bold; }
         .planet-sign { color: var(--gold); font-weight: bold; text-transform: uppercase; }
 
-        /* LEITURA */
+        /* Leitura */
         .reading-section { display: flex; flex-direction: column; gap: 40px; }
         .chapter { 
-            background: #0f0f0f; padding: 40px; border-radius: 4px;
-            position: relative; overflow: hidden; border-left: 5px solid var(--gold);
+            background: #0f0f0f; padding: 40px; border-radius: 4px; border-left: 5px solid var(--gold);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        
-        .chapter h3 { 
-            font-family: 'Cinzel'; color: var(--gold); margin: 0 0 20px 0; font-size: 1.6em; 
-            border-bottom: 1px solid #333; padding-bottom: 15px; 
-        }
-        
+        .chapter h3 { font-family: 'Cinzel'; color: var(--gold); margin: 0 0 20px 0; font-size: 1.6em; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .chapter p { margin-bottom: 15px; line-height: 1.8; text-align: justify; color: #ccc; }
         .chapter strong { color: #fff; }
 
-        /* IMPRESSÃO */
-        .btn-float {
-            position: fixed; bottom: 30px; right: 30px; 
-            background: var(--gold); color: #000; 
-            padding: 20px 40px; border-radius: 50px; 
-            font-family: 'Cinzel'; font-weight: bold; cursor: pointer;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6); z-index: 100; border: none; font-size: 1.2em;
-        }
-
+        .btn-float { position: fixed; bottom: 30px; right: 30px; background: var(--gold); color: #000; padding: 15px 35px; border-radius: 50px; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border: none; z-index: 100; font-size: 1.1em; }
+        
+        /* Print */
         @media print {
             body { background: #fff; color: #000; }
             .btn-float, .btn-back { display: none !important; }
             .chart-box { border: 2px solid #000; background: #fff !important; filter: invert(1); width: 300px; height: 300px; margin: 0 auto; }
-            .chapter { background: #fff; border: 1px solid #ccc; border-left: none; box-shadow: none; page-break-inside: avoid; margin-bottom: 30px; color: #000; }
-            .chapter h3 { color: #000; border-bottom: 2px solid #000; }
+            .chapter { background: #fff; border: 1px solid #ccc; border-left: none; box-shadow: none; page-break-inside: avoid; color: #000; }
+            .chapter h3, .planet-sign, .header-title { color: #000; text-shadow: none; }
             .chapter p { color: #000; }
             .data-panel { border: 1px solid #000; background: #fff; }
             .planet-row { border-bottom: 1px solid #ccc; }
-            .planet-label, .planet-sign { color: #000; }
-            .header-title { color: #000; text-shadow: none; }
+            .planet-label { color: #000; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="btn-back" onclick="window.location.href='dashboard-premium.html'">← VOLTAR</div>
-    
+    <div onclick="window.location.href='dashboard-premium.html'" style="cursor:pointer; color:#888; margin-bottom:20px;">← VOLTAR</div>
     <h1 class="header-title">DOSSIÊ ASTRAL</h1>
-    <div class="header-sub" id="header-info">Carregando seus dados...</div>
+    <div class="header-sub" id="header-info">Carregando...</div>
 
     <div class="mapa-grid">
         <div class="chart-box" id="chart-render"></div>
         <div class="data-panel">
-            <h3>Posições Planetárias</h3>
+            <h3 style="color:var(--gold); font-family:'Cinzel'; margin-top:0; border-bottom:1px solid var(--gold); padding-bottom:10px;">Posições</h3>
             <div id="planetary-list">Calculando...</div>
         </div>
     </div>
@@ -100,18 +78,16 @@
     <div class="reading-section" id="reading-area"></div>
 </div>
 
-<button class="btn-float" onclick="window.print()"><i class="fas fa-print"></i> IMPRIMIR PDF</button>
+<button class="btn-float" onclick="window.print()">IMPRIMIR PDF</button>
 
 <script>
-    // 1. CONFIGURAÇÃO
+    // 1. FIREBASE
     const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
     try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const auth = firebase.auth();
     const db = firebase.firestore();
 
     const SIGNOS = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
-    
-    // Lista de Planetas para Gerar (Ordem de Exibição)
     const PLANETAS = [
         { id: "sol", nome: "Sol", icon: "fa-sun" },
         { id: "asc", nome: "Ascendente", icon: "fa-arrow-up" },
@@ -123,35 +99,31 @@
         { id: "sat", nome: "Saturno", icon: "fa-ring" }
     ];
 
-    // 2. MOTOR MATEMÁTICO (KEPLER PURO)
+    // 2. CÁLCULO (Kepler)
     function norm(x) { x = x % 360; if (x < 0) x += 360; return x; }
     const sind = (d) => Math.sin(d * Math.PI / 180);
     const cosd = (d) => Math.cos(d * Math.PI / 180);
     const tand = (d) => Math.tan(d * Math.PI / 180);
     const atand2 = (y, x) => Math.atan2(y, x) * 180 / Math.PI;
 
-    function calcularPosicoes(dataObj, lat, lon) {
-        const d = (dataObj.getTime() / 86400000) - 10957.5;
-        
-        // SOL
+    function calcular(dataObj, lat, lon) {
+        const d = (dataObj.getTime()/86400000) - 10957.5;
+        // Sol
         const L_sol = norm(280.466 + 0.985647 * d);
         const M_sol = norm(357.529 + 0.985600 * d);
         const sol = norm(L_sol + 1.915 * sind(M_sol));
-        
-        // LUA
+        // Lua
         const L_lua = norm(218.316 + 13.176396 * d);
         const M_lua = norm(134.963 + 13.064993 * d);
         const lua = norm(L_lua + 6.289 * sind(M_lua));
-        
-        // PLANETAS
-        const merc = norm(sol + 22 * sind(d * 4.09)); 
-        const venus = norm(sol + 44 * sind(d * 1.6)); 
-        const marte = norm(18.6 + 0.524 * d); 
+        // Planetas
+        const merc = norm(sol + 22 * sind(d * 4.09));
+        const venus = norm(sol + 44 * sind(d * 1.6));
+        const marte = norm(18.6 + 0.524 * d);
         const jup = norm(19.9 + 0.083 * d);
         const sat = norm(316.9 + 0.033 * d);
-
-        // ASCENDENTE (GMST + LON)
-        const jd = (dataObj.getTime() / 86400000) + 2440587.5;
+        // Ascendente
+        const jd = (dataObj.getTime()/86400000) + 2440587.5;
         const t = (jd - 2451545.0) / 36525.0;
         let gmst = norm(280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * t * t);
         const lst = norm(gmst + lon);
@@ -159,35 +131,31 @@
         const sinAsc = -(sind(lst) * cosd(eps) + tand(lat) * sind(eps));
         const cosAsc = cosd(lst);
         const asc = norm(atand2(cosAsc, sinAsc));
-
+        
         return { sol, lua, merc, venus, marte, jup, sat, asc };
     }
 
-    // 3. EXECUÇÃO E RENDERIZAÇÃO
+    // 3. EXECUÇÃO
     auth.onAuthStateChanged(user => {
-        if(!user) return window.location.href = 'index.html';
-        
+        if(!user) return window.location.href='index.html';
         db.collection("usuarios").doc(user.uid).get().then(doc => {
-            if(doc.exists) {
-                const d = doc.data();
-                processar(d.nomeNascimento, d.dataNascimento, d.horaNascimento);
-            }
+            if(doc.exists) processar(doc.data());
         });
     });
 
-    function processar(nome, dataStr, horaStr) {
-        document.getElementById('header-info').innerText = `${nome} | ${dataStr} às ${horaStr}`;
+    function processar(d) {
+        document.getElementById('header-info').innerText = `${d.nomeNascimento || ''} | ${d.dataNascimento} | ${d.horaNascimento}`;
         
-        const [ano, mes, dia] = dataStr.split('-').map(Number);
-        const [hora, min] = horaStr.split(':').map(Number);
-        // UTC-3 Hardcoded para Brasil
-        const dataObj = new Date(Date.UTC(ano, mes-1, dia, hora+3, min));
+        // UTC-3 Force
+        const [a, m, dia] = d.dataNascimento.split('-').map(Number);
+        const [hr, min] = d.horaNascimento.split(':').map(Number);
+        const dt = new Date(Date.UTC(a, m-1, dia, hr+3, min));
         
-        const pos = calcularPosicoes(dataObj, -23.55, -46.63);
+        const pos = calcular(dt, -23.55, -46.63);
         renderizar(pos);
     }
 
-    function getSigno(grau) { return SIGNOS[Math.floor(grau / 30)]; }
+    function getSigno(g) { return SIGNOS[Math.floor(g / 30)]; }
 
     function renderizar(pos) {
         const lista = document.getElementById('planetary-list');
@@ -197,63 +165,48 @@
 
         PLANETAS.forEach(p => {
             const val = pos[p.id];
-            const signo = getSigno(val);
-            
-            // 1. Tabela Técnica
+            const signoRaw = getSigno(val);
+            const signoNome = signoRaw.charAt(0).toUpperCase() + signoRaw.slice(1).toLowerCase(); // Normaliza (Touro)
+
+            // Tabela
             lista.innerHTML += `
                 <div class="planet-row">
                     <span class="planet-label"><i class="fas ${p.icon}"></i> ${p.nome}</span>
-                    <span class="planet-sign">${signo}</span>
+                    <span class="planet-sign">${signoNome}</span>
                 </div>`;
 
-            // 2. Texto Gerado (Chama a função do astro-database.js)
-            // AQUI É O PULO DO GATO: Se a função existir, usa ela.
-            let conteudoHTML = "";
+            // Texto (Gerador)
+            let txt = "Carregando...";
             if (typeof gerarInterpretacao === "function") {
-                conteudoHTML = gerarInterpretacao(p.id, signo);
-            } else {
-                conteudoHTML = `<p>Erro: Banco de dados não carregado. Verifique astro-database.js</p>`;
+                txt = gerarInterpretacao(p.id, signoNome); // CHAMA O GERADOR
             }
 
-            area.innerHTML += `<div class="chapter">${conteudoHTML}</div>`;
+            area.innerHTML += `<div class="chapter">${txt}</div>`;
         });
 
         desenharSVG(pos);
     }
 
     function desenharSVG(pos) {
-        const cx = 175, cy = 175, r = 140;
-        const rot = 180 - pos.asc;
+        const cx=175, cy=175, r=140, rot=180-pos.asc;
         let svg = `<svg viewBox="0 0 350 350"><g transform="rotate(${rot}, ${cx}, ${cy})">`;
         
-        // Casas
-        SIGNOS.forEach((s, i) => {
-            const ang = i*30; const rad = ang*Math.PI/180;
-            const x2 = cx + r*Math.cos(rad); const y2 = cy + r*Math.sin(rad);
-            svg += `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#333" />`;
-            const tx = cx + (r-20)*Math.cos(rad+0.26);
-            const ty = cy + (r-20)*Math.sin(rad+0.26);
+        SIGNOS.forEach((s,i) => {
+            const ang=i*30, rad=ang*Math.PI/180;
+            const x2=cx+r*Math.cos(rad), y2=cy+r*Math.sin(rad);
+            svg += `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#333"/>`;
+            const tx=cx+(r-20)*Math.cos(rad+0.26), ty=cy+(r-20)*Math.sin(rad+0.26);
             svg += `<text x="${tx}" y="${ty}" fill="#666" font-size="10" transform="rotate(${ang+90}, ${tx}, ${ty})" text-anchor="middle">${s.substring(0,3)}</text>`;
         });
 
-        // Planetas
         PLANETAS.forEach(p => {
-            const rad = pos[p.id] * Math.PI/180;
-            let dist = 0.7;
-            if(p.id === 'merc' || p.id === 'venus') dist = 0.55;
-            if(p.id === 'marte' || p.id === 'jup') dist = 0.85;
-            
-            const px = cx + (r*dist)*Math.cos(rad);
-            const py = cy + (r*dist)*Math.sin(rad);
-            
-            let color = "#fff";
-            if(p.id === 'sol') color = "#ffd700";
-            if(p.id === 'asc') color = "#d4af37";
-
-            svg += `<circle cx="${px}" cy="${py}" r="8" fill="#000" stroke="${color}" />`;
-            // Símbolo Simples
-            const sym = p.nome.substring(0,1);
-            svg += `<text x="${px}" y="${py+3}" fill="${color}" font-size="10" text-anchor="middle" font-weight="bold">${sym}</text>`;
+            const rad=pos[p.id]*Math.PI/180;
+            let dist=0.7;
+            if(p.id=='merc'||p.id=='venus') dist=0.55;
+            if(p.id=='marte'||p.id=='jup') dist=0.85;
+            const px=cx+(r*dist)*Math.cos(rad), py=cy+(r*dist)*Math.sin(rad);
+            const clr = (p.id=='sol'||p.id=='asc') ? '#ffd700' : '#fff';
+            svg += `<circle cx="${px}" cy="${py}" r="8" fill="#000" stroke="${clr}" /><text x="${px}" y="${py+3}" fill="${clr}" font-size="10" text-anchor="middle" font-weight="bold">${p.nome.substring(0,1)}</text>`;
         });
 
         svg += `</g><path d="M ${cx-r} ${cy} L ${cx-r-15} ${cy-5} L ${cx-r-15} ${cy+5} Z" fill="#d4af37"/></svg>`;
