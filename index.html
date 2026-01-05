@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Arcano | Login</title>
+    <title>Portal Arcano | Acesso</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -17,7 +17,6 @@
         
         body { margin: 0; font-family: 'Cormorant Garamond', serif; background: url('https://www.transparenttextures.com/patterns/stardust.png'), var(--bg-dark); color: #e0e0e0; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         
-        /* CONTAINER CENTRAL */
         .login-container {
             background: rgba(10, 10, 10, 0.95); border: 1px solid var(--gold);
             padding: 40px; border-radius: 8px; width: 100%; max-width: 450px;
@@ -26,84 +25,96 @@
         }
 
         .portal-logo { font-family: 'Cinzel'; font-size: 2.5em; color: var(--gold); margin-bottom: 10px; text-shadow: 0 0 20px rgba(212,175,55,0.5); }
-        .portal-sub { color: #888; margin-bottom: 40px; letter-spacing: 2px; text-transform: uppercase; font-size: 0.8em; }
+        .portal-sub { color: #888; margin-bottom: 30px; letter-spacing: 2px; text-transform: uppercase; font-size: 0.8em; }
 
-        /* FORMULÁRIO */
-        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group { margin-bottom: 15px; text-align: left; }
         .input-group label { display: block; color: var(--gold); font-family: 'Cinzel'; margin-bottom: 5px; font-size: 0.9em; }
         .form-control { 
             width: 93%; padding: 12px; background: #000; border: 1px solid #333; color: #fff; 
             font-family: sans-serif; font-size: 1em; border-radius: 4px; transition: 0.3s;
         }
-        .form-control:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 10px rgba(212,175,55,0.2); }
+        .form-control:focus { border-color: var(--gold); outline: none; }
 
-        .btn-login { 
+        .btn-main { 
             background: linear-gradient(45deg, #d4af37, #b8860b); color: #000; border: none; 
             padding: 15px; width: 100%; font-family: 'Cinzel'; font-weight: bold; font-size: 1.1em; 
             cursor: pointer; border-radius: 4px; margin-top: 10px; transition: 0.3s;
         }
-        .btn-login:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--gold); }
+        .btn-main:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--gold); }
+
+        .toggle-link { margin-top: 20px; font-size: 0.9em; color: #666; cursor: pointer; text-decoration: underline; }
+        .toggle-link:hover { color: var(--gold); }
 
         .error-msg { color: #ff4444; font-size: 0.9em; margin-top: 15px; display: none; }
 
         /* LOADING */
         #loading-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); display: flex; flex-direction: column;
+            background: rgba(0,0,0,0.95); display: flex; flex-direction: column;
             align-items: center; justify-content: center; z-index: 10; display: none;
         }
         .spinner { font-size: 3em; color: var(--gold); animation: spin 2s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* ÁREA GRATUITA (PAYWALL) */
-        #free-user-view { display: none; text-align: center; }
-        .paywall-box { border: 1px dashed var(--gold); padding: 20px; margin-top: 20px; border-radius: 8px; background: rgba(212,175,55,0.05); }
-        .lock-icon { font-size: 3em; color: var(--gold); margin-bottom: 15px; }
-        
+        /* TELA DE BLOQUEIO (FREE) */
+        #paywall-view { display: none; }
+        .lock-icon { font-size: 4em; color: var(--gold); margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-<div class="login-container" id="login-screen">
+<div class="login-container">
     
     <div id="loading-overlay">
         <i class="fas fa-compass spinner"></i>
-        <p style="margin-top:20px; color:#fff; font-family:'Cinzel';">Verificando Alinhamento Astral...</p>
+        <p style="margin-top:20px; color:#fff; font-family:'Cinzel';" id="loading-text">Verificando Credenciais...</p>
     </div>
 
     <div class="portal-logo">PORTAL ARCANO</div>
     <p class="portal-sub">Acesso aos Mistérios</p>
 
-    <div id="auth-form">
+    <div id="login-form">
         <div class="input-group">
             <label>E-mail</label>
-            <input type="email" id="email" class="form-control" placeholder="seu@email.com">
+            <input type="email" id="login-email" class="form-control">
         </div>
         <div class="input-group">
             <label>Senha</label>
-            <input type="password" id="password" class="form-control" placeholder="••••••••">
+            <input type="password" id="login-pass" class="form-control">
         </div>
-        
-        <button class="btn-login" onclick="fazerLogin()">ENTRAR NO TEMPLO</button>
-        <p class="error-msg" id="error-txt">Credenciais inválidas.</p>
-        
-        <div style="margin-top:20px; font-size:0.8em; color:#666;">
-            Ainda não é um iniciado? <a href="#" style="color:var(--gold);">Criar conta</a>
-        </div>
+        <button class="btn-main" onclick="fazerLogin()">ENTRAR</button>
+        <div class="toggle-link" onclick="alternarForm('cadastro')">Não tem conta? Cadastre-se</div>
+        <p class="error-msg" id="login-error"></p>
     </div>
 
-    <div id="free-user-view">
-        <div class="paywall-box">
-            <i class="fas fa-lock lock-icon"></i>
-            <h3 style="font-family:'Cinzel'; color:#fff; margin:0 0 10px 0;">MAPA ASTRAL BLOQUEADO</h3>
-            <p style="color:#ccc; line-height:1.6; font-size:0.95em;">
-                Detectamos uma "Frequência de Estagnação" no seu mapa. Para acessar a análise completa, previsões 2026 e rituais de quebra de demanda, torne-se Premium.
-            </p>
-            <button class="btn-login" onclick="alert('Redirecionar para Checkout...')" style="margin-top:20px;">
-                DESBLOQUEAR TUDO (R$ 29,90)
-            </button>
-            <p style="margin-top:15px; font-size:0.8em; color:#555; cursor:pointer;" onclick="logout()">Sair / Trocar Conta</p>
+    <div id="register-form" style="display:none;">
+        <div class="input-group">
+            <label>Seu Nome</label>
+            <input type="text" id="reg-nome" class="form-control">
         </div>
+        <div class="input-group">
+            <label>E-mail</label>
+            <input type="email" id="reg-email" class="form-control">
+        </div>
+        <div class="input-group">
+            <label>Senha</label>
+            <input type="password" id="reg-pass" class="form-control">
+        </div>
+        <button class="btn-main" onclick="criarConta()">CRIAR CONTA</button>
+        <div class="toggle-link" onclick="alternarForm('login')">Já tem conta? Fazer Login</div>
+        <p class="error-msg" id="reg-error"></p>
+    </div>
+
+    <div id="paywall-view">
+        <i class="fas fa-lock lock-icon"></i>
+        <h3 style="font-family:'Cinzel'; color:#fff; margin:0 0 15px 0;">ACESSO RESTRITO</h3>
+        <p style="color:#ccc; line-height:1.6; font-size:0.95em; margin-bottom:20px;">
+            Sua conta atual é <strong>Gratuita</strong>. Para acessar o Mapa Astral, Zodíaco, Oráculos e Rituais, você precisa ser um Iniciado Premium.
+        </p>
+        <button class="btn-main" onclick="alert('Aqui iria para o Checkout (Stripe/Hotmart)')">
+            TORNAR-SE PREMIUM (R$ 29,90)
+        </button>
+        <div class="toggle-link" onclick="logout()">Sair / Trocar Conta</div>
     </div>
 
 </div>
@@ -115,74 +126,113 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // 2. VERIFICAÇÃO AUTOMÁTICA
+    // 2. MONITORAMENTO DE LOGIN (O GUARDA)
     auth.onAuthStateChanged(user => {
         if (user) {
-            // Usuário logado: Mostrar Loading e Checar Plano
-            document.getElementById('loading-overlay').style.display = 'flex';
+            // Usuário detectado -> Verificar Status no DB
+            mostrarLoading("Verificando Plano Astral...");
             
             db.collection("usuarios").doc(user.uid).get().then(doc => {
                 if (doc.exists) {
                     const dados = doc.data();
                     
-                    // AQUI ESTÁ A MÁGICA: VERIFICA SE É PREMIUM
-                    // Aceita tanto status quanto plano para garantir
+                    // LÓGICA DE REDIRECIONAMENTO
                     if (dados.status === "premium" || dados.plano === "premium") {
-                        console.log("Usuário Premium detectado. Redirecionando...");
+                        // É PREMIUM -> Vai pro Hub
                         window.location.href = "dashboard-premium.html";
                     } else {
-                        // É Gratuito: Tira o loading e mostra o Paywall
-                        document.getElementById('loading-overlay').style.display = 'none';
-                        document.getElementById('auth-form').style.display = 'none';
-                        document.getElementById('free-user-view').style.display = 'block';
+                        // É FREE -> Mostra Paywall aqui mesmo
+                        esconderLoading();
+                        document.getElementById('login-form').style.display = 'none';
+                        document.getElementById('register-form').style.display = 'none';
+                        document.getElementById('paywall-view').style.display = 'block';
                     }
                 } else {
-                    // Erro estranho (usuário sem doc), manda pro free
-                    document.getElementById('loading-overlay').style.display = 'none';
-                    document.getElementById('auth-form').style.display = 'none';
-                    document.getElementById('free-user-view').style.display = 'block';
+                    // Erro de cadastro incompleto -> Manda pro Paywall/Free
+                    esconderLoading();
+                    document.getElementById('login-form').style.display = 'none';
+                    document.getElementById('paywall-view').style.display = 'block';
                 }
-            }).catch(error => {
-                console.error("Erro ao verificar plano:", error);
-                document.getElementById('loading-overlay').style.display = 'none';
+            }).catch(erro => {
+                console.error(erro);
+                esconderLoading();
             });
+
         } else {
-            // Ninguém logado: Mostrar formulário normal
-            document.getElementById('loading-overlay').style.display = 'none';
-            document.getElementById('auth-form').style.display = 'block';
-            document.getElementById('free-user-view').style.display = 'none';
+            // Ninguém logado -> Mostra Login
+            esconderLoading();
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('paywall-view').style.display = 'none';
         }
     });
 
-    // 3. FUNÇÃO DE LOGIN MANUAL
+    // 3. FUNÇÕES DE AÇÃO
     function fazerLogin() {
-        const email = document.getElementById('email').value;
-        const pass = document.getElementById('password').value;
-        const errorTxt = document.getElementById('error-txt');
+        const email = document.getElementById('login-email').value;
+        const pass = document.getElementById('login-pass').value;
+        const errBox = document.getElementById('login-error');
 
-        if(!email || !pass) {
-            errorTxt.innerText = "Preencha todos os campos.";
-            errorTxt.style.display = 'block';
-            return;
-        }
+        if(!email || !pass) return mostrarErro(errBox, "Preencha todos os campos.");
 
-        document.getElementById('loading-overlay').style.display = 'flex'; // Mostra spinner
+        mostrarLoading("Entrando...");
+        auth.signInWithEmailAndPassword(email, pass).catch(error => {
+            esconderLoading();
+            mostrarErro(errBox, "Erro: " + error.message);
+        });
+    }
 
-        auth.signInWithEmailAndPassword(email, pass)
-            .then((userCredential) => {
-                // O onAuthStateChanged acima vai capturar e fazer o redirecionamento
-            })
-            .catch((error) => {
-                document.getElementById('loading-overlay').style.display = 'none';
-                errorTxt.innerText = "Erro: " + error.message;
-                errorTxt.style.display = 'block';
+    function criarConta() {
+        const nome = document.getElementById('reg-nome').value;
+        const email = document.getElementById('reg-email').value;
+        const pass = document.getElementById('reg-pass').value;
+        const errBox = document.getElementById('reg-error');
+
+        if(!nome || !email || !pass) return mostrarErro(errBox, "Preencha tudo.");
+
+        mostrarLoading("Criando sua alma digital...");
+        
+        auth.createUserWithEmailAndPassword(email, pass).then(cred => {
+            // Cria o documento no DB como GRATUITO por padrão
+            return db.collection("usuarios").doc(cred.user.uid).set({
+                nome: nome,
+                email: email,
+                plano: "gratuito", // Começa como free
+                status: "free",
+                data_cadastro: new Date().toISOString()
             });
+        }).then(() => {
+            // O onAuthStateChanged vai pegar o login automático e jogar pro Paywall
+        }).catch(error => {
+            esconderLoading();
+            mostrarErro(errBox, error.message);
+        });
     }
 
     function logout() {
-        auth.signOut().then(() => {
-            window.location.reload();
-        });
+        auth.signOut().then(() => location.reload());
+    }
+
+    // 4. UTILITÁRIOS VISUAIS
+    function alternarForm(tipo) {
+        document.getElementById('login-form').style.display = (tipo === 'login') ? 'block' : 'none';
+        document.getElementById('register-form').style.display = (tipo === 'cadastro') ? 'block' : 'none';
+        document.getElementById('login-error').style.display = 'none';
+        document.getElementById('reg-error').style.display = 'none';
+    }
+
+    function mostrarLoading(texto) {
+        document.getElementById('loading-text').innerText = texto;
+        document.getElementById('loading-overlay').style.display = 'flex';
+    }
+
+    function esconderLoading() {
+        document.getElementById('loading-overlay').style.display = 'none';
+    }
+
+    function mostrarErro(elemento, msg) {
+        elemento.innerText = msg;
+        elemento.style.display = 'block';
     }
 </script>
 </body>
