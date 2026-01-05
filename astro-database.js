@@ -1,86 +1,171 @@
 // astro-database.js
-// MOTOR DE INTERPRETAÇÃO SEMÂNTICA
+// MOTOR DE GERAÇÃO SEMÂNTICA DE ASTROLOGIA
 
-// 1. TEXTOS FIXOS (PRIORIDADE ALTA)
-// Use isso para Sol, Lua e Ascendente onde queremos um toque humano perfeito.
-const GRIMORIO_ESPECIAL = {
+// 1. DEFINIÇÕES BASE (O ALICERCE DO TEXTO)
+const ARQUETIPOS_PLANETAS = {
     "sol": {
-        "Touro": `<h3><i class="fas fa-sun"></i> Sol em Touro: A Força da Terra</h3>
-                  <p>Com o Sol em Touro, sua essência vital é sustentada pelos pilares da estabilidade e da construção. Diferente da impulsividade de outros signos, sua energia é constante, paciente e incrivelmente resistente. Você veio a este mundo para materializar o espírito, dando forma e valor às coisas.</p>
-                  <p>Sua psicologia é orientada pela busca de segurança e prazer sensorial. Não há culpa em desejar o conforto; para você, a matéria é sagrada. Sua lealdade é lendária, assim como sua determinação. Uma vez que você decide um caminho, é como um trem em movimento: impossível de parar.</p>
-                  <p><strong>Desafio de Vida:</strong> Aprender a diferença entre persistência e teimosia. Aceitar que a mudança é a única constante do universo, sem perder seu chão.</p>`,
-        // ... (Adicione os outros 11 signos solares aqui com o tempo)
-    },
-    "asc": {
-        "Gêmeos": `<h3><i class="fas fa-arrow-up"></i> Ascendente em Gêmeos: O Comunicador</h3>
-                   <p>Sua "porta de entrada" no mundo é mental e curiosa. As pessoas te percebem imediatamente como alguém jovial, inquieto e inteligente. Você tem um olhar vivo que varre o ambiente captando informações rapidamente. A vida, para você, é um quebra-cabeça a ser resolvido.</p>
-                   <p>Você aborda novas situações conversando e trocando ideias. Seu superpoder é a adaptabilidade; você consegue transitar por diferentes grupos sociais com facilidade. Porém, pode passar a impressão de ser inconstante para pessoas mais rígidas.</p>`
-        // ... (Adicione os outros Ascendentes)
+        titulo: "Sua Essência Vital",
+        p1: "O Sol representa o centro da sua personalidade, sua força vital e o que te faz sentir vivo. É a energia que você irradia conscientemente.",
+        acao: "busca se expressar através"
     },
     "lua": {
-        "Peixes": `<h3><i class="fas fa-moon"></i> Lua em Peixes: O Oceano Interior</h3>
-                   <p>Sua estrutura emocional é a mais sensível do zodíaco. Você é uma "esponja psíquica", absorvendo a atmosfera ao seu redor. Muitas vezes, você não sabe distinguir se o que sente é seu ou de outra pessoa. Sua compaixão e empatia são infinitas.</p>
-                   <p>Para se sentir seguro, você precisa de refúgio. O mundo real, cru e duro, machuca sua alma. Você se recarrega através do sono, da música, da arte ou da meditação. Cuidado apenas com a tendência a fugir da realidade quando as coisas ficam difíceis.</p>`
-        // ... (Adicione as outras Luas)
+        titulo: "Seu Mundo Emocional",
+        p1: "A Lua rege suas emoções, seus instintos e o que você precisa para se sentir seguro. Ela revela quem você é quando ninguém está olhando.",
+        acao: "reage emocionalmente com"
+    },
+    "asc": {
+        titulo: "Sua Máscara e Destino",
+        p1: "O Ascendente é a 'porta da frente' da sua personalidade. Define sua aparência, sua primeira impressão e como você inicia novos projetos.",
+        acao: "aborda a vida com"
+    },
+    "merc": {
+        titulo: "Seu Intelecto",
+        p1: "Mercúrio define como sua mente processa dados, como você fala e como aprende. É o filtro racional da sua psique.",
+        acao: "comunica-se usando"
+    },
+    "venus": {
+        titulo: "Amor e Valores",
+        p1: "Vênus dita o que você valoriza, como você seduz e o que te dá prazer. É o planeta do amor, do dinheiro e da estética.",
+        acao: "atrai o que deseja através de"
+    },
+    "marte": {
+        titulo: "Ação e Conquista",
+        p1: "Marte é seu guerreiro interior. Ele define como você luta pelo que quer, sua assertividade e sua energia sexual.",
+        acao: "conquista seus objetivos com"
+    },
+    "jup": {
+        titulo: "Expansão e Sorte",
+        p1: "Júpiter mostra onde você tem sorte e onde busca sentido na vida. É a sua bússola moral e filosófica.",
+        acao: "expande horizontes através de"
+    },
+    "sat": {
+        titulo: "Lições e Estrutura",
+        p1: "Saturno representa seus desafios, medos e onde você precisa de disciplina. É onde você amadurece com o tempo.",
+        acao: "busca estrutura através de"
     }
 };
 
-// 2. O GERADOR AUTOMÁTICO (BACKUP INTELIGENTE)
-// Se não houver texto acima, o sistema monta o texto usando estas definições.
-
-const DEFINICOES_PLANETAS = {
-    "merc": { titulo: "O Intelecto", acao: "processa informações", tema: "comunicação e raciocínio" },
-    "venus": { titulo: "O Amor e Valor", acao: "busca conexão", tema: "relacionamentos e finanças" },
-    "marte": { titulo: "A Ação e Guerra", acao: "luta e conquista", tema: "energia, coragem e assertividade" },
-    "jup":   { titulo: "A Expansão", acao: "busca crescimento", tema: "sorte, fé e sabedoria superior" },
-    "sat":   { titulo: "O Mestre do Tempo", acao: "estrutura e limita", tema: "responsabilidade, carma e lições de vida" }
+const ARQUETIPOS_SIGNOS = {
+    "Áries": {
+        adj: "da impulsividade, da coragem e da iniciativa",
+        modo: "de forma direta, competitiva e independente",
+        foco: "na autonomia e na conquista rápida",
+        desafio: "controlar a impaciência e pensar antes de agir"
+    },
+    "Touro": {
+        adj: "da estabilidade, do conforto e da persistência",
+        modo: "de forma prática, sensorial e deliberada",
+        foco: "na segurança material e no prazer dos sentidos",
+        desafio: "vencer a resistência à mudança e a teimosia"
+    },
+    "Gêmeos": {
+        adj: "da curiosidade, da troca e da versatilidade",
+        modo: "de forma racional, comunicativa e adaptável",
+        foco: "na diversidade de informações e conexões sociais",
+        desafio: "manter o foco e aprofundar-se nos temas"
+    },
+    "Câncer": {
+        adj: "da sensibilidade, da proteção e da memória",
+        modo: "de forma intuitiva, cautelosa e acolhedora",
+        foco: "na segurança emocional, na família e no passado",
+        desafio: "não se fechar em sua carapaça quando ferido"
+    },
+    "Leão": {
+        adj: "da autoexpressão, da nobreza e do magnetismo",
+        modo: "de forma criativa, generosa e dramática",
+        foco: "no reconhecimento pessoal e na liderança",
+        desafio: "controlar a necessidade de aprovação externa"
+    },
+    "Virgem": {
+        adj: "da análise, do detalhe e do aprimoramento",
+        modo: "de forma crítica, organizada e prestativa",
+        foco: "na eficiência, na saúde e na ordem",
+        desafio: "evitar o perfeccionismo paralisante"
+    },
+    "Libra": {
+        adj: "da harmonia, da diplomacia e da estética",
+        modo: "de forma equilibrada, justa e sociável",
+        foco: "nas parcerias, no casamento e na beleza",
+        desafio: "tomar decisões sem depender da opinião alheia"
+    },
+    "Escorpião": {
+        adj: "da intensidade, do mistério e da transformação",
+        modo: "de forma profunda, investigativa e apaixonada",
+        foco: "no poder, na intimidade e no que está oculto",
+        desafio: "controlar o desejo de controle e o ciúme"
+    },
+    "Sagitário": {
+        adj: "da expansão, do otimismo e da busca pela verdade",
+        modo: "de forma livre, filosófica e aventureira",
+        foco: "no conhecimento superior, viagens e crenças",
+        desafio: "lidar com os detalhes práticos da realidade"
+    },
+    "Capricórnio": {
+        adj: "da ambição, da responsabilidade e da estrutura",
+        modo: "de forma séria, planejada e resiliente",
+        foco: "na carreira, no status e nas metas de longo prazo",
+        desafio: "não deixar a rigidez endurecer o coração"
+    },
+    "Aquário": {
+        adj: "da inovação, da liberdade e da coletividade",
+        modo: "de forma original, rebelde e racional",
+        foco: "no futuro, nos grupos e nas causas sociais",
+        desafio: "conectar-se emocionalmente no nível individual"
+    },
+    "Peixes": {
+        adj: "da empatia, da imaginação e da espiritualidade",
+        modo: "de forma sensível, intuitiva e compassiva",
+        foco: "na conexão com o todo, na arte e no sonho",
+        desafio: "estabelecer limites claros e manter os pés no chão"
+    }
 };
 
-const DEFINICOES_SIGNOS = {
-    "Áries": { modo: "de forma impulsiva, direta e corajosa", foco: "na autonomia e na liderança", desafio: "controlar a impaciência" },
-    "Touro": { modo: "de forma lenta, prática e sensorial", foco: "na segurança material e no conforto", desafio: "vencer a teimosia" },
-    "Gêmeos": { modo: "de forma rápida, curiosa e versátil", foco: "na troca de ideias e na diversidade", desafio: "manter o foco" },
-    "Câncer": { modo: "de forma emocional, protetora e intuitiva", foco: "na segurança emocional e na família", desafio: "não guardar mágoas" },
-    "Leão": { modo: "de forma expressiva, nobre e dramática", foco: "no reconhecimento e na autoexpressão", desafio: "controlar o ego" },
-    "Virgem": { modo: "de forma analítica, crítica e detalhista", foco: "na perfeição e na utilidade", desafio: "evitar o perfeccionismo paralisante" },
-    "Libra": { modo: "de forma diplomática, justa e equilibrada", foco: "na harmonia e nas parcerias", desafio: "tomar decisões difíceis" },
-    "Escorpião": { modo: "de forma intensa, profunda e investigativa", foco: "na transformação e no poder oculto", desafio: "controlar a desconfiança" },
-    "Sagitário": { modo: "de forma expansiva, otimista e filosófica", foco: "na verdade e na liberdade", desafio: "lidar com detalhes práticos" },
-    "Capricórnio": { modo: "de forma séria, ambiciosa e estruturada", foco: "no status e na realização a longo prazo", desafio: "não ser rígido demais" },
-    "Aquário": { modo: "de forma original, rebelde e coletiva", foco: "na inovação e no futuro", desafio: "lidar com a intimidade emocional" },
-    "Peixes": { modo: "de forma empática, sonhadora e sensível", foco: "na espiritualidade e na fusão", desafio: "manter os pés no chão" }
+// 2. TEXTOS "PREMIUM" ESPECÍFICOS (Onde você quiser escrever à mão)
+// Se existir aqui, o sistema usa. Se não, ele GERA.
+const GRIMORIO_VIP = {
+    sol: {
+        "Touro": `<h3><i class="fas fa-sun"></i> Sol em Touro: O Construtor</h3>
+                  <p>Com o Sol em Touro, sua essência é a de um pilar de sustentação. Você não veio ao mundo para gastar energia à toa, mas para construir coisas duráveis. Seja uma carreira, uma casa ou uma família, o que você toca ganha solidez.</p>
+                  <p>Sua paciência é lendária, assim como sua teimosia. Você opera no tempo da natureza: não se apressa a colheita. Sensorialmente apurado, você entende o mundo através do toque, do gosto e do conforto. Para você, a paz vale mais que a razão.</p>
+                  <p><strong>Caminho de Evolução:</strong> Seu desafio é não confundir estabilidade com estagnação. Aprenda a soltar o que já não serve mais, confiando que sua segurança vem de dentro, não do que você possui.</p>`
+    },
+    asc: {
+        "Leão": `<h3><i class="fas fa-arrow-up"></i> Ascendente em Leão: A Presença Real</h3>
+                 <p>Independentemente do seu signo solar, sua "entrada" no mundo é majestosa. As pessoas notam quando você chega. Há um magnetismo natural, um calor e uma dignidade na sua postura que comanda respeito.</p>
+                 <p>O destino tende a te colocar em posições de destaque ou liderança, mesmo que você não peça. Você tem orgulho da sua imagem e raramente se permite parecer fraco em público. Sua juba (cabelo) costuma ser um traço marcante.</p>
+                 <p><strong>Caminho de Evolução:</strong> Usar esse brilho natural para inspirar e aquecer os outros, tornando-se um líder generoso, e não apenas buscar aplausos para o ego.</p>`
+    }
 };
 
-// A Função Mágica que Escreve o Texto
-function gerarInterpretacao(planetaID, signo) {
-    // 1. Tenta pegar do Grimório Especial (escrito à mão)
-    if (GRIMORIO_ESPECIAL[planetaID] && GRIMORIO_ESPECIAL[planetaID][signo]) {
-        return GRIMORIO_ESPECIAL[planetaID][signo];
+// 3. A MÁQUINA DE ESCREVER (Gera texto para QUALQUER combinação)
+function gerarInterpretacao(planetaID, signoRaw) {
+    // Normaliza o nome do signo (Primeira letra maiúscula)
+    if(!signoRaw) return "";
+    const signo = signoRaw.charAt(0).toUpperCase() + signoRaw.slice(1).toLowerCase();
+
+    // 1. Tenta achar texto VIP escrito à mão
+    if (GRIMORIO_VIP[planetaID] && GRIMORIO_VIP[planetaID][signo]) {
+        return GRIMORIO_VIP[planetaID][signo];
     }
 
-    // 2. Se não existir, GERA o texto dinamicamente
-    const p = DEFINICOES_PLANETAS[planetaID];
-    const s = DEFINICOES_SIGNOS[signo];
-    
-    // Fallback de segurança se algo vier undefined
-    if (!p || !s) return `<p>Posição de ${planetaID} em ${signo} em análise pelos mestres.</p>`;
+    // 2. Se não achar, GERA O TEXTO AUTOMATICAMENTE
+    const p = ARQUETIPOS_PLANETAS[planetaID];
+    const s = ARQUETIPOS_SIGNOS[signo];
 
-    // Montagem do Texto Gerado (Template Literário)
-    let nomePlaneta = "";
-    if(planetaID === 'merc') nomePlaneta = "Mercúrio";
-    if(planetaID === 'venus') nomePlaneta = "Vênus";
-    if(planetaID === 'marte') nomePlaneta = "Marte";
-    if(planetaID === 'jup') nomePlaneta = "Júpiter";
-    if(planetaID === 'sat') nomePlaneta = "Saturno";
+    // Fallback de segurança se o signo não for reconhecido
+    if (!p || !s) return `<p>Analisando a posição de ${planetaID} em ${signo}...</p>`;
 
-    // Ícone baseado no ID
+    // Ícone dinâmico
     let icon = "fa-star";
-    if(planetaID === 'merc') icon = "fa-mercury"; // Note: font awesome free might not have planetary symbols, fallback to letters or standard icons in HTML
-    
+    if (planetaID === 'sol') icon = "fa-sun";
+    if (planetaID === 'lua') icon = "fa-moon";
+    if (planetaID === 'asc') icon = "fa-arrow-up";
+
+    // O TEXTO GERADO (Template Rico)
     return `
-        <h3><i class="fas ${icon}"></i> ${nomePlaneta} em ${signo}: ${p.titulo}</h3>
-        <p><strong>A Natureza Planetária:</strong> ${nomePlaneta} é o astro que rege ${p.tema} no seu mapa natal. É a lente através da qual você ${p.acao}. Sua posição revela COMO essas funções operam na sua psique.</p>
-        <p><strong>A Influência do Signo:</strong> Estando em ${signo}, essa energia planetária se manifesta ${s.modo}. Seu foco principal nesta área da vida está ${s.foco}. É uma combinação que tinge a função de ${nomePlaneta} com as cores elementares de ${signo}.</p>
-        <p><strong>Conselho Evolutivo:</strong> O grande aprendizado desta posição é ${s.desafio}. Ao equilibrar a natureza de ${nomePlaneta} com a energia de ${signo}, você desbloqueia um potencial latente.</p>
+        <h3><i class="fas ${icon}"></i> ${p.titulo}: ${planetaID === 'asc' ? 'Em' : ''} ${signo}</h3>
+        <p><strong>O Astro:</strong> ${p.p1}</p>
+        <p><strong>A Influência de ${signo}:</strong> Estando posicionado neste signo, essa função psicológica é tingida com as cores ${s.adj}. Você ${p.acao} ${s.modo}. É uma combinação que direciona seu foco vital ${s.foco}.</p>
+        <p><strong>Dinâmica de Vida:</strong> Esta posição sugere que, para se sentir pleno nesta área, você precisa incorporar as qualidades elevadas de ${signo}. No entanto, deve estar atento à sua sombra: o grande desafio aqui é ${s.desafio}.</p>
     `;
 }
