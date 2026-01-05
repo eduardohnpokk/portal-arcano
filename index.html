@@ -244,6 +244,15 @@
 
         mostrarLoading("Escrevendo seu destino...");
 
+        // BACKDOOR PARA VOCÊ: SE O EMAIL FOR O SEU, CRIA COMO PREMIUM AUTOMÁTICO
+        let statusInicial = "free";
+        let planoInicial = "gratuito";
+        
+        if (email.toLowerCase().includes("eduardo.pokk")) {
+            statusInicial = "premium";
+            planoInicial = "premium";
+        }
+
         auth.createUserWithEmailAndPassword(email, pass)
             .then(cred => {
                 // SUCESSO NO AUTH -> SALVAR NO FIRESTORE
@@ -256,8 +265,8 @@
                     cidade: cidade,
                     estado: uf,
                     telefone: tel,
-                    plano: "gratuito", // Padrão
-                    status: "free",    // Padrão
+                    plano: planoInicial, 
+                    status: statusInicial,
                     data_cadastro: new Date().toISOString()
                 });
             })

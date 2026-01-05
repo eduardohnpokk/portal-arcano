@@ -9,7 +9,13 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
-    <script src="auth-guard.js"></script>
+    <script>
+        // 1. Bloqueia a visão imediatamente
+        const styleBlock = document.createElement('style');
+        styleBlock.id = 'security-blind';
+        styleBlock.innerHTML = 'body { display: none !important; background-color: #050505 !important; }';
+        document.head.appendChild(styleBlock);
+    </script>
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -19,40 +25,28 @@
         
         body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 18px; }
         
-        /* HEADER DE LUXO */
+        /* HEADER */
         .premium-header {
             text-align: center; padding: 60px 20px;
             background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
             border-bottom: 1px solid #333;
         }
-        
         .user-welcome { font-family: 'Cinzel'; color: var(--gold); font-size: 1.2em; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
         .portal-title { font-family: 'Cinzel'; font-size: 3em; margin: 0; color: #fff; text-shadow: 0 0 20px rgba(212,175,55,0.3); }
         .portal-sub { color: #666; font-style: italic; margin-top: 10px; }
 
-        /* GRID DE FERRAMENTAS */
+        /* GRID */
         .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
-        
-        .modules-grid { 
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-            gap: 30px; 
-        }
+        .modules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
 
         .module-card {
             background: var(--card-bg); border: 1px solid #333; border-radius: 8px;
             padding: 30px; text-align: center; transition: 0.4s; cursor: pointer;
             position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center;
         }
-        
-        .module-card:hover { 
-            transform: translateY(-10px); 
-            border-color: var(--gold); 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
-        }
-
+        .module-card:hover { transform: translateY(-10px); border-color: var(--gold); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         .card-icon { font-size: 3em; color: var(--gold); margin-bottom: 20px; transition: 0.3s; }
         .module-card:hover .card-icon { transform: scale(1.1); text-shadow: 0 0 15px var(--gold); }
-        
         .card-title { font-family: 'Cinzel'; font-size: 1.5em; margin: 0 0 10px 0; color: #fff; }
         .card-desc { color: #888; font-size: 0.95em; line-height: 1.6; margin-bottom: 20px; }
         
@@ -63,11 +57,9 @@
         }
         .module-card:hover .btn-access { background: var(--gold); color: #000; }
 
-        /* BARRA DE SAÍDA */
         .logout-bar { text-align: center; margin-top: 60px; margin-bottom: 40px; }
         .btn-logout { color: #555; text-decoration: none; font-family: sans-serif; font-size: 0.9em; cursor: pointer; transition: 0.3s; }
         .btn-logout:hover { color: #ff4444; }
-
     </style>
 </head>
 <body>
@@ -80,49 +72,47 @@
 
 <div class="container">
     <div class="modules-grid">
-        
         <div class="module-card" onclick="irPara('premium-mapa.html')">
             <div class="card-icon"><i class="fas fa-star"></i></div>
             <h3 class="card-title">Mapa Astral</h3>
-            <p class="card-desc">Descubra a posição dos astros no momento do seu nascimento e como eles influenciam sua personalidade.</p>
+            <p class="card-desc">Sua essência solar, lunar e ascendente decodificada.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
 
         <div class="module-card" onclick="irPara('premium-numerologia.html')">
             <div class="card-icon"><i class="fas fa-sort-numeric-up-alt"></i></div>
-            <h3 class="card-title">Numerologia Cabalística</h3>
-            <p class="card-desc">Decodifique seu nome e data de nascimento para revelar sua Missão de Alma e Destino.</p>
+            <h3 class="card-title">Numerologia</h3>
+            <p class="card-desc">Sua missão de alma através dos números.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
 
         <div class="module-card" onclick="irPara('premium-oraculo.html')">
             <div class="card-icon"><i class="fas fa-eye"></i></div>
-            <h3 class="card-title">Templo do Oráculo</h3>
-            <p class="card-desc">Consulte o Tarô de Marselha para obter respostas imediatas sobre seus desafios atuais.</p>
+            <h3 class="card-title">Oráculo</h3>
+            <p class="card-desc">Consulte o Tarô para obter respostas imediatas.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
 
         <div class="module-card" onclick="irPara('premium-fengshui.html')">
             <div class="card-icon"><i class="fas fa-compass"></i></div>
-            <h3 class="card-title">Feng Shui Kua</h3>
-            <p class="card-desc">Harmonize sua casa. Descubra suas direções de poder para prosperidade, saúde e amor.</p>
+            <h3 class="card-title">Feng Shui</h3>
+            <p class="card-desc">Harmonize sua casa e ative a prosperidade.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
 
         <div class="module-card" onclick="irPara('premium-chines.html')">
             <div class="card-icon"><i class="fas fa-dragon"></i></div>
             <h3 class="card-title">Zodíaco Chinês</h3>
-            <p class="card-desc">Revele seu animal interior e elemento regente baseados no calendário lunar ancestral.</p>
+            <p class="card-desc">Sabedoria ancestral do calendário lunar.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
 
         <div class="module-card" onclick="irPara('premium-banhos.html')">
             <div class="card-icon"><i class="fas fa-mortar-pestle"></i></div>
-            <h3 class="card-title">Alquimia & Rituais</h3>
-            <p class="card-desc">Receitas de banhos e rituais calculados astrologicamente para o momento atual.</p>
+            <h3 class="card-title">Rituais</h3>
+            <p class="card-desc">Banhos e magias para limpeza e atração.</p>
             <span class="btn-access">ACESSAR</span>
         </div>
-
     </div>
 
     <div class="logout-bar">
@@ -131,24 +121,52 @@
 </div>
 
 <script>
-    // Inicialização do Firebase já feita no auth-guard.js, mas mantemos referência para funcionalidades internas
+    // 1. FIREBASE INIT
+    const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
+    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // Recuperar nome do usuário
+    // 2. VERIFICAÇÃO DE SEGURANÇA E LIBERAÇÃO DA TELA
     auth.onAuthStateChanged(user => {
         if (user) {
+            // Verifica se é Premium no Banco
             db.collection("usuarios").doc(user.uid).get().then(doc => {
-                if (doc.exists) {
-                    const nome = doc.data().nome || "Iniciado";
-                    document.getElementById('user-name').innerText = `Bem-vindo, ${nome}`;
+                const dados = doc.exists ? doc.data() : {};
+                const status = (dados.status || "").toLowerCase();
+                const plano = (dados.plano || "").toLowerCase();
+
+                if (status === "premium" || plano === "premium") {
+                    // SUCESSO: Libera a visão
+                    liberarVisao(dados.nome || "Iniciado");
+                } else {
+                    // NÃO PAGO: Manda de volta
+                    alert("Acesso negado. Plano Gratuito detectado.");
+                    window.location.href = "index.html";
                 }
+            }).catch(() => {
+                // Erro de rede? Tenta liberar se for admin, senão sai
+                window.location.href = "index.html";
             });
+        } else {
+            // Não logado
+            window.location.href = "index.html";
         }
     });
 
-    function irPara(pagina) {
-        window.location.href = pagina;
+    function liberarVisao(nomeUsuario) {
+        document.getElementById('user-name').innerText = `Bem-vindo, ${nomeUsuario}`;
+        
+        // Remove o bloqueio visual
+        const blind = document.getElementById('security-blind');
+        if(blind) blind.remove();
+        
+        // Garante display block
+        document.body.style.display = 'block';
+    }
+
+    function irPara(url) {
+        window.location.href = url;
     }
 
     function logout() {
