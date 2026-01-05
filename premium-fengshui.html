@@ -24,7 +24,14 @@
         .header-title { font-family: 'Cinzel'; color: var(--gold); text-align: center; margin-top: 40px; font-size: 2.8em; letter-spacing: 2px; }
         .header-sub { text-align: center; color: #888; font-family: sans-serif; margin-bottom: 30px; }
 
-        /* INTRO BOX */
+        /* NOVO: INTRODUÇÃO CONCEITUAL */
+        .concept-section {
+            border-bottom: 1px solid #333; padding-bottom: 30px; margin-bottom: 30px; text-align: justify;
+        }
+        .concept-section h3 { font-family: 'Cinzel'; color: var(--gold); margin-bottom: 15px; font-size: 1.5em; }
+        .concept-section p { line-height: 1.8; color: #ccc; margin-bottom: 15px; }
+
+        /* INTRO BOX (KUA ESPECÍFICO) */
         .intro-box {
             background: rgba(20, 20, 20, 0.9); border: 1px solid var(--gold);
             padding: 30px; margin-bottom: 40px; border-radius: 8px; text-align: center;
@@ -43,8 +50,9 @@
         }
         .btn-calc { 
             background: var(--gold); color: #000; border: none; padding: 15px; width: 100%; 
-            font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border-radius: 4px; margin-top: 10px;
+            font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border-radius: 4px; margin-top: 10px; transition: 0.3s;
         }
+        .btn-calc:hover { background: #fff; }
 
         /* RESULTADOS */
         #result-area { display: none; }
@@ -69,23 +77,37 @@
 
         /* Cores Específicas */
         .success { background: linear-gradient(135deg, #0f2027 0%, #203a43 100%); border-left: 4px solid #4caf50; }
-        .health { background: linear-gradient(135deg, #1e130c 0%, #9a8478 100%); border-left: 4px solid #d4af37; } /* Terra */
+        .health { background: linear-gradient(135deg, #1e130c 0%, #9a8478 100%); border-left: 4px solid #d4af37; }
         .love { background: linear-gradient(135deg, #2b1313 0%, #4c2626 100%); border-left: 4px solid #ff69b4; }
         .stability { background: linear-gradient(135deg, #111 0%, #222 100%); border-left: 4px solid #888; }
 
         .warning-box { margin-top: 30px; padding: 20px; background: #220000; border: 1px solid #ff4444; color: #ffcccc; text-align: center; border-radius: 4px; }
 
-        .btn-float { position: fixed; bottom: 30px; right: 30px; background: var(--gold); color: #000; padding: 15px 35px; border-radius: 50px; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border: none; z-index: 100; font-size: 1.1em; }
+        /* NOVO: GUIA DETALHADO FINAL */
+        .detailed-guide {
+            margin-top: 60px;
+            background: #0f0f0f;
+            padding: 40px;
+            border-top: 4px solid var(--gold);
+        }
+        .detailed-guide h3 { font-family: 'Cinzel'; color: var(--gold); font-size: 1.6em; margin-top: 0; }
+        .guide-block { margin-bottom: 20px; }
+        .guide-block h4 { color: #fff; margin-bottom: 10px; font-size: 1.1em; }
+        .guide-block p { color: #aaa; text-align: justify; line-height: 1.7; }
+
+        /* BOTÕES */
+        .btn-float { position: fixed; bottom: 30px; right: 30px; background: var(--gold); color: #000; padding: 15px 35px; border-radius: 50px; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border: none; z-index: 100; font-size: 1.1em; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         .btn-back { cursor: pointer; color: #888; text-transform: uppercase; font-size: 0.8em; margin-bottom: 20px; display: inline-block; }
 
         @media print {
-            .precision-form, .btn-float, .btn-back, .intro-box { display: none !important; }
-            #result-area { display: block !important; }
+            .precision-form, .btn-float, .btn-back, .intro-box, .concept-section { display: none !important; }
+            #result-area, #detailed-guide-area { display: block !important; }
             body { background: #fff; color: #000; }
-            .kua-number, .kua-meta h3 { color: #000; text-shadow: none; }
+            .kua-number, .kua-meta h3, .concept-section h3, .detailed-guide h3, .guide-block h4 { color: #000; text-shadow: none; }
             .direction-card { background: #fff !important; border: 1px solid #000; color: #000; page-break-inside: avoid; }
-            .direction-card h4, .direction-card p { color: #000; }
+            .direction-card h4, .direction-card p, .concept-section p, .guide-block p { color: #000; }
             .warning-box { background: #fff; border: 2px solid #000; color: #000; }
+            .detailed-guide { border: none; border-top: 2px solid #000; background: #fff; }
         }
         @media(max-width: 600px) { .directions-grid { grid-template-columns: 1fr; } .kua-header { flex-direction: column; text-align: center; } }
     </style>
@@ -98,8 +120,14 @@
     <h1 class="header-title">FENG SHUI: KUA</h1>
     <p class="header-sub">Arquitetura Energética Pessoal</p>
 
+    <div class="concept-section">
+        <h3>A Acupuntura do Espaço</h3>
+        <p>O Feng Shui não é meramente decoração ou superstição; é uma ciência milenar chinesa que estuda como a energia vital (Chi) flui através do ambiente físico. Assim como a acupuntura desbloqueia a energia do corpo, o Feng Shui desbloqueia a energia da sua casa.</p>
+        <p>Utilizamos aqui o método clássico <strong>Ba Zhai (Oito Mansões)</strong>. Diferente do Feng Shui intuitivo, este é matemático: baseia-se na data do seu nascimento para calcular seu <strong>Número Kua</strong>. Este número revela sua "assinatura magnética", indicando quais direções cardeais alimentam sua vitalidade e quais a drenam.</p>
+    </div>
+
     <div class="intro-box">
-        <p>O <strong>Número Kua</strong> (Ming Gua) é sua assinatura energética no espaço. Ele revela quais direções cardeais fortalecem sua aura e quais a drenam. Para calcular com precisão de Mestre, precisamos confirmar seus dados biológicos solares.</p>
+        <p>Para calcular sua assinatura com precisão de Mestre, precisamos confirmar seus dados biológicos solares (considerando o Ano Novo Chinês).</p>
     </div>
 
     <div class="precision-form" id="input-area">
@@ -127,33 +155,53 @@
     <div id="result-area">
         </div>
 
+    <div class="detailed-guide" id="detailed-guide-area" style="display:none;">
+        <h3>Como Aplicar essa Sabedoria</h3>
+        
+        <div class="guide-block">
+            <h4><i class="fas fa-compass"></i> Não derrube paredes, mova-se.</h4>
+            <p>O Feng Shui Kua funciona através do alinhamento. Você não precisa reformar a casa. O segredo é posicionar seus locais de longa permanência (Cama e Mesa de Trabalho) de forma que, ao usá-los, o topo da sua cabeça esteja apontado para uma de suas direções favoráveis.</p>
+        </div>
+
+        <div class="guide-block">
+            <h4><i class="fas fa-bed"></i> A Posição de Comando</h4>
+            <p>Para a cama (Saúde e Amor), o ideal é que a cabeceira esteja na direção indicada. Se não for possível, tente ao menos garantir que, ao deitar, você consiga ver a porta do quarto sem estar diretamente alinhado a ela.</p>
+        </div>
+
+        <div class="guide-block">
+            <h4><i class="fas fa-briefcase"></i> Foco e Prosperidade</h4>
+            <p>Para o trabalho, vire sua cadeira para sua direção "Sheng Qi" (Sucesso). Mesmo que a mesa fique na diagonal da sala, receber essa energia frontalmente durante as horas de trabalho aumenta drasticamente sua produtividade e autoridade.</p>
+        </div>
+
+        <div class="guide-block">
+            <h4><i class="fas fa-ban"></i> A Direção de Perda</h4>
+            <p>Evite ao máximo encarar sua direção de azar durante reuniões importantes ou dormir com a cabeça apontada para ela. Se não houver opção, use cristais de proteção ou espelhos Bagua para refletir a energia densa.</p>
+        </div>
+    </div>
+
 </div>
 
 <button class="btn-float" onclick="window.print()"><i class="fas fa-file-pdf"></i> SALVAR MAPA</button>
 
 <script>
-    // 1. FIREBASE INIT (Para pré-carregar dados se houver)
+    // 1. FIREBASE INIT
     const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
     try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // Tenta pré-preencher
+    // Pré-preenchimento
     auth.onAuthStateChanged(user => {
         if(user) {
             db.collection("usuarios").doc(user.uid).get().then(doc => {
-                if(doc.exists) {
-                    const d = doc.data();
-                    if(d.dataNascimento) {
-                        const ano = d.dataNascimento.split('-')[0];
-                        document.getElementById('anoInput').value = ano;
-                    }
+                if(doc.exists && doc.data().dataNascimento) {
+                    document.getElementById('anoInput').value = doc.data().dataNascimento.split('-')[0];
                 }
             });
         }
     });
 
-    // 2. FUNÇÃO DE CÁLCULO E EXIBIÇÃO
+    // 2. CÁLCULO
     function calcularAgora() {
         const ano = document.getElementById('anoInput').value;
         const genero = document.getElementById('generoInput').value;
@@ -161,17 +209,21 @@
 
         if(!ano) { alert("Por favor, digite o ano."); return; }
 
-        // Chama o banco de dados
+        // Chama Database
         const kua = calcularKua(ano, genero, antesFev4);
         const htmlRelatorio = gerarRelatorioFengShui(kua);
 
-        // Renderiza
+        // Renderiza Mapa
         const area = document.getElementById('result-area');
         area.innerHTML = htmlRelatorio;
         
-        // Efeito de transição
+        // Transição e Exibição do Guia Final
         document.getElementById('input-area').style.display = 'none';
         area.style.display = 'block';
+        document.getElementById('detailed-guide-area').style.display = 'block'; // Mostra o guia final
+        
+        // Scroll suave
+        area.scrollIntoView({ behavior: 'smooth' });
     }
 </script>
 </body>
