@@ -74,4 +74,268 @@
             padding: 15px; font-family: 'Cormorant Garamond', serif; font-size: 1.1em; 
             border-radius: 4px; box-sizing: border-box; resize: vertical; transition: 0.3s;
         }
-        .styled-select:focus, .styled-textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0
+        .styled-select:focus, .styled-textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 10px rgba(212,175,55,0.2); }
+
+        .btn-send {
+            background: var(--gold); color: #000; border: none; padding: 18px 40px; 
+            font-family: 'Cinzel'; font-size: 1.3em; font-weight: bold; cursor: pointer; 
+            border-radius: 4px; transition: 0.3s; width: 100%; margin-top: 30px;
+            text-transform: uppercase; letter-spacing: 2px;
+        }
+        .btn-send:hover { background: #e6c256; box-shadow: 0 0 30px rgba(212,175,55,0.4); }
+        .btn-send:disabled { background: #333; color: #666; cursor: not-allowed; box-shadow: none; }
+
+        /* AVISO IMPORTANTE (HUMANIZADO) */
+        .human-notice {
+            background: rgba(212, 175, 55, 0.05); border: 1px solid #333; padding: 20px;
+            margin-top: 30px; border-radius: 6px; text-align: center;
+        }
+        .human-notice i { color: var(--gold); margin-right: 8px; }
+        .spam-warning { color: #ff9800; font-weight: bold; font-size: 0.9em; margin-top: 10px; display: block; }
+
+        /* HISTÓRICO DE PEDIDOS */
+        .history-section { border-top: 1px solid #333; padding-top: 40px; }
+        .history-title { font-family: 'Cinzel'; color: var(--gold); font-size: 2em; margin-bottom: 30px; text-align: center; }
+        
+        .history-list { display: flex; flex-direction: column; gap: 20px; }
+        .history-card { 
+            background: #111; border: 1px solid #333; padding: 20px; border-radius: 6px; 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .h-info h4 { margin: 0 0 5px 0; color: #fff; font-family: 'Cinzel'; }
+        .h-info p { margin: 0; color: #888; font-size: 0.9em; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
+        .h-status { 
+            padding: 5px 15px; border-radius: 20px; font-size: 0.8em; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .status-pendente { background: rgba(255, 152, 0, 0.15); color: #ff9800; border: 1px solid #ff9800; }
+        .status-enviado { background: rgba(46, 125, 50, 0.15); color: #81c784; border: 1px solid #81c784; }
+
+        @media(max-width: 768px) { .oracles-section { grid-template-columns: 1fr; } .history-card { flex-direction: column; text-align: center; gap: 15px; } .h-info p { max-width: 100%; white-space: normal; } }
+    </style>
+</head>
+<body>
+
+<div id="loading-screen">
+    <i class="fas fa-eye spinner"></i>
+    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Conectando aos Oráculos...</p>
+</div>
+
+<div class="container">
+    <div class="nav-bar">
+        <div onclick="window.location.href='dashboard-premium.html'" class="btn-back">← Voltar ao Hub</div>
+    </div>
+
+    <div class="page-header">
+        <h1 class="page-title">CONSULTAS SAGRADAS</h1>
+        <div class="page-sub">
+            Acesse a sabedoria ancestral. Suas perguntas serão encaminhadas aos nossos mestres e analisadas ritualisticamente. A resposta completa e solucionadora será enviada ao seu e-mail.
+        </div>
+    </div>
+
+    <div class="oracles-section">
+        <div class="oracle-card">
+            <div class="oracle-header">
+                <i class="fas fa-leaf oracle-icon"></i>
+                <div class="oracle-name">Baralho Cigano</div>
+            </div>
+            <div class="oracle-desc">
+                Direto, assertivo e focado no cotidiano. O Baralho Cigano (Lenormand) é ideal para questões práticas sobre amor, trabalho, fofocas e acontecimentos imediatos. Ele não rodeia: mostra a realidade como ela é.
+            </div>
+        </div>
+
+        <div class="oracle-card">
+            <div class="oracle-header">
+                <i class="fas fa-eye oracle-icon"></i>
+                <div class="oracle-name">Tarot Egípcio</div>
+            </div>
+            <div class="oracle-desc">
+                O mais antigo e esotérico. Combina Astrologia e Simbologia Egípcia. Ideal para análises profundas de personalidade, conexões kármicas, missão de vida e entendimento das leis universais que regem seu momento.
+            </div>
+        </div>
+
+        <div class="oracle-card">
+            <div class="oracle-header">
+                <i class="fas fa-shell oracle-icon"></i>
+                <div class="oracle-name">Jogo de Búzios</div>
+            </div>
+            <div class="oracle-desc">
+                A voz dos Orixás. Este oráculo sagrado trata de destino (Odu), proteção espiritual e limpeza de caminhos. É a ferramenta certa para quando você sente sua vida travada por forças espirituais.
+            </div>
+        </div>
+    </div>
+
+    <div class="ritual-form">
+        <div class="counter-badge" id="limit-badge">...</div>
+
+        <h2 style="color:var(--gold); font-family:'Cinzel'; text-align:center; margin-bottom:30px;">Inicie o Ritual de Consulta</h2>
+
+        <div>
+            <label class="form-label">1. Escolha o Oráculo:</label>
+            <select id="oracle-selector" class="styled-select">
+                <option value="Baralho Cigano">Baralho Cigano (Questões Práticas)</option>
+                <option value="Tarot Egípcio">Tarot Egípcio (Questões Profundas)</option>
+                <option value="Búzios">Jogo de Búzios (Questões Espirituais)</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="form-label">2. Descreva sua Questão:</label>
+            <textarea id="question-text" rows="6" class="styled-textarea" placeholder="Concentre-se. Digite sua pergunta com o máximo de detalhes possível para uma leitura precisa. Inclua nomes e datas se envolver terceiros."></textarea>
+        </div>
+
+        <div class="human-notice">
+            <i class="fas fa-envelope-open-text"></i>
+            Nossos oraculistas receberão sua pergunta e assim que possível encaminharão a resposta no seu e-mail.
+            <span class="spam-warning">⚠️ Fique de olho na sua caixa de SPAM ou Lixo Eletrônico.</span>
+        </div>
+
+        <button id="btn-submit" class="btn-send" onclick="enviarConsulta()">Enviar ao Templo</button>
+    </div>
+
+    <div class="history-section">
+        <h2 class="history-title">Meus Pedidos</h2>
+        <div id="history-list" class="history-list">
+            <p style="text-align:center; color:#666;">Carregando histórico...</p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- 1. FAILSAFE ---
+    setTimeout(() => { document.getElementById('loading-screen').style.display = 'none'; }, 2000);
+
+    // --- 2. CONFIGURAÇÕES ---
+    const MAX_DAILY = 3;
+    let usedCount = 0;
+    let userUid = null;
+    let userEmail = "";
+
+    // --- 3. FUNÇÕES DO SISTEMA ---
+    
+    // Carregar Histórico
+    function carregarHistorico() {
+        db.collection('perguntas')
+          .where('uid', '==', userUid)
+          .orderBy('data', 'desc')
+          .limit(10)
+          .onSnapshot(snapshot => {
+              const lista = document.getElementById('history-list');
+              lista.innerHTML = '';
+              
+              let countHoje = 0;
+              const hojeStr = new Date().toDateString();
+
+              if(snapshot.empty){
+                  lista.innerHTML = '<p style="text-align:center; color:#666;">Nenhuma consulta realizada ainda.</p>';
+              }
+
+              snapshot.forEach(doc => {
+                  const d = doc.data();
+                  const dataPed = d.data ? d.data.toDate() : new Date();
+                  
+                  if(dataPed.toDateString() === hojeStr) countHoje++;
+
+                  // Renderiza Card
+                  const card = document.createElement('div');
+                  card.className = 'history-card';
+                  
+                  // Status
+                  const statusClass = d.respondido ? 'status-enviado' : 'status-pendente';
+                  const statusTexto = d.respondido ? 'RESPONDIDO' : 'EM ANÁLISE';
+
+                  card.innerHTML = `
+                      <div class="h-info">
+                          <h4>${d.oraculo}</h4>
+                          <p>"${d.pergunta}"</p>
+                          <small style="color:#666">${dataPed.toLocaleString()}</small>
+                      </div>
+                      <div class="h-status ${statusClass}">
+                          ${statusTexto}
+                      </div>
+                  `;
+                  lista.appendChild(card);
+              });
+
+              usedCount = countHoje;
+              atualizarLimiteUI();
+          });
+    }
+
+    function atualizarLimiteUI() {
+        const remaining = MAX_DAILY - usedCount;
+        const badge = document.getElementById('limit-badge');
+        const btn = document.getElementById('btn-submit');
+        const txt = document.getElementById('question-text');
+
+        badge.innerText = `Disponível Hoje: ${Math.max(0, remaining)} / ${MAX_DAILY}`;
+
+        if (remaining <= 0) {
+            btn.disabled = true;
+            btn.innerText = "Limite Diário Atingido";
+            btn.style.background = "#222";
+            btn.style.border = "1px solid #333";
+            txt.disabled = true;
+            txt.placeholder = "Você atingiu o limite sagrado de 3 perguntas por dia. Volte amanhã.";
+            txt.value = "";
+        }
+    }
+
+    function enviarConsulta() {
+        const question = document.getElementById('question-text').value.trim();
+        const select = document.getElementById('oracle-selector');
+        const type = select.value;
+        const btn = document.getElementById('btn-submit');
+
+        // Validação
+        if (question.length < 15) {
+            alert("Sua pergunta é muito breve. Por favor, forneça mais detalhes.");
+            return;
+        }
+
+        if (usedCount >= MAX_DAILY) return;
+
+        // Efeito de Envio
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando ao Templo...';
+
+        // Salvar no Firestore
+        db.collection('perguntas').add({
+            uid: userUid,
+            email: userEmail,
+            oraculo: type,
+            pergunta: question,
+            data: firebase.firestore.FieldValue.serverTimestamp(),
+            respondido: false
+        }).then(() => {
+            alert(`Sua pergunta ao ${type} foi recebida! Nossos mestres iniciarão a leitura. Verifique seu e-mail.`);
+            document.getElementById('question-text').value = "";
+            btn.disabled = false;
+            btn.innerText = "Enviar ao Templo";
+        }).catch((error) => {
+            console.error("Erro:", error);
+            alert("Erro ao enviar. Tente novamente.");
+            btn.disabled = false;
+            btn.innerText = "Enviar ao Templo";
+        });
+    }
+
+    // --- 4. AUTH & INIT ---
+    const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
+    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
+    auth.onAuthStateChanged(user => {
+        if(user){
+            userUid = user.uid;
+            userEmail = user.email;
+            document.getElementById('loading-screen').style.display = 'none';
+            carregarHistorico();
+        } else {
+            window.location.href = 'index.html';
+        }
+    });
+</script>
+</body>
+</html>
