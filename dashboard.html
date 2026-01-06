@@ -15,121 +15,109 @@
     
     <style>
         :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
-        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; overflow-x: hidden; }
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; line-height: 1.6; }
         
-        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
         
         /* HEADER */
-        .header { text-align: center; margin-bottom: 60px; border-bottom: 1px solid #222; padding-bottom: 40px; }
-        .welcome-text { font-family: 'Cinzel'; color: var(--gold); font-size: 2.5em; margin: 0; }
-        .user-sign { font-size: 1.2em; color: #888; text-transform: uppercase; letter-spacing: 4px; margin-top: 10px; }
+        .header { text-align: center; margin-bottom: 50px; }
+        .welcome-text { font-family: 'Cinzel'; color: var(--gold); font-size: 2.2em; margin: 0; }
+        .user-sign { font-size: 1.1em; color: #888; text-transform: uppercase; letter-spacing: 3px; margin-top: 5px; }
 
-        /* GRID DE CONTEÚDO */
-        .grid-destiny { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        /* SEÇÕES DE CONTEÚDO (RESUMOS) */
+        .destiny-section { 
+            background: var(--card-bg); border-left: 3px solid var(--gold); 
+            padding: 30px; margin-bottom: 30px; border-radius: 0 8px 8px 0;
+        }
+        .destiny-section h3 { font-family: 'Cinzel'; color: var(--gold); margin-top: 0; font-size: 1.4em; }
+        .destiny-section p { font-size: 1.1em; color: #ccc; margin-bottom: 10px; }
+        .read-more-dots { color: var(--gold); font-weight: bold; letter-spacing: 2px; }
+
+        /* ÁREA DE CONVITE PREMIUM */
+        .premium-callout {
+            background: linear-gradient(180deg, #0a0a0a 0%, #151108 100%);
+            border: 1px solid #333; padding: 50px 30px; text-align: center; 
+            border-radius: 12px; margin-top: 60px; position: relative;
+        }
+        .premium-callout h2 { font-family: 'Cinzel'; color: var(--gold); font-size: 1.8em; margin-bottom: 15px; }
+        .premium-callout p { font-size: 1.2em; max-width: 700px; margin: 0 auto 30px auto; color: #aaa; }
         
-        .card { 
-            background: var(--card-bg); border: 1px solid #1a1a1a; padding: 30px; border-radius: 8px; 
-            position: relative; transition: 0.4s; overflow: hidden;
+        .benefits-list { 
+            display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; 
+            margin-bottom: 35px; color: var(--gold); font-family: 'Cinzel'; font-size: 0.85em; 
         }
 
-        .card h3 { font-family: 'Cinzel'; color: var(--gold); margin-top: 0; border-bottom: 1px solid #222; padding-bottom: 15px; }
-        
-        /* EFEITO GOSTINHO DE QUERO MAIS */
-        .locked-content { filter: blur(5px); opacity: 0.4; user-select: none; pointer-events: none; }
-        .lock-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: rgba(0,0,0,0.4); z-index: 2;
+        .btn-upgrade {
+            background: var(--gold); color: #000; border: none; padding: 18px 50px;
+            font-family: 'Cinzel'; font-size: 1.2em; font-weight: bold; cursor: pointer;
+            border-radius: 4px; transition: 0.3s; text-transform: uppercase; letter-spacing: 2px;
         }
-        .lock-icon { font-size: 2em; color: var(--gold); margin-bottom: 10px; }
+        .btn-upgrade:hover { background: #fff; box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); transform: translateY(-2px); }
 
-        /* SEÇÃO DE VENDAS (Abaixo do conteúdo) */
-        .sales-banner {
-            margin-top: 80px; background: radial-gradient(circle, #1a150a 0%, #050505 100%);
-            border: 2px solid var(--gold); padding: 50px; text-align: center; border-radius: 12px;
-            box-shadow: 0 0 50px rgba(212, 175, 55, 0.1);
-        }
-        .sales-banner h2 { font-family: 'Cinzel'; color: var(--gold); font-size: 2.2em; margin-bottom: 20px; }
-        .sales-banner p { font-size: 1.3em; max-width: 800px; margin: 0 auto 30px auto; color: #ccc; }
-        
-        .premium-features { display: flex; justify-content: center; gap: 30px; margin-bottom: 40px; flex-wrap: wrap; }
-        .feature-item { font-family: 'Cinzel'; font-size: 0.9em; color: var(--gold); }
-        .feature-item i { margin-right: 8px; }
+        /* FOOTER */
+        .footer { margin-top: 80px; text-align: center; border-top: 1px solid #222; padding: 40px 0; }
+        .logout-link { color: #555; text-decoration: none; font-size: 0.9em; cursor: pointer; }
 
-        .btn-premium {
-            background: var(--gold); color: #000; border: none; padding: 20px 60px;
-            font-family: 'Cinzel'; font-size: 1.4em; font-weight: bold; cursor: pointer;
-            transition: 0.3s; border-radius: 4px; text-transform: uppercase; letter-spacing: 2px;
-        }
-        .btn-premium:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(212, 175, 55, 0.4); }
-
-        /* FOOTER / LOGOUT */
-        .footer { margin-top: 60px; text-align: center; padding-bottom: 40px; }
-        .btn-logout { background: none; border: 1px solid #333; color: #666; padding: 10px 20px; cursor: pointer; }
-
-        @media(max-width: 768px) { .welcome-text { font-size: 1.8em; } .sales-banner { padding: 30px 15px; } }
+        /* ESCONDER QUANDO JÁ FOR PREMIUM */
+        #area-premium-ativa { display: none; text-align: center; margin-top: 40px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h1 class="welcome-text" id="user-name">Carregando...</h1>
-        <div class="user-sign" id="user-sign">Sincronizando as estrelas</div>
+        <h1 class="welcome-text" id="user-name">Saudações</h1>
+        <div class="user-sign" id="user-sign">Sincronizando seu destino...</div>
     </div>
 
-    <div class="grid-destiny">
-        <div class="card">
-            <div class="lock-overlay"><i class="fas fa-lock lock-icon"></i></div>
-            <h3>Sua Jornada Astral</h3>
-            <div class="locked-content">
-                <p>O alinhamento de Saturno com sua casa 7 indica que este é um ano de colheitas profundas. Sua Vênus em harmonia sugere que um segredo de família será revelado através de...</p>
-                <p>A posição da sua Lua revela um desejo reprimido por segurança que será testado no próximo eclipse...</p>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="lock-overlay"><i class="fas fa-lock lock-icon"></i></div>
-            <h3>O Código do Nome</h3>
-            <div class="locked-content">
-                <p>A vibração do seu nome carrega o número 8, o número da abundância e do poder. Porém, seu ano pessoal 7 exige que você faça uma limpeza energética em sua mesa de trabalho para que...</p>
-                <p>A ausência de números pares em seu ciclo atual indica uma transição para...</p>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="lock-overlay"><i class="fas fa-lock lock-icon"></i></div>
-            <h3>Harmonia do Lar</h3>
-            <div class="locked-content">
-                <p>Sua área do sucesso está sendo drenada por um elemento de água mal posicionado. Para atrair a prosperidade que as estrelas prometem, você deve colocar um cristal de...</p>
-                <p>O fluxo de Chi em sua entrada principal está bloqueado por objetos que...</p>
-            </div>
-        </div>
+    <div class="destiny-section">
+        <h3><i class="fas fa-star" style="margin-right: 10px; font-size: 0.8em;"></i> Sua Essência Astral</h3>
+        <p id="mapa-resumo">
+            A posição do Sol no momento do seu nascimento revela uma alma em busca de propósito. Suas casas astrológicas sugerem uma grande inclinação para a espiritualidade, porém, há uma quadratura em Marte que pode estar travando sua vida financeira...
+        </p>
+        <span class="read-more-dots">. . .</span>
     </div>
 
-    <div class="sales-banner" id="premium-offer">
-        <h2>Desbloqueie seu Destino Completo</h2>
+    <div class="destiny-section">
+        <h3><i class="fas fa-infinity" style="margin-right: 10px; font-size: 0.8em;"></i> O Código do seu Nome</h3>
+        <p id="num-resumo">
+            As letras do seu nome vibram na frequência do número 8. Isso indica que você nasceu para liderar e prosperar, mas seu ano pessoal atual exige uma introspecção profunda antes de qualquer investimento...
+        </p>
+        <span class="read-more-dots">. . .</span>
+    </div>
+
+    <div class="destiny-section">
+        <h3><i class="fas fa-yin-yang" style="margin-right: 10px; font-size: 0.8em;"></i> Zodíaco Chinês e Harmonia</h3>
+        <p id="zodiaco-resumo">
+            Sob a regência do seu signo chinês, este ciclo favorece as conexões emocionais. No entanto, a energia "Chi" do seu ambiente atual parece estagnada, necessitando de uma correção elemental urgente no setor leste da sua casa...
+        </p>
+        <span class="read-more-dots">. . .</span>
+    </div>
+
+    <div class="premium-callout" id="venda-container">
+        <h2>Desbloqueie o Conhecimento Completo</h2>
         <p>
-            As estrelas têm muito mais a dizer. Assine agora para ler seu mapa completo e receber orientações exclusivas dos nossos mestres.
+            Estes são apenas os primeiros passos. Assine agora para ler sua análise profunda e receber orientações exclusivas dos nossos mestres para transformar sua realidade.
         </p>
         
-        <div class="premium-features">
-            <div class="feature-item"><i class="fas fa-check"></i> Oráculo Ilimitado</div>
-            <div class="feature-item"><i class="fas fa-check"></i> Rituais de Banho</div>
-            <div class="feature-item"><i class="fas fa-check"></i> Guia de Cristais</div>
-            <div class="feature-item"><i class="fas fa-check"></i> Previsões 2026</div>
+        <div class="benefits-list">
+            <span><i class="fas fa-magic"></i> CONSULTA AO ORÁCULO</span>
+            <span><i class="fas fa-tint"></i> RITUAIS DE BANHO</span>
+            <span><i class="fas fa-gem"></i> GUIA DE CRISTAIS</span>
         </div>
 
-        <button class="btn-premium" id="btn-comprar">Quero Ser Premium</button>
-        <p style="font-size: 0.8em; color: #666; margin-top: 20px;">Acesso instantâneo via PIX ou Cartão.</p>
+        <button class="btn-upgrade" id="btn-comprar">Acessar Tudo por R$ 29,90</button>
+        <p style="font-size: 0.8em; color: #555; margin-top: 15px;">Liberação imediata via PIX ou Cartão.</p>
     </div>
 
-    <div id="premium-area" style="display:none; text-align:center; margin-top:50px;">
-        <button class="btn-premium" onclick="window.location.href='premium-perguntas.html'">Consultar Oráculo Agora</button>
+    <div id="area-premium-ativa">
+        <h2 style="font-family:'Cinzel'; color:var(--gold);">Acesso Sagrado Liberado</h2>
+        <p>Você agora faz parte do círculo interno do Portal Arcano.</p>
+        <button class="btn-upgrade" onclick="window.location.href='premium-perguntas.html'">Ir para Consultas com Oráculo</button>
     </div>
 
     <div class="footer">
-        <button class="btn-logout" onclick="firebase.auth().signOut()">Encerrar Conexão</button>
+        <div class="logout-link" onclick="firebase.auth().signOut()">ENCERRAR SESSÃO</div>
     </div>
 </div>
 
@@ -143,60 +131,48 @@
 
     auth.onAuthStateChanged(user => {
         if (user) {
-            carregarDados(user);
+            verificarStatus(user);
         } else {
             window.location.href = 'index.html';
         }
     });
 
-    async function carregarDados(user) {
+    async function verificarStatus(user) {
         const doc = await db.collection('users').doc(user.uid).get();
         if (doc.exists) {
             const data = doc.data();
             document.getElementById('user-name').innerText = `Saudações, ${data.nome.split(' ')[0]}`;
             document.getElementById('user-sign').innerText = `Signo de ${data.signo} | Guardião da Luz`;
 
-            // Verifica se é PREMIUM
+            // Se for PREMIUM, altera o visual para o usuário
             if (data.premium === true) {
-                liberarAcesso();
+                document.getElementById('venda-container').style.display = 'none';
+                document.getElementById('area-premium-ativa').style.display = 'block';
+                
+                // Remove as reticências e mostra que o conteúdo é completo (Simulando a liberação)
+                const dots = document.querySelectorAll('.read-more-dots');
+                dots.forEach(d => d.style.display = 'none');
             }
         }
     }
 
-    function liberarAcesso() {
-        // Remove os cadeados e o borrão
-        const locks = document.querySelectorAll('.lock-overlay');
-        locks.forEach(l => l.style.display = 'none');
-        
-        const content = document.querySelectorAll('.locked-content');
-        content.forEach(c => {
-            c.style.filter = 'none';
-            c.style.opacity = '1';
-            c.style.pointerEvents = 'auto';
-        });
-
-        // Troca o banner de venda pelo acesso ao oráculo
-        document.getElementById('premium-offer').style.display = 'none';
-        document.getElementById('premium-area').style.display = 'block';
-    }
-
-    // LÓGICA DO BOTÃO DE COMPRA (MERCADO PAGO)
+    // BOTÃO DE COMPRA (MERCADO PAGO)
     document.getElementById('btn-comprar').addEventListener('click', async () => {
         const btn = document.getElementById('btn-comprar');
-        btn.innerText = "CONECTANDO AO BANCO...";
+        btn.innerText = "SINCRONIZANDO PAGAMENTO...";
         btn.disabled = true;
 
         try {
-            // Chama a função 'criarPagamento' que subimos para o Google
+            // Chama a função do seu servidor
             const criarPagamento = functions.httpsCallable('criarPagamento');
             const result = await criarPagamento();
             
-            // Redireciona para o Mercado Pago
+            // Vai para o Checkout do Mercado Pago
             window.location.href = result.data.link;
         } catch (error) {
             console.error(error);
-            alert("Erro ao iniciar portal de pagamento. Tente novamente.");
-            btn.innerText = "Quero Ser Premium";
+            alert("Erro ao conectar ao Portal. Tente novamente.");
+            btn.innerText = "Acessar Tudo por R$ 29,90";
             btn.disabled = false;
         }
     });
