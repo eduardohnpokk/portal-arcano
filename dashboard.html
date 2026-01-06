@@ -3,373 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Arcano | Oráculo Pessoal</title>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Portal Arcano | Meu Destino</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-functions-compat.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        :root { --gold: #d4af37; --gold-light: #f9e29c; --glass: rgba(0, 0, 0, 0.3); --dark-bg: #050505; }
-        body { margin: 0; font-family: 'Raleway', sans-serif; background: #000 url('portalarcano_background.jpg') no-repeat center center fixed; background-size: cover; color: white; line-height: 1.8; padding-bottom: 100px; }
-        header { padding: 40px 20px 10px 20px; text-align: center; }
-        h1 { font-family: 'Cinzel', serif; color: var(--gold); letter-spacing: 6px; margin: 0; text-shadow: 0 0 25px rgba(212, 175, 55, 0.5); font-size: 2.2em; }
-        .subtitulo { letter-spacing: 4px; color: var(--gold-light); font-weight: 300; margin-top: 10px; text-transform: uppercase; font-size: 0.9em; }
-
-        /* BARRA DE DNA ESPIRITUAL */
-        .dna-espiritual { background: rgba(0, 0, 0, 0.8); border-top: 1px solid var(--gold); border-bottom: 1px solid var(--gold); padding: 15px; margin: 20px auto 40px auto; max-width: 900px; display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; font-size: 0.8em; text-transform: uppercase; letter-spacing: 1px; color: #ddd; backdrop-filter: blur(5px); }
-        .dna-item { background: rgba(212, 175, 55, 0.1); padding: 5px 10px; border-radius: 4px; border: 1px solid rgba(212,175,55,0.3); }
-        .dna-item b { color: var(--gold-light); }
-
-        .container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
-        .secao { background: var(--glass); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 20px; padding: 40px; margin-bottom: 50px; backdrop-filter: blur(4px); box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
-        h2 { font-family: 'Cinzel', serif; color: var(--gold); border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding-bottom: 15px; margin-bottom: 25px; font-size: 1.5em; letter-spacing: 2px; }
-        .destaque { color: var(--gold-light); font-weight: 600; }
-        .texto-profundo { font-size: 1.1em; color: #f0f0f0; text-align: justify; margin-bottom: 20px; font-weight: 300; }
+        :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; overflow-x: hidden; }
         
-        .lock-container { background: rgba(20, 20, 20, 0.9); padding: 30px; border-radius: 15px; border: 1px dashed var(--gold); text-align: center; margin-top: 25px; }
-        .btn-premium { background: linear-gradient(135deg, #d4af37 0%, #f9e29c 50%, #d4af37 100%); color: #000; padding: 16px 20px; border: none; border-radius: 5px; font-family: 'Cinzel', serif; font-weight: bold; cursor: pointer; width: 100%; text-transform: uppercase; margin-top: 10px; letter-spacing: 1px; font-size: 0.9em; transition: 0.3s; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); }
-        .btn-premium:hover { transform: scale(1.02); box-shadow: 0 0 25px var(--gold); }
-        .nota-preco { font-size: 0.75em; color: #aaa; margin-top: 8px; font-style: italic; }
-
-        input[type="text"] { width: 100%; padding: 12px; margin-top: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--gold); color: white; border-radius: 5px; box-sizing: border-box; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
         
-        /* MAPA SVG */
-        #chart-container { width: 300px; height: 300px; margin: 20px auto; position: relative; }
-        svg { width: 100%; height: 100%; filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3)); }
+        /* HEADER */
+        .header { text-align: center; margin-bottom: 60px; border-bottom: 1px solid #222; padding-bottom: 40px; }
+        .welcome-text { font-family: 'Cinzel'; color: var(--gold); font-size: 2.5em; margin: 0; }
+        .user-sign { font-size: 1.2em; color: #888; text-transform: uppercase; letter-spacing: 4px; margin-top: 10px; }
 
-        .tag-elemento { background: rgba(212, 175, 55, 0.15); padding: 5px 15px; border-radius: 20px; font-size: 0.9em; border: 1px solid var(--gold); color: var(--gold-light); display: inline-block; margin-bottom: 15px; }
+        /* GRID DE CONTEÚDO */
+        .grid-destiny { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
         
-        .historico-item { background: rgba(0,0,0,0.6); padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid var(--gold); font-size: 0.9em; }
-        .status-pendente { color: #f9e29c; font-style: italic; display: block; margin-top: 5px; font-size: 0.85em; }
+        .card { 
+            background: var(--card-bg); border: 1px solid #1a1a1a; padding: 30px; border-radius: 8px; 
+            position: relative; transition: 0.4s; overflow: hidden;
+        }
 
-        /* BARRA FIXA */
-        .sticky-offer { position: fixed; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, #000, rgba(20, 20, 20, 0.95)); border-top: 2px solid var(--gold); padding: 15px; text-align: center; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .offer-text { color: var(--gold-light); font-size: 0.85em; margin-bottom: 5px; font-weight: bold; }
-        .offer-btn { background: var(--gold); color: #000; padding: 8px 25px; border-radius: 30px; font-weight: bold; text-transform: uppercase; font-size: 0.8em; border: none; cursor: pointer; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); } 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); } }
+        .card h3 { font-family: 'Cinzel'; color: var(--gold); margin-top: 0; border-bottom: 1px solid #222; padding-bottom: 15px; }
+        
+        /* EFEITO GOSTINHO DE QUERO MAIS */
+        .locked-content { filter: blur(5px); opacity: 0.4; user-select: none; pointer-events: none; }
+        .lock-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.4); z-index: 2;
+        }
+        .lock-icon { font-size: 2em; color: var(--gold); margin-bottom: 10px; }
+
+        /* SEÇÃO DE VENDAS (Abaixo do conteúdo) */
+        .sales-banner {
+            margin-top: 80px; background: radial-gradient(circle, #1a150a 0%, #050505 100%);
+            border: 2px solid var(--gold); padding: 50px; text-align: center; border-radius: 12px;
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.1);
+        }
+        .sales-banner h2 { font-family: 'Cinzel'; color: var(--gold); font-size: 2.2em; margin-bottom: 20px; }
+        .sales-banner p { font-size: 1.3em; max-width: 800px; margin: 0 auto 30px auto; color: #ccc; }
+        
+        .premium-features { display: flex; justify-content: center; gap: 30px; margin-bottom: 40px; flex-wrap: wrap; }
+        .feature-item { font-family: 'Cinzel'; font-size: 0.9em; color: var(--gold); }
+        .feature-item i { margin-right: 8px; }
+
+        .btn-premium {
+            background: var(--gold); color: #000; border: none; padding: 20px 60px;
+            font-family: 'Cinzel'; font-size: 1.4em; font-weight: bold; cursor: pointer;
+            transition: 0.3s; border-radius: 4px; text-transform: uppercase; letter-spacing: 2px;
+        }
+        .btn-premium:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(212, 175, 55, 0.4); }
+
+        /* FOOTER / LOGOUT */
+        .footer { margin-top: 60px; text-align: center; padding-bottom: 40px; }
+        .btn-logout { background: none; border: 1px solid #333; color: #666; padding: 10px 20px; cursor: pointer; }
+
+        @media(max-width: 768px) { .welcome-text { font-size: 1.8em; } .sales-banner { padding: 30px 15px; } }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>PORTAL ARCANO</h1>
-    <p class="subtitulo">ANÁLISE VIBRACIONAL</p>
-</header>
-
-<div class="dna-espiritual">
-    <div class="dna-item">Nome: <b id="dna-nome">...</b></div>
-    <div class="dna-item">Nasc: <b id="dna-nasc">...</b></div>
-    <div class="dna-item">Hora: <b id="dna-hora">...</b></div>
-    <div class="dna-item">Local: <b id="dna-local">...</b></div>
-    <div class="dna-item">Sexo: <b id="dna-sexo">...</b></div>
-    <div class="dna-item">Sol: <b id="dna-signo">...</b></div>
-    <div class="dna-item">Asc: <b id="dna-asc">...</b></div>
-</div>
-
 <div class="container">
-    
-    <div class="secao">
-        <h2>🔭 Arquitetura da Alma</h2>
-        <div class="texto-profundo">
-            Sua vinda ao mundo em <span class="destaque" id="info-cidade">...</span> não foi um acaso. O cosmos registrou sua assinatura exata. Calculamos que seu Sol está em <span class="destaque" id="info-signo-texto">...</span> e sua personalidade externa (Ascendente) se projeta através de <span class="destaque" id="info-asc-texto">...</span>.
-            <br><br>
-            Detectamos uma <b>"Frequência de Estagnação"</b> no seu mapa. Você sente que, por mais que lute, uma força invisível trava seus resultados financeiros? Isso é a tensão planetária do seu nascimento agindo sem controle.
+    <div class="header">
+        <h1 class="welcome-text" id="user-name">Carregando...</h1>
+        <div class="user-sign" id="user-sign">Sincronizando as estrelas</div>
+    </div>
+
+    <div class="grid-destiny">
+        <div class="card">
+            <div class="lock-overlay"><i class="fas fa-lock lock-icon"></i></div>
+            <h3>Sua Jornada Astral</h3>
+            <div class="locked-content">
+                <p>O alinhamento de Saturno com sua casa 7 indica que este é um ano de colheitas profundas. Sua Vênus em harmonia sugere que um segredo de família será revelado através de...</p>
+                <p>A posição da sua Lua revela um desejo reprimido por segurança que será testado no próximo eclipse...</p>
+            </div>
         </div>
-        <div class="lock-container">
-            <p>Sua <span class="destaque">Dívida Cármica</span> e as previsões para <span class="ano-dinamico">2026</span> estão protegidas.</p>
-            <button class="btn-premium" onclick="irPagamento()">DESBLOQUEAR TUDO (R$ 29,90)</button>
-            <p class="nota-preco">*Libera todo o portal: Mapa, Numerologia e Oráculos.</p>
+
+        <div class="card">
+            <div class="lock-overlay"><i class="fas fa-lock lock-icon"></i></div>
+            <h3>O Código do Nome</h3>
+            <div class="locked-content">
+                <p>A vibração do seu nome carrega o número 8, o número da abundância e do poder. Porém, seu ano pessoal 7 exige que você faça uma limpeza energética em sua mesa de trabalho para que...</p>
+                <p>A ausência de números pares em seu ciclo atual indica uma transição para...</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="lock-overlay"><i class="fas fa-lock lock-icon"></i></div>
+            <h3>Harmonia do Lar</h3>
+            <div class="locked-content">
+                <p>Sua área do sucesso está sendo drenada por um elemento de água mal posicionado. Para atrair a prosperidade que as estrelas prometem, você deve colocar um cristal de...</p>
+                <p>O fluxo de Chi em sua entrada principal está bloqueado por objetos que...</p>
+            </div>
         </div>
     </div>
 
-    <div class="secao" style="text-align: center;">
-        <h2>🌌 Seu Céu de Nascimento</h2>
-        <div id="chart-container"></div>
-        <div class="texto-profundo">
-            Este gráfico é a representação matemática do céu no seu horário exato (<span class="destaque" id="info-hora-mapa">...</span>). A concentração de planetas mostra onde está sua maior dor e seu maior tesouro nesta vida.
-        </div>
-        <button class="btn-premium" onclick="irPagamento()">BAIXAR Dossiê COMPLETO (PDF)</button>
-    </div>
-
-    <div class="secao">
-        <h2>✡️ O Código do Nome</h2>
-        <div class="texto-profundo">
-            Seu nome de nascimento, <span class="destaque" id="info-nome-nasc">...</span>, e a energia da sua linhagem materna (<span class="destaque" id="info-mae">...</span>), formam um algoritmo. Você pode estar vivendo sob uma "Assinatura de Escassez". Apenas o cálculo do Nome Sagrado pode corrigir isso.
-        </div>
-        <div class="lock-container">
-            <button class="btn-premium" onclick="irPagamento()">LIBERAR NUMEROLOGIA</button>
-        </div>
-    </div>
-
-    <div class="secao">
-        <h2>🌿 Ritual de Selamento Áurico</h2>
-        <p><span class="tag-elemento">Elemento Regente: <span id="userElemento">...</span></span></p>
-        <div class="texto-profundo">
-            Para sua vibração (Elemento <span id="info-elem-texto">...</span>), o banho de <b>Limpeza de Base</b> é o recurso imediato.
-            <br><b>Ingredientes:</b> Alecrim, Manjericão e Arruda.
-        </div>
-        <div class="lock-container" style="border-color: #ff6b6b; background: rgba(255, 107, 107, 0.05);">
-            <p>⚠️ <b>ATENÇÃO:</b> Membros Premium recebem o <b>Banho Exclusivo do Dia</b>, calculado para os trânsitos de hoje.</p>
-            <button class="btn-premium" onclick="irPagamento()">ATIVAR BANHOS EXCLUSIVOS</button>
-        </div>
-    </div>
-
-    <div class="secao">
-        <h2>⛩️ O Fluxo da Prosperidade</h2>
-        <div class="texto-profundo">
-            Existe um "ponto cego" no seu quarto que está drenando sua energia vital durante o sono. Sem corrigir isso através do Feng Shui, o dinheiro entra e sai sem controle.
-        </div>
-        <div class="lock-container">
-            <p>🔒 O <b>Mapa do Baguá</b> da sua casa é revelado no plano pago.</p>
-            <button class="btn-premium" onclick="irPagamento()">HARMONIZAR MEU LAR</button>
-        </div>
-    </div>
-
-    <div class="secao">
-        <h2>🐉 O Animal Guardião</h2>
-        <div class="texto-profundo">
-            Você é regido pelo <span class="destaque" id="info-signo-chines">...</span>. No ano de <span class="ano-dinamico">2026</span>, a energia deste animal exige cautela extrema para evitar perdas.
-        </div>
-        <div class="lock-container">
-            <button class="btn-premium" onclick="irPagamento()">VER PREVISÕES <span class="ano-dinamico">2026</span></button>
-        </div>
-    </div>
-
-    <div class="secao">
-        <h2>🔮 Oráculos e Consultas</h2>
+    <div class="sales-banner" id="premium-offer">
+        <h2>Desbloqueie seu Destino Completo</h2>
+        <p>
+            As estrelas têm muito mais a dizer. Assine agora para ler seu mapa completo e receber orientações exclusivas dos nossos mestres.
+        </p>
         
-        <div class="lock-container">
-            <h3>🐚 Búzios (1 hora)</h3>
-            <input type="text" id="pergBuzios" placeholder="Sua pergunta...">
-            <button class="btn-premium" onclick="solicitarConsulta('Búzios', 'pergBuzios')">ENVIAR (ACESSO TOTAL)</button>
+        <div class="premium-features">
+            <div class="feature-item"><i class="fas fa-check"></i> Oráculo Ilimitado</div>
+            <div class="feature-item"><i class="fas fa-check"></i> Rituais de Banho</div>
+            <div class="feature-item"><i class="fas fa-check"></i> Guia de Cristais</div>
+            <div class="feature-item"><i class="fas fa-check"></i> Previsões 2026</div>
         </div>
 
-        <div class="lock-container" style="margin-top: 30px;">
-            <h3>🃏 Tarot Cigano (30 min)</h3>
-            <input type="text" id="pergCigano" placeholder="Sua pergunta...">
-            <button class="btn-premium" onclick="solicitarConsulta('Tarot Cigano', 'pergCigano')">ENVIAR (ACESSO TOTAL)</button>
-        </div>
-
-        <div class="lock-container" style="margin-top: 30px;">
-            <h3>👁️ Tarot Egípcio (2 horas)</h3>
-            <input type="text" id="pergEgipcio" placeholder="O que o destino deve revelar?">
-            <button class="btn-premium" onclick="solicitarConsulta('Tarot Egípcio', 'pergEgipcio')">ENVIAR (ACESSO TOTAL)</button>
-        </div>
-
-        <div id="secao-historico" style="margin-top: 50px; border-top: 1px solid rgba(212,175,55,0.3); padding-top: 30px;">
-            <h3 style="font-family: 'Cinzel'; color: var(--gold); text-align: center;">Histórico de Consultas</h3>
-            <div id="lista-historico"><p style="text-align: center; opacity: 0.5;">Carregando...</p></div>
-        </div>
+        <button class="btn-premium" id="btn-comprar">Quero Ser Premium</button>
+        <p style="font-size: 0.8em; color: #666; margin-top: 20px;">Acesso instantâneo via PIX ou Cartão.</p>
     </div>
 
-    <div style="text-align: center; margin: 60px 0; opacity: 0.4;">
-        <span onclick="excluirConta()" style="cursor:pointer; text-decoration: underline; font-size: 0.8em;">Encerrar Minha Jornada e Apagar Dados</span>
+    <div id="premium-area" style="display:none; text-align:center; margin-top:50px;">
+        <button class="btn-premium" onclick="window.location.href='premium-perguntas.html'">Consultar Oráculo Agora</button>
     </div>
 
-</div>
-
-<div class="sticky-offer" onclick="irPagamento()">
-    <div class="offer-text">🔓 OFERTA: Mapa + Tarot + Feng Shui + Numerologia</div>
-    <button class="offer-btn">ATIVAR TUDO POR R$ 29,90</button>
+    <div class="footer">
+        <button class="btn-logout" onclick="firebase.auth().signOut()">Encerrar Conexão</button>
+    </div>
 </div>
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE",
-        authDomain: "portal-mistico-6532b.firebaseapp.com",
-        projectId: "portal-mistico-6532b",
-        storageBucket: "portal-mistico-6532b.firebasestorage.app",
-        messagingSenderId: "925159229004",
-        appId: "1:925159229004:web:5d9dc758474789085016e9"
-    };
-
-    try {
-        firebase.initializeApp(firebaseConfig);
-    } catch(e) { console.error("Erro Firebase Init", e); }
-    
+    // Configurações do seu Firebase (NÃO ALTERAR)
+    const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
+    firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
-
-    // === FUNÇÕES MATEMÁTICAS SEGURAS ===
-    const geoDB = {
-        "SP": {lat:-23.55, lon:-46.63}, "SAO PAULO": {lat:-23.55, lon:-46.63},
-        "RJ": {lat:-22.90, lon:-43.17}, "RIO": {lat:-22.90, lon:-43.17},
-        "MG": {lat:-19.91, lon:-43.93}, "BH": {lat:-19.91, lon:-43.93},
-        "DF": {lat:-15.79, lon:-47.88}, "BRASILIA": {lat:-15.79, lon:-47.88},
-        "BA": {lat:-12.97, lon:-38.50}, "SALVADOR": {lat:-12.97, lon:-38.50},
-        "DEFAULT": {lat:-15.79, lon:-47.88} 
-    };
-
-    function getCoords(str) {
-        if(!str) return geoDB.DEFAULT;
-        const s = str.toUpperCase();
-        for(let k in geoDB) { if(s.includes(k)) return geoDB[k]; }
-        return geoDB.DEFAULT;
-    }
-
-    function toJulian(date) { return (date.getTime() / 86400000) - (date.getTimezoneOffset() / 1440) + 2440587.5; }
-    function normalize(deg) { deg = deg % 360; if (deg < 0) deg += 360; return deg; }
-    
-    function getSunLong(jd) {
-        const n = jd - 2451545.0;
-        const L = normalize(280.460 + 0.9856474 * n);
-        const g = normalize(357.528 + 0.9856003 * n);
-        return normalize(L + 1.915 * Math.sin(g * Math.PI/180));
-    }
-
-    function getAscendant(date, hora, lat, lon) {
-        try {
-            const [h, m] = hora.split(':').map(Number);
-            const jd = toJulian(date);
-            const t = (jd - 2451545.0) / 36525.0;
-            const gmst = 280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * t * t;
-            const lst = normalize(gmst + (h+3)*15 + m*0.25 + lon); // +3h aproximado para UTC Brasil
-            
-            const eps = 23.439 * Math.PI / 180;
-            const latRad = lat * Math.PI / 180;
-            const lstRad = lst * Math.PI / 180;
-            
-            const y = Math.cos(lstRad);
-            const x = - (Math.sin(lstRad) * Math.cos(eps) + Math.tan(latRad) * Math.sin(eps));
-            return normalize((Math.atan2(y, x) * 180 / Math.PI));
-        } catch(e) { return 0; }
-    }
-
-    function getSignName(deg) {
-        const signs = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
-        return signs[Math.floor(deg / 30)] || "Áries";
-    }
-
-    function drawChart(sun, asc) {
-        const el = document.getElementById('chart-container');
-        if(!el) return;
-        const cx = 150, cy = 150, r = 120;
-        let svg = `<svg viewBox="0 0 300 300">
-            <circle cx="${cx}" cy="${cy}" r="${r}" fill="#050505" stroke="#d4af37" stroke-width="2"/>
-            <g transform="rotate(${-asc + 180}, ${cx}, ${cy})">`; 
-        
-        for(let i=0; i<12; i++) {
-            const rot = i * 30;
-            svg += `<line x1="${cx}" y1="${cy}" x2="${cx + r}" y2="${cy}" transform="rotate(${rot}, ${cx}, ${cy})" stroke="rgba(212,175,55,0.3)" />`;
-            const sym = ["♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"][i];
-            svg += `<text x="${cx + r - 15}" y="${cy}" transform="rotate(${rot + 15}, ${cx}, ${cy})" fill="#fff" font-size="14" text-anchor="middle" alignment-baseline="middle" style="opacity:0.6">${sym}</text>`;
-        }
-        svg += `</g>`;
-        
-        // Plotar Sol
-        const relSun = normalize(sun - asc + 180);
-        const radSun = relSun * Math.PI / 180;
-        const px = cx + (r * 0.7) * Math.cos(radSun);
-        const py = cy + (r * 0.7) * Math.sin(radSun);
-        svg += `<text x="${px}" y="${py}" fill="#ffd700" font-size="24" text-anchor="middle" alignment-baseline="middle">☉</text>`;
-        
-        // Ascendente Marcador
-        svg += `<path d="M ${cx-r} ${cy} L ${cx-r-10} ${cy-5} L ${cx-r-10} ${cy+5} Z" fill="#d4af37"/>`;
-        svg += `</svg>`;
-        el.innerHTML = svg;
-    }
-
-    // === INICIALIZAÇÃO ===
-    const anoVenda = new Date().getMonth() >= 9 ? new Date().getFullYear() + 1 : new Date().getFullYear();
-    document.querySelectorAll('.ano-dinamico').forEach(e => e.innerText = anoVenda);
+    const functions = firebase.functions();
 
     auth.onAuthStateChanged(user => {
-        if (!user) { window.location.href = "index.html"; return; }
-
-        db.collection("usuarios").doc(user.uid).onSnapshot(doc => {
-            if (doc.exists) {
-                const d = doc.data();
-                
-                const nome = d.nomeNascimento || d.nome || "Buscador";
-                const mae = d.nomeMae || "Linhagem Materna";
-                const nasc = d.dataNascimento || "2000-01-01";
-                const hora = d.horaNascimento || "12:00";
-                const local = d.localNascimento || "Brasil";
-                const sexo = d.sexo || "Alma";
-
-                // Cálculos
-                const [yyyy, mm, dd] = nasc.split('-').map(Number);
-                const dateObj = new Date(yyyy, mm-1, dd);
-                const coords = getCoords(local);
-                
-                const sunDeg = getSunLong(toJulian(dateObj));
-                const ascDeg = getAscendant(dateObj, hora, coords.lat, coords.lon);
-                
-                const signoSolar = getSignName(sunDeg);
-                const signoAsc = getSignName(ascDeg);
-
-                // Preencher HTML
-                const safeSet = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
-                
-                safeSet('dna-nome', nome.split(' ')[0].toUpperCase());
-                safeSet('dna-nasc', nasc);
-                safeSet('dna-hora', hora);
-                safeSet('dna-local', local);
-                safeSet('dna-sexo', sexo);
-                safeSet('dna-signo', signoSolar);
-                safeSet('dna-asc', signoAsc);
-
-                safeSet('info-cidade', local);
-                safeSet('info-signo-texto', signoSolar);
-                safeSet('info-asc-texto', signoAsc);
-                safeSet('info-nome-nasc', nome);
-                safeSet('info-mae', mae);
-                safeSet('info-hora-mapa', hora);
-
-                // Elemento
-                let el = "Água";
-                if(["Áries","Leão","Sagitário"].includes(signoSolar)) el = "Fogo";
-                else if(["Touro","Virgem","Capricórnio"].includes(signoSolar)) el = "Terra";
-                else if(["Gêmeos","Libra","Aquário"].includes(signoSolar)) el = "Ar";
-                safeSet('userElemento', el);
-                safeSet('info-elem-texto', el);
-
-                // Chinês
-                const anoChines = ["Macaco","Galo","Cão","Porco","Rato","Boi","Tigre","Coelho","Dragão","Serpente","Cavalo","Cabra"][yyyy % 12];
-                safeSet('info-signo-chines', anoChines);
-
-                // Desenhar Mapa
-                drawChart(sunDeg, ascDeg);
-            }
-        });
-
-        // Histórico
-        db.collection("consultas").where("userId", "==", user.uid).orderBy("data", "desc")
-            .onSnapshot(snap => {
-                const lista = document.getElementById('lista-historico');
-                if(!lista) return;
-                if(snap.empty) { lista.innerHTML = "<p style='text-align:center; opacity:0.5'>Nenhuma consulta.</p>"; return; }
-                lista.innerHTML = "";
-                snap.forEach(r => {
-                    const c = r.data();
-                    lista.innerHTML += `<div class="historico-item"><b>${c.tipo}</b>: ${c.pergunta}<br><span class="status-pendente">Status: ${c.status || 'Pendente'}</span></div>`;
-                });
-            });
+        if (user) {
+            carregarDados(user);
+        } else {
+            window.location.href = 'index.html';
+        }
     });
 
-    function solicitarConsulta(tipo, id) {
-        const val = document.getElementById(id).value;
-        if(!val) return alert("Digite sua pergunta.");
-        db.collection("consultas").add({
-            userId: auth.currentUser.uid,
-            tipo: tipo,
-            pergunta: val,
-            data: new Date().toISOString(),
-            status: 'Aguardando Mestre'
-        }).then(() => {
-            document.getElementById(id).value = "";
-            window.open('https://www.mercadopago.com.br/', '_blank');
-        });
-    }
+    async function carregarDados(user) {
+        const doc = await db.collection('users').doc(user.uid).get();
+        if (doc.exists) {
+            const data = doc.data();
+            document.getElementById('user-name').innerText = `Saudações, ${data.nome.split(' ')[0]}`;
+            document.getElementById('user-sign').innerText = `Signo de ${data.signo} | Guardião da Luz`;
 
-    function irPagamento() { window.open('https://www.mercadopago.com.br/', '_blank'); }
-    
-    function excluirConta() {
-        if(confirm("Apagar tudo?")) {
-            const u = auth.currentUser;
-            db.collection("usuarios").doc(u.uid).delete().then(() => u.delete().then(() => location.href="index.html"));
+            // Verifica se é PREMIUM
+            if (data.premium === true) {
+                liberarAcesso();
+            }
         }
     }
+
+    function liberarAcesso() {
+        // Remove os cadeados e o borrão
+        const locks = document.querySelectorAll('.lock-overlay');
+        locks.forEach(l => l.style.display = 'none');
+        
+        const content = document.querySelectorAll('.locked-content');
+        content.forEach(c => {
+            c.style.filter = 'none';
+            c.style.opacity = '1';
+            c.style.pointerEvents = 'auto';
+        });
+
+        // Troca o banner de venda pelo acesso ao oráculo
+        document.getElementById('premium-offer').style.display = 'none';
+        document.getElementById('premium-area').style.display = 'block';
+    }
+
+    // LÓGICA DO BOTÃO DE COMPRA (MERCADO PAGO)
+    document.getElementById('btn-comprar').addEventListener('click', async () => {
+        const btn = document.getElementById('btn-comprar');
+        btn.innerText = "CONECTANDO AO BANCO...";
+        btn.disabled = true;
+
+        try {
+            // Chama a função 'criarPagamento' que subimos para o Google
+            const criarPagamento = functions.httpsCallable('criarPagamento');
+            const result = await criarPagamento();
+            
+            // Redireciona para o Mercado Pago
+            window.location.href = result.data.link;
+        } catch (error) {
+            console.error(error);
+            alert("Erro ao iniciar portal de pagamento. Tente novamente.");
+            btn.innerText = "Quero Ser Premium";
+            btn.disabled = false;
+        }
+    });
 </script>
+
 </body>
 </html>
