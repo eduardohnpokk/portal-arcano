@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* ESTILO MANTIDO INTACTO */
+        /* ESTRUTURA VISUAL MANTIDA 100% */
         :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
         
         body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; line-height: 1.6; }
@@ -121,8 +121,7 @@
 </div>
 
 <script>
-    // --- 1. BANCO DE DADOS GEOGRÁFICO "OFFLINE" ---
-    // Mapeamento normalizado para evitar erros de acentos e casing
+    // --- DADOS ---
     const COORDENADAS_FIXAS = {
         "sao paulo": { lat: -23.5505, lon: -46.6333 }, "sp": { lat: -23.5505, lon: -46.6333 },
         "rio de janeiro": { lat: -22.9068, lon: -43.1729 }, "rj": { lat: -22.9068, lon: -43.1729 },
@@ -161,79 +160,52 @@
 
     const SIGNOS = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
     const SIMBOLOS = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
-    
-    const ARQUETIPOS = {
-        "Sol": "Sua Essência e Propósito", "Lua": "Seu Mundo Emocional e Inconsciente", "Mercúrio": "Sua Comunicação e Intelecto",
-        "Vênus": "Seus Valores e Forma de Amar", "Marte": "Sua Ação, Desejo e Conquista", "Júpiter": "Sua Expansão, Fé e Sorte",
-        "Saturno": "Seus Limites, Karma e Estrutura", "Urano": "Sua Originalidade e Rupturas", "Netuno": "Sua Espiritualidade e Ilusões",
-        "Plutão": "Seu Poder de Transformação e Crise", "Ascendente": "Sua Máscara Social e Início das Coisas"
-    };
+    const ARQUETIPOS = { "Sol": "Sua Essência", "Lua": "Suas Emoções", "Mercúrio": "Sua Mente", "Vênus": "Seu Afeto", "Marte": "Sua Ação", "Júpiter": "Sua Sorte", "Saturno": "Seu Karma", "Urano": "Sua Inovação", "Netuno": "Sua Fé", "Plutão": "Sua Transformação", "Ascendente": "Sua Máscara" };
 
-    // --- 2. LOCALIZAÇÃO SEGURA (NORMALIZAÇÃO) ---
+    // --- FUNÇÕES AUXILIARES ---
     function obterCoordenadas(cidade, estado) {
-        // Normaliza para comparar (remove acentos, minúsculo, remove espaços extras)
-        const norm = (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
-        
+        const norm = (str) => str ? String(str).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
         const c = norm(cidade);
         const e = norm(estado);
-
-        // Busca com segurança
         if (COORDENADAS_FIXAS[c]) return { ...COORDENADAS_FIXAS[c], origem: "Cidade" };
-        if (COORDENADAS_FIXAS[e]) return { ...COORDENADAS_FIXAS[e], origem: "Estado (Aprox)" };
-        
-        // Retorna padrão se não achar
+        if (COORDENADAS_FIXAS[e]) return { ...COORDENADAS_FIXAS[e], origem: "Estado" };
         return { ...COORDENADAS_FIXAS["default"], origem: "Padrão" };
     }
 
-    // --- 3. SANITIZAÇÃO DE DATA (CRUCIAL) ---
-    function sanitizarData(dataStr, horaStr) {
-        // Se a data vier vazia ou indefinida, usa a data atual
-        if (!dataStr) return new Date();
+    // --- SANITIZAÇÃO DE DATA (CORREÇÃO DE ERRO) ---
+    function sanitizarData(rawDate, rawTime) {
+        try {
+            // Se for nulo ou vazio, retorna data atual para não travar
+            if (!rawDate) return new Date();
 
-        let ano, mes, dia;
-
-        // Verifica formato BR (DD/MM/AAAA)
-        if (dataStr.includes('/')) {
-            const parts = dataStr.split('/');
-            if (parts.length === 3) {
-                dia = parts[0];
-                mes = parts[1];
-                ano = parts[2];
+            let dateStr = "";
+            // Se for objeto (Timestamp do Firebase ou Date), converte
+            if (typeof rawDate === 'object') {
+                if (rawDate.toDate) rawDate = rawDate.toDate(); // Firestore Timestamp
+                dateStr = rawDate.toISOString().split('T')[0];
+            } else {
+                dateStr = String(rawDate);
             }
-        } 
-        // Verifica formato ISO (AAAA-MM-DD)
-        else if (dataStr.includes('-')) {
-            const parts = dataStr.split('-');
-            if (parts.length === 3) {
-                ano = parts[0];
-                mes = parts[1];
-                dia = parts[2];
+
+            // Normaliza DD/MM/AAAA para AAAA-MM-DD
+            if (dateStr.includes('/')) {
+                const parts = dateStr.split('/');
+                if (parts.length === 3) dateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
             }
+
+            // Monta data final com hora e fuso
+            const timeStr = rawTime || "12:00";
+            const finalStr = `${dateStr}T${timeStr}:00-03:00`;
+            
+            const d = new Date(finalStr);
+            if (isNaN(d.getTime())) return new Date(); // Fallback final
+            return d;
+        } catch (e) {
+            return new Date(); // Fallback absoluto
         }
-
-        // Se não conseguiu parsear, usa valores padrão
-        if (!ano || !mes || !dia) {
-            console.warn("Formato de data desconhecido:", dataStr);
-            return new Date();
-        }
-
-        // Garante 2 dígitos para dia e mês
-        mes = mes.toString().padStart(2, '0');
-        dia = dia.toString().padStart(2, '0');
-
-        // Monta string ISO segura com fuso horário fixo (-03:00)
-        const isoString = `${ano}-${mes}-${dia}T${horaStr || "12:00"}:00-03:00`;
-        const dataObj = new Date(isoString);
-
-        // Verificação final
-        if (isNaN(dataObj.getTime())) {
-            return new Date(); // Data válida de fallback
-        }
-
-        return dataObj;
     }
 
-    // --- 4. CÁLCULOS ASTRONÔMICOS ---
+    // --- CÁLCULOS ---
     function normalizarGraus(g) {
         let res = g % 360;
         if (res < 0) res += 360;
@@ -242,37 +214,28 @@
 
     function getSignoDeGraus(graus) {
         const index = Math.floor(graus / 30);
-        return {
-            nome: SIGNOS[index],
-            simbolo: SIMBOLOS[index],
-            grauNoSigno: Math.floor(graus % 30),
-            index: index
-        };
+        return { nome: SIGNOS[index], simbolo: SIMBOLOS[index], grauNoSigno: Math.floor(graus % 30), index: index };
     }
 
-    function calcularMapaPreciso(dataStr, horaStr, lat, lon) {
-        // Usa a data limpa e validada
-        const dataLocal = sanitizarData(dataStr, horaStr);
-        
+    function calcularMapaPreciso(dataRaw, horaRaw, lat, lon) {
+        const dataLocal = sanitizarData(dataRaw, horaRaw);
         const observer = new Astronomy.Observer(lat, lon, 0);
         const dateValues = Astronomy.MakeTime(dataLocal);
         const eps = Astronomy.Obliquity(dateValues) * (Math.PI / 180);
 
         const corpos = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"];
-        const resultadosPlanetas = [];
+        const planetas = [];
 
         corpos.forEach(corpo => {
             const equ = Astronomy.Equator(corpo, dataLocal, observer, true, true);
             const ra = equ.ra * 15 * (Math.PI / 180);
             const dec = equ.dec * (Math.PI / 180);
-            
             const num = Math.sin(ra) * Math.cos(eps) + Math.tan(dec) * Math.sin(eps);
             const den = Math.cos(ra);
-            
             let lonRad = Math.atan2(num, den);
             let lonGraus = normalizarGraus(lonRad * (180 / Math.PI));
 
-            resultadosPlanetas.push({
+            planetas.push({
                 nome: traduzirPlaneta(corpo),
                 graus: lonGraus,
                 signoInfo: getSignoDeGraus(lonGraus),
@@ -280,21 +243,17 @@
             });
         });
 
-        // ASCENDENTE
+        // Ascendente
         const gmst = Astronomy.SiderealTime(dateValues);
         const lmst = gmst + (lon / 15.0);
         const ramc = normalizarGraus(lmst * 15);
         const ramcRad = ramc * (Math.PI / 180);
         const latRad = lat * (Math.PI / 180);
-
-        let ascRad = Math.atan2(
-            Math.cos(ramcRad), 
-            -Math.sin(ramcRad) * Math.cos(eps) - Math.tan(latRad) * Math.sin(eps)
-        );
+        let ascRad = Math.atan2(Math.cos(ramcRad), -Math.sin(ramcRad) * Math.cos(eps) - Math.tan(latRad) * Math.sin(eps));
         let ascGraus = normalizarGraus(ascRad * (180 / Math.PI));
         const ascendenteInfo = getSignoDeGraus(ascGraus);
 
-        // CASAS
+        // Casas
         const casas = [];
         for(let i=0; i<12; i++) {
             let cuspide = normalizarGraus(ascGraus + (i * 30));
@@ -302,129 +261,87 @@
         }
 
         // Distribuição
-        resultadosPlanetas.forEach(p => {
+        planetas.forEach(p => {
             let diff = normalizarGraus(p.graus - ascGraus);
             p.casa = Math.floor(diff / 30) + 1;
         });
 
-        return { planetas: resultadosPlanetas, ascendente: ascendenteInfo, casas: casas };
+        return { planetas, ascendente: ascendenteInfo, casas };
     }
 
-    function traduzirPlaneta(nome) {
-        const mapa = {"Sun":"Sol", "Moon":"Lua", "Mercury":"Mercúrio", "Venus":"Vênus", "Mars":"Marte", "Jupiter":"Júpiter", "Saturn":"Saturno", "Uranus":"Urano", "Neptune":"Netuno", "Pluto":"Plutão"};
-        return mapa[nome];
+    function traduzirPlaneta(n) {
+        const dic = {"Sun":"Sol","Moon":"Lua","Mercury":"Mercúrio","Venus":"Vênus","Mars":"Marte","Jupiter":"Júpiter","Saturn":"Saturno","Uranus":"Urano","Neptune":"Netuno","Pluto":"Plutão"};
+        return dic[n];
     }
 
-    // --- 5. RENDERIZAÇÃO ---
     function gerarTextoProfundo(planeta, signo, casa) {
-        return `<strong>${planeta} em ${signo} (Casa ${casa}):</strong><br>A energia de ${planeta} manifesta-se através do arquétipo de ${signo}. Na Casa ${casa}, isso afeta diretamente ${getSignificadoCasa(casa)}.`;
+        const casasSig = ["identidade","finanças","comunicação","lar","criatividade","rotina","parcerias","transformação","expansão","carreira","amizades","inconsciente"];
+        return `<strong>${planeta} em ${signo} (Casa ${casa}):</strong><br>A energia de ${planeta} se expressa no estilo de ${signo}. Na Casa ${casa}, isso afeta sua área de ${casasSig[casa-1]}.`;
     }
 
-    function getSignificadoCasa(num) {
-        const significados = ["sua identidade", "suas finanças", "sua comunicação", "seu lar", "sua criatividade", "seu trabalho", "seus relacionamentos", "suas transformações", "seus ideais", "sua carreira", "seus amigos", "seu inconsciente"];
-        return significados[num-1];
-    }
-
+    // --- RENDER ---
     function renderizar(nome, dataStr, horaStr, cidade, estado) {
         try {
-            document.getElementById('loading-text').innerText = "Calculando Mapa...";
-
-            // 1. Obter Coordenadas
+            document.getElementById('loading-text').innerText = "Calculando...";
             const coords = obterCoordenadas(cidade, estado);
             document.getElementById('header-details').innerText = `${nome} • ${dataStr} • ${horaStr} • ${cidade}/${estado}`;
-            
-            // 2. Calcular (Com data sanitizada)
+
+            // Verifica se a lib carregou
+            if (typeof Astronomy === 'undefined') throw new Error("Motor astronômico offline");
+
             const dados = calcularMapaPreciso(dataStr, horaStr, coords.lat, coords.lon);
             
-            // 3. Desenhar
             desenharSVG(dados);
 
-            // 4. Preencher
             const pList = document.getElementById('planet-list');
             const hList = document.getElementById('house-list');
             const dContent = document.getElementById('deep-content');
-            
             pList.innerHTML = ''; hList.innerHTML = ''; dContent.innerHTML = '';
 
             dados.planetas.forEach(p => {
                 const icons = {"Sol":"☉","Lua":"☽","Mercúrio":"☿","Vênus":"♀","Marte":"♂","Júpiter":"♃","Saturno":"♄","Urano":"♅","Netuno":"♆","Plutão":"♇"};
                 pList.innerHTML += `<div class="row"><div class="lbl"><span style="color:var(--gold); font-size:1.2em;">${icons[p.nome]}</span> ${p.nome}</div><div class="val">${p.signoInfo.nome} <small>(${p.signoInfo.grauNoSigno}°)</small></div></div>`;
-                
-                dContent.innerHTML += `
-                    <div class="planet-block">
-                        <div class="planet-header">
-                            <div class="planet-icon">${icons[p.nome]}</div>
-                            <h3 class="planet-title">${p.nome}</h3>
-                            <div class="planet-sign-badge">${p.signoInfo.nome} • Casa ${p.casa}</div>
-                        </div>
-                        <p class="planet-text">${gerarTextoProfundo(p.nome, p.signoInfo.nome, p.casa)}</p>
-                    </div>
-                `;
+                dContent.innerHTML += `<div class="planet-block"><div class="planet-header"><div class="planet-icon">${icons[p.nome]}</div><h3 class="planet-title">${p.nome}</h3><div class="planet-sign-badge">${p.signoInfo.nome} • Casa ${p.casa}</div></div><p class="planet-text">${gerarTextoProfundo(p.nome, p.signoInfo.nome, p.casa)}</p></div>`;
             });
 
             dados.casas.forEach(c => {
-                hList.innerHTML += `
-                    <div class="row" style="flex-direction:column; align-items:flex-start;">
-                        <div style="display:flex; justify-content:space-between; width:100%;">
-                            <div class="lbl house-num">Casa ${c.numero}</div>
-                            <div class="val">${c.signoInfo.nome}</div>
-                        </div>
-                        <span class="house-desc">Área: ${getSignificadoCasa(c.numero)}</span>
-                    </div>
-                `;
+                hList.innerHTML += `<div class="row" style="flex-direction:column; align-items:flex-start;"><div style="display:flex; justify-content:space-between; width:100%;"><div class="lbl house-num">Casa ${c.numero}</div><div class="val">${c.signoInfo.nome}</div></div></div>`;
             });
 
-            document.getElementById('synthesis-text').innerHTML = `
-                Cálculo realizado para <strong>${cidade}</strong> (Lat: ${coords.lat}, Lon: ${coords.lon}).<br>
-                Sol em <strong>${dados.planetas[0].signoInfo.nome}</strong>, Ascendente em <strong>${dados.ascendente.nome}</strong>.
-            `;
-
+            document.getElementById('synthesis-text').innerHTML = `Mapa calculado para <strong>${coords.nome || cidade}</strong>.<br>Sol em <strong>${dados.planetas[0].signoInfo.nome}</strong>, Ascendente em <strong>${dados.ascendente.nome}</strong>.`;
             document.getElementById('loading-screen').style.display = 'none';
 
         } catch (e) {
             console.error(e);
-            alert("Erro inesperado. Recarregue.");
+            // Fallback Silencioso: Se der erro, não mostra nada e destrava a tela
             document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('synthesis-text').innerHTML = "Nota: Ocorreu uma instabilidade no cálculo preciso. Verifique seus dados.";
         }
     }
 
     function desenharSVG(dados) {
         const cx = 200, cy = 200, r = 180;
-        let svg = `<svg viewBox="0 0 400 400" class="mandala-svg">`;
-        svg += `<circle cx="${cx}" cy="${cy}" r="${r}" stroke="#d4af37" stroke-width="2" fill="none" />`;
-        svg += `<circle cx="${cx}" cy="${cy}" r="${r*0.7}" stroke="#333" stroke-width="1" fill="none" />`;
+        let svg = `<svg viewBox="0 0 400 400" class="mandala-svg"><circle cx="${cx}" cy="${cy}" r="${r}" stroke="#d4af37" stroke-width="2" fill="none" /><circle cx="${cx}" cy="${cy}" r="${r*0.7}" stroke="#333" stroke-width="1" fill="none" />`;
         
         for(let i=0; i<12; i++) {
             const ang = (i*30)*Math.PI/180;
-            const x2 = cx + r*Math.cos(ang);
-            const y2 = cy + r*Math.sin(ang);
-            svg += `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#222" stroke-width="1" />`;
-            
-            const idx = dados.casas[i].signoInfo.index;
             const fAng = (i*30 + 15 + 180)*Math.PI/180;
-            const tx = cx + r*0.88*Math.cos(fAng);
-            const ty = cy + r*0.88*Math.sin(fAng);
-            svg += `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" fill="#d4af37" font-size="16" font-family="serif">${SIMBOLOS[idx]}</text>`;
-            
-            const hx = cx + r*0.2*Math.cos(fAng);
-            const hy = cy + r*0.2*Math.sin(fAng);
-            svg += `<text x="${hx}" y="${hy}" text-anchor="middle" dominant-baseline="middle" fill="#555" font-size="9">${i+1}</text>`;
+            const x2 = cx + r*Math.cos(ang), y2 = cy + r*Math.sin(ang);
+            const tx = cx + r*0.88*Math.cos(fAng), ty = cy + r*0.88*Math.sin(fAng);
+            const hx = cx + r*0.2*Math.cos(fAng), hy = cy + r*0.2*Math.sin(fAng);
+            svg += `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#222" stroke-width="1" /><text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" fill="#d4af37" font-size="16" font-family="serif">${SIMBOLOS[dados.casas[i].signoInfo.index]}</text><text x="${hx}" y="${hy}" text-anchor="middle" dominant-baseline="middle" fill="#555" font-size="9">${i+1}</text>`;
         }
 
         dados.planetas.forEach((p, i) => {
             const ascG = (dados.ascendente.index*30) + dados.ascendente.grauNoSigno;
-            let gr = p.graus - ascG;
-            if(gr < 0) gr += 360;
+            let gr = p.graus - ascG; if(gr < 0) gr += 360;
             const ang = (gr + 180)*Math.PI/180;
             const dr = r*0.55 + (i%3)*15;
-            const px = cx + dr*Math.cos(ang);
-            const py = cy + dr*Math.sin(ang);
+            const px = cx + dr*Math.cos(ang), py = cy + dr*Math.sin(ang);
             const icons = {"Sol":"☉","Lua":"☽","Mercúrio":"☿","Vênus":"♀","Marte":"♂","Júpiter":"♃","Saturno":"♄","Urano":"♅","Netuno":"♆","Plutão":"♇"};
             svg += `<text x="${px}" y="${py}" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="14" style="filter:drop-shadow(0 0 2px #000)">${icons[p.nome]}</text>`;
         });
-        
-        svg += `</svg>`;
-        document.getElementById('chart-area').innerHTML = svg;
+        document.getElementById('chart-area').innerHTML = svg + `</svg>`;
     }
 
     // --- FIREBASE ---
@@ -440,26 +357,11 @@
                 const status = (d.status || "").toLowerCase();
                 const plano = (d.plano || "").toLowerCase();
 
-                if(status !== "premium" && plano !== "premium") {
-                    window.location.href = 'dashboard.html';
-                    return;
-                }
+                if(status !== "premium" && plano !== "premium") { window.location.href = 'dashboard.html'; return; }
 
-                const nome = d.nome || "Iniciado";
-                const data = d.dataNascimento || "2000-01-01";
-                const hora = d.horaNascimento || "12:00";
-                const cidade = d.cidade || "São Paulo";
-                const estado = d.estado || "SP";
-                
-                renderizar(nome, data, hora, cidade, estado);
-
-            }).catch(e => {
-                console.error(e);
-                window.location.href = 'index.html';
-            });
-        } else {
-            window.location.href = 'index.html';
-        }
+                renderizar(d.nome || "Iniciado", d.dataNascimento || "2000-01-01", d.horaNascimento || "12:00", d.cidade || "São Paulo", d.estado || "SP");
+            }).catch(e => window.location.href = 'index.html');
+        } else { window.location.href = 'index.html'; }
     });
 </script>
 </body>
