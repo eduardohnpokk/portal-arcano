@@ -13,179 +13,185 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
+        :root { --gold: #d4af37; --bg-dark: #050505; }
         
         body { 
             margin: 0; 
             font-family: 'Cormorant Garamond', serif; 
-            background-color: var(--bg-dark); 
+            background: url('https://www.transparenttextures.com/patterns/stardust.png'), var(--bg-dark); 
             color: #e0e0e0; 
             min-height: 100vh; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* HEADER / TOPO */
-        .header-premium {
+        /* HEADER ESTILO SCREENSHOT */
+        .header-container {
             text-align: center;
-            padding: 40px 20px;
-            border-bottom: 1px solid rgba(212,175,55,0.1);
-            margin-bottom: 40px;
+            padding-top: 60px;
+            width: 100%;
+            margin-bottom: 50px;
         }
 
-        .titulo-iniciado {
+        .main-title {
             font-family: 'Cinzel', serif;
+            font-size: 3.5em;
             color: var(--gold);
-            font-size: 3em;
-            margin: 0 0 30px 0;
-            text-shadow: 0 0 15px rgba(212,175,55,0.3);
+            text-shadow: 0 0 20px rgba(212,175,55,0.4);
+            margin: 0;
+            letter-spacing: 2px;
         }
 
-        /* INFO BAR (Signo, Asc, Num) */
-        .info-bar {
+        .stats-row {
             display: flex;
             justify-content: center;
-            gap: 50px;
-            max-width: 800px;
-            margin: 0 auto;
-            flex-wrap: wrap;
+            gap: 60px;
+            margin-top: 30px;
         }
 
-        .info-item {
+        .stat-box {
             text-align: center;
         }
 
-        .info-label {
-            display: block;
+        .stat-label {
             font-family: 'Cinzel', serif;
-            font-size: 0.8em;
+            font-size: 0.75em;
             color: #666;
-            letter-spacing: 2px;
-            margin-bottom: 5px;
+            letter-spacing: 3px;
             text-transform: uppercase;
+            display: block;
+            margin-bottom: 5px;
         }
 
-        .info-value {
-            font-size: 1.5em;
+        .stat-value {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8em;
             color: #fff;
         }
-        
-        #user-numerologia {
+
+        .stat-value.num-highlight {
             color: var(--gold);
             font-family: 'Cinzel', serif;
+            font-weight: bold;
         }
 
         /* GRID DE CARDS */
-        .dashboard-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+        .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
+            max-width: 1200px;
+            width: 90%;
+            padding: 20px;
         }
 
-        .card-premium {
-            background: var(--card-bg);
-            border: 1px solid #222;
-            border-radius: 8px;
+        .card {
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid #333;
+            border-radius: 6px;
             padding: 40px 20px;
             text-align: center;
-            transition: all 0.3s ease;
+            transition: 0.3s;
             cursor: pointer;
             position: relative;
             overflow: hidden;
         }
 
-        .card-premium:hover {
+        .card:hover {
             border-color: var(--gold);
-            box-shadow: 0 0 20px rgba(212,175,55,0.1);
+            box-shadow: 0 0 30px rgba(212,175,55,0.1);
             transform: translateY(-5px);
         }
+
+        /* Efeito de brilho dourado no hover */
+        .card::before {
+            content: ''; position: absolute; top:0; left:0; width:100%; height:4px;
+            background: var(--gold); transform: scaleX(0); transition: 0.3s;
+        }
+        .card:hover::before { transform: scaleX(1); }
 
         .card-icon {
             font-size: 2.5em;
             color: var(--gold);
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
-        .card-title {
+        .card h3 {
             font-family: 'Cinzel', serif;
             font-size: 1.1em;
+            margin: 0 0 10px 0;
             color: #fff;
-            margin-bottom: 15px;
-            font-weight: bold;
         }
 
-        .card-desc {
-            color: #888;
+        .card p {
             font-size: 0.9em;
-            line-height: 1.6;
+            color: #888;
+            margin: 0;
         }
 
-        /* LOADING */
-        #loading-overlay {
+        #loading {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5,5,5,0.98); display: flex;
-            flex-direction: column; align-items: center; justify-content: center;
-            z-index: 999;
+            background: #000; z-index: 999;
+            display: flex; justify-content: center; align-items: center;
+            flex-direction: column;
+        }
+
+        @media(max-width: 768px) {
+            .cards-grid { grid-template-columns: 1fr; }
+            .stats-row { gap: 20px; flex-wrap: wrap; }
+            .main-title { font-size: 2.5em; }
         }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay">
-        <i class="fas fa-circle-notch fa-spin" style="font-size:3em; color:var(--gold);"></i>
-        <p style="margin-top:20px; color:#fff; font-family:'Cinzel';">Consultando os astros...</p>
+    <div id="loading">
+        <i class="fas fa-compass fa-spin" style="font-size: 3em; color: var(--gold);"></i>
+        <p style="color: #666; font-family: 'Cinzel'; margin-top: 20px;">Alinhando os Astros...</p>
     </div>
 
-    <header class="header-premium">
-        <h1 class="titulo-iniciado">INICIADO</h1>
+    <div class="header-container">
+        <h1 class="main-title">INICIADO</h1>
         
-        <div class="info-bar">
-            <div class="info-item">
-                <span class="info-label">SIGNO</span>
-                <span class="info-value" id="user-signo">Calculando...</span>
+        <div class="stats-row">
+            <div class="stat-box">
+                <span class="stat-label">SIGNO</span>
+                <span class="stat-value" id="user-signo">Calculando...</span>
             </div>
-            <div class="info-item">
-                <span class="info-label">ASCENDENTE</span>
-                <span class="info-value" id="user-ascendente">Calculando...</span>
+            <div class="stat-box">
+                <span class="stat-label">ASCENDENTE</span>
+                <span class="stat-value" id="user-ascendente">Calculando...</span>
             </div>
-            <div class="info-item">
-                <span class="info-label">NUMEROLOGIA</span>
-                <span class="info-value" id="user-numerologia">...</span>
+            <div class="stat-box">
+                <span class="stat-label">NUMEROLOGIA</span>
+                <span class="stat-value num-highlight" id="user-numerologia">...</span>
             </div>
         </div>
-    </header>
+    </div>
 
-    <div class="dashboard-container">
-        
-        <div class="card-premium">
+    <div class="cards-grid">
+        <div class="card" onclick="alert('Funcionalidade do Oráculo em manutenção pelos espíritos.')">
             <div class="card-icon"><i class="fas fa-eye"></i></div>
-            <div class="card-title">ORÁCULO SAGRADO</div>
-            <div class="card-desc">Faça perguntas diretas à IA Mística (Tarot, Búzios, Cigano).</div>
+            <h3>ORÁCULO SAGRADO</h3>
+            <p>Faça perguntas diretas à IA Mística (Tarot, Búzios, Cigano).</p>
         </div>
 
-        <div class="card-premium">
+        <div class="card">
             <div class="card-icon"><i class="fas fa-star"></i></div>
-            <div class="card-title">MAPA ASTRAL COMPLETO</div>
-            <div class="card-desc">Sua mandala astrológica detalhada.</div>
+            <h3>MAPA ASTRAL COMPLETO</h3>
+            <p>Sua mandala astrológica detalhada.</p>
         </div>
 
-        <div class="card-premium">
-            <div class="card-icon"><i class="fas fa-arrows-to-dot"></i></div>
-            <div class="card-title">NUMEROLOGIA CABALÍSTICA</div>
-            <div class="card-desc">O poder oculto do seu nome e data.</div>
+        <div class="card">
+            <div class="card-icon"><i class="fas fa-arrow-up-9-1"></i></div>
+            <h3>NUMEROLOGIA CABALÍSTICA</h3>
+            <p>O poder oculto do seu nome e data.</p>
         </div>
-
-         <div class="card-premium">
-            <div class="card-icon"><i class="fas fa-book-journal-whills"></i></div>
-            <div class="card-title">REGISTROS AKÁSHICOS</div>
-            <div class="card-desc">Acesse sua biblioteca espiritual.</div>
-        </div>
-
     </div>
 
     <script>
-        // CONFIGURAÇÃO FIREBASE (A mesma do seu index)
+        // Configuração original do seu Portal Arcano
         const firebaseConfig = { 
             apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", 
             authDomain: "portal-mistico-6532b.firebaseapp.com", 
@@ -194,102 +200,113 @@
             messagingSenderId: "925159229004", 
             appId: "1:925159229004:web:5d9dc758474789085016e9" 
         };
-        
         try { firebase.initializeApp(firebaseConfig); } catch(e) {}
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // LOGICA PRINCIPAL
         auth.onAuthStateChanged(user => {
             if (user) {
-                console.log("Usuário logado:", user.uid);
-                carregarDados(user.uid);
+                carregarDadosUsuario(user.uid);
             } else {
                 window.location.href = "index.html";
             }
         });
 
-        function carregarDados(uid) {
-            db.collection("usuarios").doc(uid).get().then(doc => {
-                // Esconde loading
-                document.getElementById('loading-overlay').style.display = 'none';
-
+        async function carregarDadosUsuario(uid) {
+            try {
+                const doc = await db.collection("usuarios").doc(uid).get();
                 if (doc.exists) {
                     const data = doc.data();
-                    console.log("Dados recuperados:", data);
-                    
-                    // Se tiver data de nascimento, calcula
-                    if (data.dataNascimento) {
-                        const signo = calcularSigno(data.dataNascimento);
-                        const numero = calcularNumerologia(data.dataNascimento);
-                        const ascendente = estimarAscendente(data.horaNascimento, signo);
+                    console.log("Dados brutos:", data);
 
-                        // Atualiza a tela
-                        document.getElementById('user-signo').innerText = signo;
-                        document.getElementById('user-ascendente').innerText = ascendente;
-                        document.getElementById('user-numerologia').innerText = numero;
+                    // A MÁGICA ACONTECE AQUI:
+                    // Se o documento tem dataNascimento, calculamos tudo agora
+                    if (data.dataNascimento) {
+                        const signo = getSigno(data.dataNascimento);
+                        const numerologia = getNumerologia(data.dataNascimento);
+                        const ascendente = getAscendenteEstimado(data.horaNascimento, signo);
+
+                        // Atualiza tela
+                        setText('user-signo', signo);
+                        setText('user-numerologia', numerologia);
+                        setText('user-ascendente', ascendente);
                     } else {
-                        document.getElementById('user-signo').innerText = "N/A";
+                        setText('user-signo', "Data ausente");
                     }
-                } else {
-                    console.error("Documento do usuário não encontrado no Firestore!");
                 }
-            }).catch(err => {
-                console.error("Erro Firestore:", err);
-                document.getElementById('loading-overlay').style.display = 'none';
-            });
+            } catch (error) {
+                console.error(error);
+            }
+            // Remove loading
+            document.getElementById('loading').style.display = 'none';
         }
 
-        // --- FUNÇÕES MÍSTICAS DE CÁLCULO ---
-        function calcularSigno(dateString) {
-            // Ajuste de fuso horário simples (pega o dia/mês local da string)
-            const parts = dateString.split('-'); 
-            const dia = parseInt(parts[2]);
-            const mes = parseInt(parts[1]);
+        function setText(id, text) {
+            const el = document.getElementById(id);
+            if(el) el.innerText = text;
+        }
 
-            if ((mes == 1 && dia >= 20) || (mes == 2 && dia <= 18)) return "Aquário";
-            if ((mes == 2 && dia >= 19) || (mes == 3 && dia <= 20)) return "Peixes";
-            if ((mes == 3 && dia >= 21) || (mes == 4 && dia <= 19)) return "Áries";
-            if ((mes == 4 && dia >= 20) || (mes == 5 && dia <= 20)) return "Touro";
-            if ((mes == 5 && dia >= 21) || (mes == 6 && dia <= 20)) return "Gêmeos";
-            if ((mes == 6 && dia >= 21) || (mes == 7 && dia <= 22)) return "Câncer";
-            if ((mes == 7 && dia >= 23) || (mes == 8 && dia <= 22)) return "Leão";
-            if ((mes == 8 && dia >= 23) || (mes == 9 && dia <= 22)) return "Virgem";
-            if ((mes == 9 && dia >= 23) || (mes == 10 && dia <= 22)) return "Libra";
-            if ((mes == 10 && dia >= 23) || (mes == 11 && dia <= 21)) return "Escorpião";
-            if ((mes == 11 && dia >= 22) || (mes == 12 && dia <= 21)) return "Sagitário";
-            if ((mes == 12 && dia >= 22) || (mes == 1 && dia <= 19)) return "Capricórnio";
+        // --- MOTORES DE CÁLCULO ---
+
+        function getSigno(dateString) {
+            const date = new Date(dateString + "T12:00:00"); // Força meio dia pra evitar fuso
+            const day = date.getDate();
+            const month = date.getMonth() + 1;
+
+            if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) return "Aquário";
+            if ((month == 2 && day >= 19) || (month == 3 && day <= 20)) return "Peixes";
+            if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) return "Áries";
+            if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) return "Touro";
+            if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) return "Gêmeos";
+            if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) return "Câncer";
+            if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) return "Leão";
+            if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) return "Virgem";
+            if ((month == 9 && day >= 23) || (month == 10 && day <= 22)) return "Libra";
+            if ((month == 10 && day >= 23) || (month == 11 && day <= 21)) return "Escorpião";
+            if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) return "Sagitário";
+            if ((month == 12 && day >= 22) || (month == 1 && day <= 19)) return "Capricórnio";
             return "Indefinido";
         }
 
-        function calcularNumerologia(dateString) {
-            let nums = dateString.replace(/-/g, '');
-            let soma = 0;
-            // Redução a um único dígito (exceto 11 e 22 se quiser, aqui simplificado para 1-9)
-            while (nums.length > 1) {
-                soma = 0;
-                for (let i = 0; i < nums.length; i++) soma += parseInt(nums.charAt(i));
-                nums = soma.toString();
+        function getNumerologia(dateString) {
+            // Ex: 2009-03-20 -> 20090320
+            let str = dateString.replace(/\D/g, '');
+            let sum = 0;
+            
+            // Soma inicial
+            for(let char of str) sum += parseInt(char);
+            
+            // Redução recursiva até 1 digito (ou 11/22 se quiser, mas aqui simplificado)
+            while(sum > 9 && sum !== 11 && sum !== 22) {
+                let tempStr = sum.toString();
+                let tempSum = 0;
+                for(let char of tempStr) tempSum += parseInt(char);
+                sum = tempSum;
             }
-            return nums;
+            return sum;
         }
 
-        function estimarAscendente(hora, signoSolar) {
-            if (!hora) return "Desconhecido";
-            // Lógica simplificada: Signo avança a cada 2h a partir das 06:00 (nascer do sol médio)
+        function getAscendenteEstimado(timeString, signoSolar) {
+            if(!timeString) return "Desconhecido";
+            
+            // Lógica Simplificada de Ascendente (Sem Lat/Long)
+            // Regra: O ascendente muda a cada ~2 horas.
+            // Assumimos nascer do sol as 06:00 = Signo Solar no Ascendente
+            
             const signos = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
             
-            const h = parseInt(hora.split(':')[0]);
-            const idxSolar = signos.indexOf(signoSolar);
+            const [hora, min] = timeString.split(':').map(Number);
+            const indexSolar = signos.indexOf(signoSolar);
             
-            // Quantas casas mover? (Hora - 6h) / 2h
-            // Se for negativo (ex: 02:00 da manhã), ajusta
-            let casas = Math.floor((h - 6) / 2);
-            let idxAsc = (idxSolar + casas) % 12;
+            // Diferença horas em relação as 06:00
+            let diff = hora - 6;
+            // Cada 2 horas avança 1 signo
+            let casas = Math.floor(diff / 2);
             
-            if (idxAsc < 0) idxAsc += 12;
+            let indexAsc = (indexSolar + casas) % 12;
+            if (indexAsc < 0) indexAsc += 12; // Ajuste para horas antes das 6 da manha
             
-            return signos[idxAsc];
+            return signos[indexAsc];
         }
     </script>
 </body>
