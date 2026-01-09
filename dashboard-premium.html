@@ -188,7 +188,7 @@
                     const plano = (data.plano || "").toLowerCase();
 
                     // REGRA DE SEGURANÇA:
-                    // Se NÃO for premium, chuta de volta para o Dashboard Free (dashboard.html)
+                    // Se NÃO for premium, chuta de volta para o Dashboard Free
                     if (status !== "premium" && plano !== "premium") {
                         window.location.href = "dashboard.html";
                         return;

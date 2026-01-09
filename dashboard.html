@@ -16,7 +16,6 @@
     <style>
         :root { --gold: #d4af37; --bg-dark: #050505; }
         
-        /* ESTILO GLOBAL (Igual ao Premium para manter consistência) */
         body { 
             margin: 0; 
             font-family: 'Cormorant Garamond', serif; 
@@ -29,7 +28,7 @@
             align-items: center;
         }
 
-        /* HEADER (Copiado do Premium) */
+        /* HEADER (IGUAL AO PREMIUM) */
         .header-container { text-align: center; padding-top: 60px; width: 100%; margin-bottom: 40px; }
         .main-title { font-family: 'Cinzel', serif; font-size: 3.5em; color: var(--gold); text-shadow: 0 0 20px rgba(212,175,55,0.4); margin: 0; letter-spacing: 2px; }
         .stats-row { display: flex; justify-content: center; gap: 60px; margin-top: 30px; }
@@ -38,7 +37,7 @@
         .stat-value { font-family: 'Cormorant Garamond', serif; font-size: 1.8em; color: #fff; }
         .stat-value.num-highlight { color: var(--gold); font-family: 'Cinzel', serif; font-weight: bold; }
 
-        /* ESTILO ESPECÍFICO DO FREE (Cards Bloqueados) */
+        /* ÁREA DE CONTEÚDO FREE (Bloqueada) */
         .container-free { max-width: 800px; width: 90%; text-align: center; padding-bottom: 50px; }
         .preview-card { background: rgba(17, 17, 17, 0.8); border: 1px solid #333; padding: 30px; margin-bottom: 20px; text-align: left; border-radius: 8px; }
         .blur-text { filter: blur(5px); user-select: none; opacity: 0.5; transition: 0.3s; }
@@ -106,7 +105,7 @@
     const db = firebase.firestore();
     const functions = firebase.functions();
 
-    // --- LÓGICA DE VERIFICAÇÃO E CÁLCULO ---
+    // VERIFICAÇÃO DE STATUS
     auth.onAuthStateChanged(user => {
         if (user) {
             db.collection("usuarios").doc(user.uid).get().then(doc => {
@@ -115,13 +114,13 @@
                     const status = (data.status || "").toLowerCase();
                     const plano = (data.plano || "").toLowerCase();
 
-                    // SE FOR PREMIUM -> VAI PARA DASHBOARD-PREMIUM.HTML
+                    // Se for PREMIUM -> Redireciona para o Premium
                     if (status === "premium" || plano === "premium") {
                         window.location.href = "dashboard-premium.html";
                         return;
                     }
 
-                    // SE FOR FREE -> FICA AQUI E CALCULA O CABEÇALHO
+                    // Se for FREE -> Fica aqui e calcula o cabeçalho
                     if (data.dataNascimento) {
                         const signo = getSigno(data.dataNascimento);
                         const numerologia = getNumerologia(data.dataNascimento);
@@ -140,7 +139,7 @@
         }
     });
 
-    // --- FUNÇÕES DE CÁLCULO (IGUAIS AO PREMIUM) ---
+    // FUNÇÕES DE CÁLCULO
     function getSigno(dateString) {
         const date = new Date(dateString + "T12:00:00");
         const day = date.getDate();
@@ -185,15 +184,24 @@
         return signos[indexAsc];
     }
 
+    // --- CORREÇÃO DO PAGAMENTO AQUI ---
     document.getElementById('btn-comprar').addEventListener('click', async () => {
         const btn = document.getElementById('btn-comprar');
-        btn.innerText = "Gerando Pagamento...";
+        btn.innerText = "Processando...";
         try {
-            const criarPagamento = firebase.functions().httpsCallable('criarPagamento');
+            const criarPagamento = functions.httpsCallable('criarPagamento');
             const result = await criarPagamento();
-            window.location.href = result.data.init_point; // Ajustado para init_point (MercadoPago padrão)
+            
+            // VOLTEI PARA result.data.link CONFORME SEU CÓDIGO ORIGINAL
+            if (result.data && result.data.link) {
+                window.location.href = result.data.link;
+            } else {
+                throw new Error("Link não recebido");
+            }
+
         } catch (error) {
-            alert("Erro ao gerar pagamento. Tente novamente.");
+            console.error(error);
+            alert("Erro ao conectar com pagamento. Tente novamente.");
             btn.innerText = "LIBERAR ACESSO AGORA";
         }
     });
