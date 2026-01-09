@@ -4,24 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Arcano | Início</title>
+    
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+    
     <style>
         :root { --gold: #d4af37; --bg-dark: #050505; }
         body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; text-align: center; padding: 20px; }
+        
         .hero { padding: 50px 20px; }
         h1 { font-family: 'Cinzel'; color: var(--gold); font-size: 2.5em; margin-bottom: 10px; }
         .subtitle { color: #888; font-size: 1.2em; max-width: 600px; margin: 0 auto 40px auto; }
+        
         .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 900px; margin: 0 auto; }
         .feature-card { border: 1px solid #333; padding: 20px; border-radius: 8px; }
         .feature-card h3 { color: var(--gold); font-family: 'Cinzel'; }
         
         .auth-box { background: #111; border: 1px solid var(--gold); padding: 30px; max-width: 400px; margin: 50px auto; border-radius: 10px; }
-        input { width: 90%; padding: 10px; margin: 10px 0; background: #000; border: 1px solid #333; color: #fff; }
-        button { width: 100%; padding: 12px; background: var(--gold); border: none; font-weight: bold; cursor: pointer; margin-top: 10px; font-family: 'Cinzel'; }
+        
+        /* Inputs e Layout */
+        input { width: 90%; padding: 10px; margin: 10px 0; background: #000; border: 1px solid #333; color: #fff; border-radius: 4px; }
+        button { width: 100%; padding: 12px; background: var(--gold); border: none; font-weight: bold; cursor: pointer; margin-top: 10px; font-family: 'Cinzel'; border-radius: 4px; }
+        
+        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 96%; margin: 0 auto; }
+        .row-2 input { width: 100%; box-sizing: border-box; } /* Ajuste para não quebrar o grid */
+        
         .toggle { color: #888; margin-top: 15px; cursor: pointer; text-decoration: underline; font-size: 0.9em; }
+        
+        /* Labels para inputs específicos */
+        label { display: block; text-align: left; margin-left: 5%; font-size: 0.8em; color: var(--gold); margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -48,9 +62,28 @@
         </div>
 
         <div id="register-form" style="display:none">
-            <input type="text" id="reg-nome" placeholder="Seu Nome">
+            <input type="text" id="reg-nome" placeholder="Nome Completo">
             <input type="email" id="reg-email" placeholder="E-mail">
             <input type="password" id="reg-pass" placeholder="Senha">
+            
+            <div class="row-2">
+                <div>
+                    <label>Nascimento</label>
+                    <input type="date" id="reg-nasc">
+                </div>
+                <div>
+                    <label>Horário</label>
+                    <input type="time" id="reg-hora">
+                </div>
+            </div>
+
+            <div class="row-2">
+                <input type="text" id="reg-cidade" placeholder="Cidade">
+                <input type="text" id="reg-uf" placeholder="UF" maxlength="2">
+            </div>
+
+            <input type="tel" id="reg-tel" placeholder="Telefone / WhatsApp">
+            
             <button onclick="register()">CRIAR CONTA</button>
             <p class="toggle" onclick="showLogin()">Já tem conta? Entrar</p>
         </div>
@@ -58,44 +91,93 @@
 
     <script>
         const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
-        firebase.initializeApp(firebaseConfig);
+        try { firebase.initializeApp(firebaseConfig); } catch(e) {}
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // ROTEAMENTO
+        // ROTEAMENTO INTELIGENTE (Lê coleção 'usuarios')
         auth.onAuthStateChanged(user => {
             if (user) {
-                document.querySelector('button').innerText = "Verificando...";
-                db.collection("users").doc(user.uid).get().then(doc => {
-                    if (doc.exists && (doc.data().premium === true || doc.data().status === 'premium')) {
-                        window.location.href = "dashboard-premium.html";
+                const btn = document.querySelector('button');
+                if(btn) btn.innerText = "Verificando...";
+                
+                db.collection("usuarios").doc(user.uid).get().then(doc => {
+                    if (doc.exists) {
+                        const d = doc.data();
+                        const isPremium = (d.status === 'premium' || d.plano === 'premium' || d.premium === true);
+                        
+                        if (isPremium) {
+                            window.location.href = "dashboard-premium.html";
+                        } else {
+                            window.location.href = "dashboard.html";
+                        }
                     } else {
+                        // Se não achar o doc, cria um básico e manda pro free
                         window.location.href = "dashboard.html";
                     }
+                }).catch(e => {
+                    console.error(e);
+                    window.location.href = "dashboard.html"; 
                 });
             }
         });
 
         function login() {
-            auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value)
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('pass').value;
+            if(!email || !pass) return alert("Preencha todos os campos.");
+            
+            auth.signInWithEmailAndPassword(email, pass)
                 .catch(e => alert("Erro: " + e.message));
         }
 
         function register() {
+            // 1. CAPTURA OS DADOS DO FORMULÁRIO COMPLETO
+            const nome = document.getElementById('reg-nome').value;
             const email = document.getElementById('reg-email').value;
             const pass = document.getElementById('reg-pass').value;
-            const nome = document.getElementById('reg-nome').value;
-            
+            const nasc = document.getElementById('reg-nasc').value;
+            const hora = document.getElementById('reg-hora').value;
+            const cidade = document.getElementById('reg-cidade').value;
+            const uf = document.getElementById('reg-uf').value;
+            const tel = document.getElementById('reg-tel').value;
+
+            // 2. VALIDAÇÃO
+            if(!nome || !email || !pass || !nasc || !hora || !cidade || !uf) {
+                return alert("Por favor, preencha todos os campos obrigatórios para o Mapa Astral.");
+            }
+
+            // 3. CRIAÇÃO NO FIREBASE
             auth.createUserWithEmailAndPassword(email, pass).then(cred => {
-                // Cria na coleção 'users' como FREE
-                db.collection("users").doc(cred.user.uid).set({
-                    nome: nome, email: email, premium: false, status: 'free'
-                }).then(() => window.location.href = "dashboard.html");
-            }).catch(e => alert("Erro: " + e.message));
+                // Salva na coleção 'usuarios' (Português, conforme sua estrutura original)
+                return db.collection("usuarios").doc(cred.user.uid).set({
+                    nome: nome,
+                    email: email,
+                    dataNascimento: nasc, // Campo essencial para o cálculo
+                    horaNascimento: hora, // Campo essencial para o ascendente
+                    cidade: cidade,
+                    estado: uf,
+                    telefone: tel,
+                    status: 'free',     // Começa como Free
+                    plano: 'gratuito',  // Começa como Gratuito
+                    data_cadastro: new Date().toISOString()
+                });
+            }).then(() => {
+                // Redireciona para o Dashboard Free após cadastro
+                window.location.href = "dashboard.html";
+            }).catch(e => alert("Erro ao cadastrar: " + e.message));
         }
 
-        function showRegister() { document.getElementById('login-form').style.display='none'; document.getElementById('register-form').style.display='block'; document.getElementById('form-title').innerText="Iniciação"; }
-        function showLogin() { document.getElementById('register-form').style.display='none'; document.getElementById('login-form').style.display='block'; document.getElementById('form-title').innerText="Entrar no Templo"; }
+        function showRegister() { 
+            document.getElementById('login-form').style.display='none'; 
+            document.getElementById('register-form').style.display='block'; 
+            document.getElementById('form-title').innerText="Cadastro de Iniciado"; 
+        }
+        function showLogin() { 
+            document.getElementById('register-form').style.display='none'; 
+            document.getElementById('login-form').style.display='block'; 
+            document.getElementById('form-title').innerText="Entrar no Templo"; 
+        }
     </script>
 </body>
 </html>
