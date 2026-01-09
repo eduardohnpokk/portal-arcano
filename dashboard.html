@@ -3,35 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Arcano | Painel</title>
+    <title>Portal Arcano | Visão Parcial</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-functions-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --gold: #d4af37; --bg-dark: #050505; }
-        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; padding: 20px; text-align: center; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .welcome { font-family: 'Cinzel'; font-size: 2em; color: var(--gold); margin-top: 40px; }
-        .card { background: #111; border: 1px solid #333; padding: 30px; margin-top: 30px; border-radius: 8px; }
-        .btn-buy { background: var(--gold); color: #000; padding: 15px 30px; font-weight: bold; font-family: 'Cinzel'; border: none; cursor: pointer; font-size: 1.1em; margin-top: 20px; width: 100%; }
-        .btn-logout { background: transparent; border: 1px solid #444; color: #888; padding: 10px 20px; margin-top: 50px; cursor: pointer; }
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; text-align: center; }
+        .preview-card { background: #111; border: 1px solid #333; padding: 20px; margin-bottom: 20px; text-align: left; opacity: 0.7; }
+        .blur-text { filter: blur(4px); user-select: none; }
+        .cta-box { border: 2px solid var(--gold); padding: 40px; background: #0f0f0f; border-radius: 10px; margin-top: 40px; }
+        .btn-buy { background: var(--gold); color: #000; font-family: 'Cinzel'; font-size: 1.2em; padding: 15px 40px; border: none; cursor: pointer; font-weight: bold; width: 100%; max-width: 300px; margin-top: 20px; }
+        .btn-logout { background: transparent; border: 1px solid #555; color: #888; padding: 5px 15px; margin-top: 50px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1 class="welcome" id="user-name">Carregando...</h1>
-    
-    <div class="card" id="offer-card">
-        <h2>Complete sua Jornada</h2>
-        <p>Você está no plano gratuito. Libere todas as ferramentas agora.</p>
-        <button class="btn-buy" id="btn-comprar">Liberar Acesso Premium (R$ 29,90)</button>
+    <h2 style="color:var(--gold); font-family:'Cinzel'">Seu Destino (Prévia)</h2>
+    <p>Você tem acesso limitado. Desbloqueie para ver os detalhes.</p>
+
+    <div class="preview-card">
+        <h3 style="color:var(--gold)">Mapa Astral</h3>
+        <p>Sol em Touro indica estabilidade, mas... <span class="blur-text">a quadratura com Saturno exige cuidado nas finanças e bloqueia sua ascensão imediata.</span></p>
     </div>
 
-    <button class="btn-logout" onclick="auth.signOut()">SAIR DO SISTEMA</button>
+    <div class="preview-card">
+        <h3 style="color:var(--gold)">Previsão do Oráculo</h3>
+        <p>As cartas mostram um caminho novo... <span class="blur-text">que se abrirá apenas se você abandonar um vício antigo que drena sua energia vital.</span></p>
+    </div>
+
+    <div class="cta-box">
+        <h1 style="font-family:'Cinzel'; color:var(--gold); margin:0;">DESBLOQUEIE TUDO</h1>
+        <p>Acesso vitalício ao Oráculo, Mapa Completo e Rituais.</p>
+        <button class="btn-buy" id="btn-comprar">QUERO ACESSO (R$ 29,90)</button>
+    </div>
+
+    <button class="btn-logout" onclick="firebase.auth().signOut()">Sair</button>
 </div>
 
 <script>
@@ -43,16 +54,10 @@
 
     auth.onAuthStateChanged(user => {
         if (user) {
-            // Verifica na coleção certa: USERS
+            // Se já for premium, não tem o que fazer aqui -> Vai pro Premium
             db.collection("users").doc(user.uid).get().then(doc => {
-                if (doc.exists) {
-                    const d = doc.data();
-                    document.getElementById('user-name').innerText = `Olá, ${d.nome || 'Iniciado'}`;
-                    
-                    // Se já for premium, manda pro Premium
-                    if (d.premium === true || d.status === 'premium') {
-                        window.location.href = "dashboard-premium.html";
-                    }
+                if (doc.exists && (doc.data().premium === true || doc.data().status === 'premium')) {
+                    window.location.href = "dashboard-premium.html";
                 }
             });
         } else {
@@ -62,13 +67,13 @@
 
     document.getElementById('btn-comprar').addEventListener('click', async () => {
         const btn = document.getElementById('btn-comprar');
-        btn.innerText = "Processando...";
+        btn.innerText = "Carregando...";
         try {
             const criarPagamento = functions.httpsCallable('criarPagamento');
             const result = await criarPagamento();
             window.location.href = result.data.link;
         } catch (error) {
-            alert("Erro no pagamento: " + error.message);
+            alert("Erro: " + error.message);
             btn.innerText = "Tentar Novamente";
         }
     });
