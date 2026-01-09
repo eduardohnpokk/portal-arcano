@@ -88,32 +88,28 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // --- ROTEAMENTO INTELIGENTE ---
+    // --- ROTEAMENTO INTELIGENTE (CORRIGIDO PARA COLEÇÃO 'users') ---
     auth.onAuthStateChanged(user => {
         if (user) {
             mostrarLoading("Verificando destino...");
             
-            // Busca dados e decide para onde ir
-            db.collection("usuarios").doc(user.uid).get({ source: 'server' })
+            // Alterado para 'users' para manter o padrão das Functions
+            db.collection("users").doc(user.uid).get({ source: 'server' })
             .then(doc => {
                 if (doc.exists) {
                     const d = doc.data();
-                    const status = (d.status || "").toLowerCase();
-                    const plano = (d.plano || "").toLowerCase();
-
-                    if (status === "premium" || plano === "premium") {
-                        // VAI PARA A TELA PREMIUM
+                    // Checa se é premium de qualquer forma (boleano ou texto)
+                    if (d.premium === true || String(d.plano).toLowerCase() === "premium" || String(d.status).toLowerCase() === "premium") {
                         window.location.href = "dashboard-premium.html";
                     } else {
-                        // VAI PARA A TELA FREE
                         window.location.href = "dashboard.html";
                     }
                 } else {
-                    // Se o doc sumiu, recria como free e manda pro dashboard free
+                    // Se o documento não existe, cria um básico na coleção certa
                     recriarDocPerdido(user);
                 }
             }).catch(err => {
-                // Erro? Tenta dashboard free por segurança
+                console.error("Erro ao rotear:", err);
                 window.location.href = "dashboard.html";
             });
         } else {
@@ -129,30 +125,29 @@
         mostrarLoading("Entrando...");
         auth.signInWithEmailAndPassword(email, pass).catch(e => {
             esconderLoading();
-            document.getElementById('login-error').innerText = e.message;
+            document.getElementById('login-error').innerText = "Erro ao acessar: Verifique e-mail e senha.";
             document.getElementById('login-error').style.display = 'block';
         });
     }
 
     function criarConta() {
-        // (Lógica de cadastro igual à anterior)
         const email = document.getElementById('reg-email').value;
         const pass = document.getElementById('reg-pass').value;
         const nome = document.getElementById('reg-nome').value;
-        // ... (Pegar outros campos) ...
         
-        // BACKDOOR: Se for seu email, vira Premium
+        if(!email || !pass || !nome) return alert("Preencha os campos obrigatórios.");
+        
         let planoInicial = "gratuito";
         let statusInicial = "free";
         if (email.toLowerCase().includes("eduardo.pokk")) {
             planoInicial = "premium"; statusInicial = "premium";
         }
 
-        if(!email || !pass || !nome) return alert("Preencha os campos obrigatórios.");
         mostrarLoading("Criando conta...");
 
         auth.createUserWithEmailAndPassword(email, pass).then(cred => {
-            return db.collection("usuarios").doc(cred.user.uid).set({
+            // Alterado para 'users'
+            return db.collection("users").doc(cred.user.uid).set({
                 nome: nome,
                 email: email,
                 dataNascimento: document.getElementById('reg-nasc').value,
@@ -162,6 +157,7 @@
                 telefone: document.getElementById('reg-tel').value,
                 plano: planoInicial,
                 status: statusInicial,
+                premium: (statusInicial === "premium"),
                 data_cadastro: new Date().toISOString()
             });
         }).catch(e => {
@@ -172,8 +168,13 @@
     }
 
     function recriarDocPerdido(user) {
-        db.collection("usuarios").doc(user.uid).set({
-            email: user.email, plano: "gratuito", status: "free", recuperado: true
+        // Alterado para 'users'
+        db.collection("users").doc(user.uid).set({
+            email: user.email, 
+            plano: "gratuito", 
+            status: "free", 
+            premium: false,
+            recuperado: true
         }).then(() => window.location.href = "dashboard.html");
     }
 
