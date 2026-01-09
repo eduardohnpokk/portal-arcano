@@ -113,7 +113,7 @@
 
     <div id="area-premium-ativa">
         <h2 style="font-family:'Cinzel'; color:var(--gold);">Acesso Sagrado Liberado</h2>
-        <p style="color:#ccc; margin-bottom: 20px;">Seu pagamento foi confirmado. Você faz parte do círculo interno.</p>
+        <p style="color:#ccc; margin-bottom: 20px;">Você já é um membro iniciado.</p>
         <button class="btn-upgrade" onclick="window.location.href='dashboard-premium.html'">ENTRAR NO DASHBOARD PREMIUM</button>
     </div>
 
@@ -123,7 +123,6 @@
 </div>
 
 <script>
-    // Configurações do seu Firebase
     const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
     try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const auth = firebase.auth();
@@ -134,13 +133,12 @@
         if (user) {
             verificarStatus(user);
         } else {
-            // Se não estiver logado, volta pro index
             window.location.href = 'index.html';
         }
     });
 
     async function verificarStatus(user) {
-        // CORRIGIDO: Agora busca na coleção 'users' para achar seu pagamento
+        // CORRIGIDO: Agora busca na coleção 'users'
         const doc = await db.collection('users').doc(user.uid).get();
         
         if (doc.exists) {
@@ -151,26 +149,20 @@
             document.getElementById('user-name').innerText = `Saudações, ${nomeUser}`;
             document.getElementById('user-sign').innerText = `Signo de ${signoUser}`;
 
-            // VERIFICAÇÃO ROBUSTA DE PREMIUM
-            if (data.premium === true || data.status === 'premium' || data.plano === 'premium') {
-                // Esconde a venda e mostra o botão de acesso
+            // Se for PREMIUM, esconde a venda e mostra botão de ir pro premium
+            if (data.premium === true || data.status === 'premium') {
                 document.getElementById('venda-container').style.display = 'none';
                 document.getElementById('area-premium-ativa').style.display = 'block';
                 
-                // Esconde as reticências
                 const dots = document.querySelectorAll('.read-more-dots');
                 dots.forEach(d => d.style.display = 'none');
             }
         }
     }
 
-    // FUNÇÃO DE LOGOUT QUE FUNCIONA
+    // LOGOUT FUNCIONAL
     function fazerLogout() {
         auth.signOut().then(() => {
-            window.location.href = "index.html";
-        }).catch((error) => {
-            console.error("Erro ao sair", error);
-            // Força o reload mesmo com erro
             window.location.href = "index.html";
         });
     }
@@ -187,7 +179,7 @@
             window.location.href = result.data.link;
         } catch (error) {
             console.error(error);
-            alert("Erro ao gerar pagamento. Tente novamente.");
+            alert("Erro ao conectar com o servidor.");
             btn.innerText = "Acessar Tudo por R$ 29,90";
             btn.disabled = false;
         }
