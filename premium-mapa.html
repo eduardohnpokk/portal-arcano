@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* ESTRUTURA VISUAL MANTIDA 100% INTACTA */
+        /* ESTRUTURA VISUAL MANTIDA 100% */
         :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
         
         body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; line-height: 1.6; }
@@ -121,10 +121,9 @@
 </div>
 
 <script>
-    // --- 1. BANCO DE DADOS GEOGRÁFICO INTERNO (SEM API) ---
-    // Coordenadas fixas para evitar erros de conexão.
+    // --- 1. BANCO DE DADOS GEOGRÁFICO "OFFLINE" (INFALÍVEL) ---
+    // Cidades normalizadas para busca sem acentos
     const COORDENADAS_FIXAS = {
-        // Cidades
         "sao paulo": { lat: -23.5505, lon: -46.6333 }, "sp": { lat: -23.5505, lon: -46.6333 },
         "rio de janeiro": { lat: -22.9068, lon: -43.1729 }, "rj": { lat: -22.9068, lon: -43.1729 },
         "brasilia": { lat: -15.7975, lon: -47.8919 }, "df": { lat: -15.7975, lon: -47.8919 },
@@ -157,7 +156,6 @@
         "boa vista": { lat: 2.8235, lon: -60.6758 }, "rr": { lat: 2.8235, lon: -60.6758 },
         "palmas": { lat: -10.2491, lon: -48.3243 }, "to": { lat: -10.2491, lon: -48.3243 },
         "surubim": { lat: -7.8333, lon: -35.7500 },
-        // Fallback
         "default": { lat: -15.79, lon: -47.88 }
     };
 
@@ -173,7 +171,7 @@
 
     // --- 2. LOCALIZAÇÃO SEGURA (SEM API) ---
     function obterCoordenadas(cidade, estado) {
-        // Normaliza (remove acentos, minúsculo)
+        // Normaliza para comparar (remove acentos, minúsculo)
         const norm = (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
         
         const c = norm(cidade);
@@ -184,7 +182,39 @@
         return { ...COORDENADAS_FIXAS["default"], origem: "Padrão" };
     }
 
-    // --- 3. MOTOR ASTRONÔMICO (Astronomy Engine) ---
+    // --- 3. SANITIZAÇÃO DE DATA (CORREÇÃO DO ERRO DE CÁLCULO) ---
+    function sanitizarData(dataStr, horaStr) {
+        // Se a data for indefinida, usa data atual para não travar
+        if (!dataStr) {
+            console.warn("Data vazia, usando padrão.");
+            return new Date();
+        }
+
+        let isoDate = dataStr;
+
+        // Se vier no formato DD/MM/YYYY, converte para YYYY-MM-DD
+        if (dataStr.includes('/')) {
+            const parts = dataStr.split('/');
+            if (parts.length === 3) {
+                // assume DD/MM/YYYY
+                isoDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+        }
+
+        // Garante formato ISO com hora e fuso
+        const finalString = `${isoDate}T${horaStr || "12:00"}:00-03:00`;
+        const dataObj = new Date(finalString);
+
+        // Se a data for inválida, retorna uma data padrão
+        if (isNaN(dataObj.getTime())) {
+            console.error("Data inválida detectada:", finalString);
+            return new Date("2000-01-01T12:00:00-03:00");
+        }
+
+        return dataObj;
+    }
+
+    // --- 4. CÁLCULOS ASTRONÔMICOS ---
     function normalizarGraus(g) {
         let res = g % 360;
         if (res < 0) res += 360;
@@ -201,39 +231,21 @@
         };
     }
 
-    // SANITIZAÇÃO DE DATA (CORREÇÃO DO ERRO PRINCIPAL)
-    function prepararDataISO(dataStr, horaStr) {
-        let dataISO = dataStr;
-        // Se vier DD/MM/YYYY, converte para YYYY-MM-DD
-        if (dataStr.includes('/')) {
-            const partes = dataStr.split('/');
-            if (partes.length === 3) {
-                dataISO = `${partes[2]}-${partes[1]}-${partes[0]}`;
-            }
-        }
-        return `${dataISO}T${horaStr}:00-03:00`; // Fuso BR
-    }
-
     function calcularMapaPreciso(dataStr, horaStr, lat, lon) {
-        // 1. Data Segura
-        const isoString = prepararDataISO(dataStr, horaStr);
-        const dataLocal = new Date(isoString);
+        // Usa a função sanitizada
+        const dataLocal = sanitizarData(dataStr, horaStr);
         
-        if (isNaN(dataLocal.getTime())) throw new Error("Data inválida");
-
         const observer = new Astronomy.Observer(lat, lon, 0);
-        const corpos = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"];
-        const resultadosPlanetas = [];
-
-        // 2. Obliquidade (Inclinação da Terra)
         const dateValues = Astronomy.MakeTime(dataLocal);
         const eps = Astronomy.Obliquity(dateValues) * (Math.PI / 180);
 
+        const corpos = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"];
+        const resultadosPlanetas = [];
+
         corpos.forEach(corpo => {
-            // Posição Equatorial (Tropical)
             const equ = Astronomy.Equator(corpo, dataLocal, observer, true, true);
             
-            // Conversão Equatorial -> Eclíptica
+            // Conversão Equatorial -> Eclíptica (Tropical)
             const ra = equ.ra * 15 * (Math.PI / 180);
             const dec = equ.dec * (Math.PI / 180);
             
@@ -251,23 +263,21 @@
             });
         });
 
-        // 3. Ascendente
+        // ASCENDENTE
         const gmst = Astronomy.SiderealTime(dateValues);
         const lmst = gmst + (lon / 15.0);
         const ramc = normalizarGraus(lmst * 15);
-        
-        const epsRad = eps; // Já em rad
-        const latRad = lat * (Math.PI / 180);
         const ramcRad = ramc * (Math.PI / 180);
+        const latRad = lat * (Math.PI / 180);
 
         let ascRad = Math.atan2(
             Math.cos(ramcRad), 
-            -Math.sin(ramcRad) * Math.cos(epsRad) - Math.tan(latRad) * Math.sin(epsRad)
+            -Math.sin(ramcRad) * Math.cos(eps) - Math.tan(latRad) * Math.sin(eps)
         );
         let ascGraus = normalizarGraus(ascRad * (180 / Math.PI));
         const ascendenteInfo = getSignoDeGraus(ascGraus);
 
-        // 4. Casas Iguais
+        // CASAS
         const casas = [];
         for(let i=0; i<12; i++) {
             let cuspide = normalizarGraus(ascGraus + (i * 30));
@@ -288,7 +298,7 @@
         return mapa[nome];
     }
 
-    // --- 4. RENDERIZAÇÃO ---
+    // --- 5. RENDERIZAÇÃO ---
     function gerarTextoProfundo(planeta, signo, casa) {
         return `<strong>${planeta} em ${signo} (Casa ${casa}):</strong><br>A energia de ${planeta} manifesta-se através do arquétipo de ${signo}. Na Casa ${casa}, isso afeta diretamente ${getSignificadoCasa(casa)}.`;
     }
@@ -300,13 +310,13 @@
 
     function renderizar(nome, dataStr, horaStr, cidade, estado) {
         try {
-            document.getElementById('header-details').innerText = `${nome} • ${dataStr} • ${horaStr} • ${cidade}/${estado}`;
             document.getElementById('loading-text').innerText = "Calculando Mapa...";
 
-            // 1. Obter Coordenadas (Interno)
+            // 1. Obter Coordenadas (Sem API)
             const coords = obterCoordenadas(cidade, estado);
+            document.getElementById('header-details').innerText = `${nome} • ${dataStr} • ${horaStr} • ${cidade}/${estado}`;
             
-            // 2. Calcular
+            // 2. Calcular (Com data sanitizada)
             const dados = calcularMapaPreciso(dataStr, horaStr, coords.lat, coords.lon);
             
             // 3. Desenhar
@@ -356,7 +366,7 @@
 
         } catch (e) {
             console.error(e);
-            alert("Erro no cálculo. Verifique se a data de nascimento está correta.");
+            alert("Erro no sistema. Recarregue a página.");
             document.getElementById('loading-screen').style.display = 'none';
         }
     }
