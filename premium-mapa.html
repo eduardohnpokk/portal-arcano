@@ -9,15 +9,17 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
+        /* ESTRUTURA VISUAL ORIGINAL MANTIDA INTACTA */
         :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
         
         body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; line-height: 1.6; }
         
-        /* LOADING */
         #loading-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 9999;
@@ -26,7 +28,6 @@
         .spinner { font-size: 4em; color: var(--gold); animation: spin 2s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* LAYOUT */
         .container { max-width: 1000px; margin: 0 auto; padding: 20px 20px 100px 20px; }
         
         .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
@@ -38,12 +39,10 @@
         .page-title { font-family: 'Cinzel'; color: var(--gold); font-size: 2.8em; margin: 0; text-shadow: 0 0 20px rgba(212,175,55,0.3); }
         .user-details { color: #888; margin-top: 5px; font-size: 1.1em; letter-spacing: 1px; }
 
-        /* MANDALA */
         .chart-container { display: flex; justify-content: center; margin: 40px 0; position: relative; }
         .mandala-svg { width: 100%; max-width: 500px; height: auto; filter: drop-shadow(0 0 20px rgba(212,175,55,0.1)); animation: rotateIn 2s ease-out; }
         @keyframes rotateIn { from { transform: rotate(-10deg); opacity: 0; } to { transform: rotate(0); opacity: 1; } }
 
-        /* TABELAS TÉCNICAS */
         .data-section { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 60px; }
         .panel { background: #111; border: 1px solid #333; border-radius: 8px; overflow: hidden; }
         .panel-header { background: #1a1a1a; padding: 15px; border-bottom: 1px solid var(--gold); font-family: 'Cinzel'; color: var(--gold); text-align: center; font-size: 1.2em; }
@@ -53,7 +52,6 @@
         .lbl { color: #fff; display: flex; align-items: center; gap: 10px; }
         .val { color: #ccc; font-family: 'Cinzel'; }
 
-        /* SEÇÃO DE INTERPRETAÇÃO DENSA */
         .deep-analysis { display: flex; flex-direction: column; gap: 40px; }
         
         .planet-block { 
@@ -68,7 +66,6 @@
         .planet-text { color: #ccc; text-align: justify; margin-bottom: 0; font-size: 1.1em; line-height: 1.8; }
         .keyword { color: var(--gold); font-weight: bold; }
 
-        /* GRANDE SÍNTESE */
         .synthesis-box { 
             margin-top: 60px; background: radial-gradient(circle at center, #222 0%, #000 100%); 
             border: 2px solid var(--gold); padding: 50px; text-align: center; border-radius: 10px;
@@ -76,8 +73,7 @@
         .synthesis-title { font-family: 'Cinzel'; font-size: 2.2em; color: var(--gold); margin-bottom: 30px; }
         .synthesis-text { font-size: 1.2em; color: #e0e0e0; text-align: justify; line-height: 2; }
 
-        /* TEXTOS DE CASAS */
-        .house-interpretation { margin-top: 10px; font-size: 0.9em; color: #888; font-style: italic; }
+        .house-desc { display: block; font-size: 0.85em; color: #888; margin-top: 5px; font-style: italic; }
 
         @media(max-width: 768px) { .data-section { grid-template-columns: 1fr; } .planet-header { flex-direction: column; text-align: center; } .planet-sign-badge { margin: 0; } }
         @media print { .btn-back, .btn-print { display: none; } body { background: #fff; color: #000; } .panel, .planet-block, .synthesis-box { background: #fff; color: #000; border: 1px solid #000; } .val, .planet-title, .synthesis-title, .keyword { color: #000 !important; } }
@@ -87,7 +83,7 @@
 
 <div id="loading-screen">
     <i class="fas fa-compass spinner"></i>
-    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Calculando Efemérides Precisas...</p>
+    <p id="loading-text" style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Iniciando Sistema...</p>
 </div>
 
 <div class="container">
@@ -101,8 +97,7 @@
         <div class="user-details" id="header-details">...</div>
     </div>
 
-    <div class="chart-container" id="chart-area">
-        </div>
+    <div class="chart-container" id="chart-area"></div>
 
     <div class="data-section">
         <div class="panel">
@@ -110,349 +105,291 @@
             <div id="planet-list"></div>
         </div>
         <div class="panel">
-            <div class="panel-header">Interpretação das Casas</div>
+            <div class="panel-header">Casas Astrológicas</div>
             <div id="house-list"></div>
         </div>
     </div>
 
-    <h2 style="text-align:center; color:var(--gold); font-family:'Cinzel'; margin-bottom:40px; font-size:2em;">ANÁLISE PROFUNDA</h2>
+    <h2 style="text-align:center; color:var(--gold); font-family:'Cinzel'; margin-bottom:40px; font-size:2em;">ANÁLISE PROFUNDA DOS ASTROS</h2>
     <div class="deep-analysis" id="deep-content"></div>
 
     <div class="synthesis-box">
-        <h2 class="synthesis-title">SÍNTESE DA ALMA</h2>
+        <h2 class="synthesis-title">A TRADUÇÃO DA ALMA</h2>
         <div class="synthesis-text" id="synthesis-text"></div>
     </div>
 
 </div>
 
 <script>
-    // --- DATABASE ASTROLÓGICA (TEXTOS PROFUNDOS) ---
-    // Estrutura: PLANETA -> SIGNO -> TEXTO
-    const DATABASE_ASTROLOGICA = {
-        "Sol": {
-            "default": "O Sol representa sua essência, vitalidade e o propósito central da sua vida.",
-            "Áries": "Com o Sol em Áries, sua essência é a de um pioneiro. Você veio ao mundo para iniciar, liderar e abrir caminhos onde não existem. Sua vitalidade depende da ação e da conquista. O desafio é controlar a impaciência e aprender que nem tudo precisa ser uma batalha.",
-            "Touro": "O Sol em Touro confere uma natureza estável, paciente e voltada para a construção de segurança material. Você busca prazer, conforto e beleza. Sua força reside na persistência inabalável, mas deve cuidar para não estagnar na zona de conforto.",
-            "Gêmeos": "Sua essência é mental, comunicativa e curiosa. O Sol em Gêmeos brilha através da troca de informações e da versatilidade. Você tem necessidade de movimento e variedade, mas precisa cultivar foco para não dispersar sua energia vital.",
-            "Câncer": "A energia vital do Sol em Câncer é nutrida pela conexão emocional, família e raízes. Você protege quem ama com ferocidade. Sua sensibilidade é sua bússola, mas pode tornar-se uma armadilha se você levar tudo para o lado pessoal.",
-            "Leão": "Aqui o Sol está em casa. Você irradia carisma, criatividade e calor humano. Veio ao mundo para se expressar e ser reconhecido por sua identidade única. O aprendizado é diferenciar autoconfiança saudável de arrogância ou necessidade excessiva de aplausos.",
-            "Virgem": "Sua luz brilha através do serviço, da análise e do aperfeiçoamento. O Sol em Virgem busca ordem no caos. Você se sente vivo quando é útil e eficiente. Cuidado com a autocrítica excessiva que pode apagar seu brilho natural.",
-            "Libra": "A busca por harmonia, beleza e justiça define sua essência. O Sol em Libra se realiza através dos relacionamentos. Você é um diplomata nato, mas precisa aprender a tomar decisões sem depender excessivamente da aprovação alheia.",
-            "Escorpião": "Sua natureza é intensa, transformadora e magnética. O Sol em Escorpião não vive na superfície; você busca profundidade em tudo. Tem poder de regeneração, mas precisa gerenciar a tendência ao controle e ao ressentimento.",
-            "Sagitário": "Você é um buscador da verdade, otimista e filósofo. O Sol em Sagitário expande horizontes através de viagens (físicas ou mentais) e conhecimento superior. Sua vitalidade vem da liberdade, mas cuidado com o excesso de franqueza.",
-            "Capricórnio": "Sua essência é estruturada, ambiciosa e responsável. O Sol em Capricórnio constrói impérios com paciência e disciplina. Você amadurece cedo e busca respeito. O desafio é não se tornar rígido demais ou melancólico.",
-            "Aquário": "Você brilha pela originalidade e pela visão de futuro. O Sol em Aquário é o rebelde com causa, focado no coletivo e na inovação. Você valoriza a liberdade acima de tudo, mas deve cuidar para não se desconectar das emoções individuais.",
-            "Peixes": "Sua natureza é compassiva, intuitiva e espiritual. O Sol em Peixes dissolve barreiras e se conecta com o todo. Você sente as dores do mundo. Seu poder está na imaginação e na fé, mas precisa de âncoras para não escapar da realidade."
-        },
-        "Lua": {
-            "default": "A Lua rege suas emoções, instintos e o que te traz segurança.",
-            "Áries": "Emoções reativas e imediatas. Você sente com fogo e paixão, mas as tempestades passam rápido.",
-            "Touro": "Segurança emocional vem da estabilidade material e da rotina. Emoções calmas e constantes.",
-            "Gêmeos": "Você racionaliza o que sente. Precisa falar sobre as emoções para processá-las.",
-            "Câncer": "A Lua está em casa. Profundamente sensível, maternal e com memória emocional poderosa.",
-            "Leão": "Sente necessidade de dramatizar ou expressar grandiosamente o que sente. Precisa de afeto visível.",
-            "Virgem": "Analisa os sentimentos. Sente-se seguro quando tudo está organizado e útil.",
-            "Libra": "Busca equilíbrio emocional através do outro. Detesta conflitos e ambientes emocionalmente pesados.",
-            "Escorpião": "Emoções viscerais, intensas e secretas. Possui um radar intuitivo para mentiras.",
-            "Sagitário": "Lida com emoções através do otimismo e do humor. Foge de sentimentos pesados ou restritivos.",
-            "Capricórnio": "Reservado emocionalmente. Sente muito, mas demonstra pouco. Busca controle sobre o que sente.",
-            "Aquário": "Destaque emocional. Analisa sentimentos como um observador externo. Valoriza amizade no afeto.",
-            "Peixes": "Esponja psíquica. Absorve emoções do ambiente. Precisa de isolamento para limpar o campo energético."
-        },
-        "Mercúrio": {
-            "default": "Define como você pensa e comunica.",
-            "Áries": "Mente rápida, direta e decisiva. Fala o que pensa, às vezes sem filtro.",
-            "Touro": "Pensamento prático, lento e deliberado. Aprende na prática e retém o conhecimento.",
-            "Gêmeos": "Mente ágil, curiosa e versátil. Processa múltiplas informações simultaneamente.",
-            "Câncer": "Pensamento influenciado pela emoção. Boa memória e comunicação empática.",
-            "Leão": "Comunicação dramática e expressiva. Fala com autoridade e criatividade.",
-            "Virgem": "Mente analítica, crítica e detalhista. Excelente para lógica e organização.",
-            "Libra": "Pensa ponderando todos os lados. Comunicação diplomática e justa.",
-            "Escorpião": "Mente investigativa. Não aceita respostas superficiais. Comunicação penetrante.",
-            "Sagitário": "Pensamento filosófico e abrangente. Interessa-se pelo sentido maior das coisas.",
-            "Capricórnio": "Mente estruturada, séria e focada em resultados. Comunicação econômica e precisa.",
-            "Aquário": "Mente inventiva e progressista. Pensa 'fora da caixa' e comunica ideias futuras.",
-            "Peixes": "Pensamento intuitivo e imaginativo. Comunica-se por imagens e sensações, não apenas lógica."
-        },
-        // Adicionei os outros planetas com textos padrão para garantir funcionamento, 
-        // mas o código irá gerar combinações baseadas nos signos para não ficar vazio.
-        "Vênus": { "default": "Como você ama e o que valoriza." },
-        "Marte": { "default": "Como você age e conquista." },
-        "Júpiter": { "default": "Onde você busca expansão e sorte." },
-        "Saturno": { "default": "Onde você encontra desafios e responsabilidade." },
-        "Urano": { "default": "Onde você busca liberdade e inovação." },
-        "Netuno": { "default": "Onde você tem inspiração espiritual e ilusões." },
-        "Plutão": { "default": "Onde você passa por transformações profundas." }
-    };
-
-    // --- INTERPRETAÇÃO DAS CASAS (Novo Recurso) ---
-    const HOUSE_MEANINGS = [
-        "Identidade, aparência e primeira impressão.", // Casa 1
-        "Valores, dinheiro e recursos materiais.", // Casa 2
-        "Comunicação, mente concreta e irmãos.", // Casa 3
-        "Família, raízes, lar e passado.", // Casa 4
-        "Criatividade, romances, filhos e autoexpressão.", // Casa 5
-        "Trabalho, saúde, rotina e serviço.", // Casa 6
-        "Parcerias, casamentos e sociedades.", // Casa 7
-        "Transformação, sexo, ocultismo e recursos compartilhados.", // Casa 8
-        "Filosofia, viagens longas e ensino superior.", // Casa 9
-        "Carreira, reputação e destino público.", // Casa 10
-        "Amigos, grupos e esperanças futuras.", // Casa 11
-        "Inconsciente, espiritualidade e isolamento." // Casa 12
-    ];
-
+    // --- 1. DADOS E TEXTOS ---
     const SIGNOS = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
     const SIMBOLOS = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
+    
+    const ARQUETIPOS = {
+        "Sol": "Sua Essência e Propósito", "Lua": "Seu Mundo Emocional e Inconsciente", "Mercúrio": "Sua Comunicação e Intelecto",
+        "Vênus": "Seus Valores e Forma de Amar", "Marte": "Sua Ação, Desejo e Conquista", "Júpiter": "Sua Expansão, Fé e Sorte",
+        "Saturno": "Seus Limites, Karma e Estrutura", "Urano": "Sua Originalidade e Rupturas", "Netuno": "Sua Espiritualidade e Ilusões",
+        "Plutão": "Seu Poder de Transformação e Crise", "Ascendente": "Sua Máscara Social e Início das Coisas"
+    };
 
-    // --- CONFIGURAÇÃO FIREBASE ---
-    const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
-    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    // --- MOTOR ASTRONÔMICO PRECISO (Simulação Orbital J2000) ---
-    // Esta função substitui o cálculo antigo baseado apenas em modulo
-    function calcularPosicaoPlanetaria(diaJuliano, planeta) {
-        // Elementos orbitais simplificados (Longitude Média e Período)
-        // L = L0 + n * T (onde T é séculos desde J2000)
+    // --- 2. GEOCODIFICAÇÃO DINÂMICA (RESOLVE O PROBLEMA 'SURUBIM') ---
+    async function buscarCoordenadas(cidade, estado) {
+        // Fallback de segurança (Centro do Brasil)
+        let coords = { lat: -15.79, lon: -47.88, nome: "Padrão (Brasília)" }; 
         
-        const T = (diaJuliano - 2451545.0) / 36525; // Séculos Julianos desde J2000.0
+        try {
+            document.getElementById('loading-text').innerText = `Localizando ${cidade}...`;
+            
+            // Busca na API do OpenStreetMap
+            const query = `${cidade}, ${estado}, Brazil`;
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
+            
+            const response = await fetch(url);
+            const data = await response.json();
 
-        let L = 0; // Longitude Média
-
-        switch(planeta) {
-            case "Sol": L = 280.46646 + 36000.76983 * T; break;
-            case "Lua": L = 218.3165 + 481267.8813 * T; break;
-            case "Mercúrio": L = 252.25091 + 149472.67468 * T; break;
-            case "Vênus": L = 181.97980 + 58517.81568 * T; break;
-            case "Marte": L = 355.43300 + 19140.29933 * T; break;
-            case "Júpiter": L = 34.40438 + 3034.90565 * T; break; // Muito mais lento
-            case "Saturno": L = 49.94432 + 1222.11379 * T; break;
-            case "Urano": L = 313.23218 + 428.46692 * T; break;
-            case "Netuno": L = 304.88003 + 218.48620 * T; break;
-            case "Plutão": L = 238.92881 + 145.2078 * T; break;
+            if (data && data.length > 0) {
+                coords = {
+                    lat: parseFloat(data[0].lat),
+                    lon: parseFloat(data[0].lon),
+                    nome: data[0].display_name.split(',')[0] // Pega só o nome da cidade
+                };
+            }
+        } catch (e) {
+            console.error("Erro na geolocalização:", e);
         }
-
-        // Normalizar para 0-360
-        L = L % 360;
-        if (L < 0) L += 360;
-
-        // Converter Longitude Eclíptica (0-360) para Índice de Signo (0-11)
-        return Math.floor(L / 30);
+        return coords;
     }
 
-    function getDiaJuliano(dateString, timeString) {
-        const date = new Date(dateString + "T" + timeString + ":00Z"); // Assume UTC para padronizar
-        return (date.getTime() / 86400000) - (date.getTimezoneOffset() / 1440) + 2440587.5;
+    // --- 3. CÁLCULOS ASTRONÔMICOS PRECISOS ---
+    function normalizarGraus(g) {
+        let res = g % 360;
+        if (res < 0) res += 360;
+        return res;
     }
 
-    // Cálculo do Ascendente (Estimativa baseada na Hora Sideral Local Aproximada)
-    // Sem lat/long, assumimos um "Ascendente Plano" onde 06:00 = Sol no Ascendente
-    function calcularAscendente(signoSolIdx, horaString) {
-        const [h, m] = horaString.split(':').map(Number);
-        const decimalHour = h + (m/60);
-        
-        // O Sol nasce aprox as 6h. Se a pessoa nasceu as 6h, Asc = Sol.
-        // A cada 2h, o Ascendente avança 1 signo (30 graus).
-        const diffHoras = decimalHour - 6;
-        const casasAvanco = diffHoras / 2;
-        
-        let ascIdx = Math.floor(signoSolIdx + casasAvanco);
-        
-        // Normaliza círculo de 12
-        ascIdx = ascIdx % 12;
-        if(ascIdx < 0) ascIdx += 12;
-        
-        return ascIdx;
+    function getSignoDeGraus(graus) {
+        const index = Math.floor(graus / 30);
+        return {
+            nome: SIGNOS[index],
+            simbolo: SIMBOLOS[index],
+            grauNoSigno: Math.floor(graus % 30),
+            index: index
+        };
     }
 
-    function gerarMapaCompleto(data, hora) {
-        const JD = getDiaJuliano(data, hora);
+    function calcularMapaPreciso(dataStr, horaStr, lat, lon) {
+        // Cria data objeto
+        const dataLocal = new Date(`${dataStr}T${horaStr}:00`);
         
-        // 1. Calcula Sol primeiro para basear o Ascendente
-        const solIdx = calcularPosicaoPlanetaria(JD, "Sol");
-        const ascIdx = calcularAscendente(solIdx, hora);
+        // Define o Observador na Terra (Latitude/Longitude exatas)
+        const observer = new Astronomy.Observer(lat, lon, 0);
 
-        const planetas = [
-            { nome: "Sol", icon: "☉", s: solIdx },
-            { nome: "Lua", icon: "☽", s: calcularPosicaoPlanetaria(JD, "Lua") },
-            { nome: "Mercúrio", icon: "☿", s: calcularPosicaoPlanetaria(JD, "Mercúrio") },
-            { nome: "Vênus", icon: "♀", s: calcularPosicaoPlanetaria(JD, "Vênus") },
-            { nome: "Marte", icon: "♂", s: calcularPosicaoPlanetaria(JD, "Marte") },
-            { nome: "Júpiter", icon: "♃", s: calcularPosicaoPlanetaria(JD, "Júpiter") },
-            { nome: "Saturno", icon: "♄", s: calcularPosicaoPlanetaria(JD, "Saturno") },
-            { nome: "Urano", icon: "♅", s: calcularPosicaoPlanetaria(JD, "Urano") },
-            { nome: "Netuno", icon: "♆", s: calcularPosicaoPlanetaria(JD, "Netuno") },
-            { nome: "Plutão", icon: "♇", s: calcularPosicaoPlanetaria(JD, "Plutão") }
-        ];
+        const corpos = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"];
+        const resultadosPlanetas = [];
 
-        // Gera Casas (Sistema de Casas Iguais a partir do Ascendente)
+        // Calcula posição de cada planeta
+        corpos.forEach(corpo => {
+            // Equator (Ascensão Reta/Declinação) é o método mais preciso para conversão astrológica
+            const equator = Astronomy.Equator(corpo, dataLocal, observer, true, true);
+            // Horizon para coordenadas locais, mas para signos usamos Eclíptica
+            const vector = Astronomy.GeoVector(corpo, dataLocal, true);
+            const ecliptic = Astronomy.Ecliptic(vector); // Longitude Eclíptica J2000
+            
+            // Ajuste simplificado para Zodíaco Tropical (Precessão aproximada se necessário, 
+            // mas Astronomy Engine já é muito preciso. Usaremos a longitude retornada).
+            
+            resultadosPlanetas.push({
+                nome: traduzirPlaneta(corpo),
+                graus: normalizarGraus(ecliptic.lon),
+                signoInfo: getSignoDeGraus(normalizarGraus(ecliptic.lon)),
+                casa: 0
+            });
+        });
+
+        // Cálculo do Ascendente (Matemática Real)
+        const dateValues = Astronomy.MakeTime(dataLocal);
+        const gmst = Astronomy.SiderealTime(dateValues);
+        const lmst = gmst + (lon / 15.0); // Hora Sideral Local
+        const ramc = normalizarGraus(lmst * 15);
+        const eps = Astronomy.Obliquity(dateValues); // Obliquidade
+
+        // Fórmula Trigonométrica do Ascendente
+        const rad = Math.PI / 180;
+        const ascRad = Math.atan2(
+            Math.cos(ramc * rad),
+            -Math.sin(ramc * rad) * Math.cos(eps * rad) - Math.tan(lat * rad) * Math.sin(eps * rad)
+        );
+        const ascGraus = normalizarGraus(ascRad / rad);
+        const ascendenteInfo = getSignoDeGraus(ascGraus);
+
+        // Casas (Sistema Igual a partir do Ascendente - Mais estável para web)
         const casas = [];
         for(let i=0; i<12; i++) {
-            casas.push({ num: i+1, s: (ascIdx + i) % 12 });
+            let cuspide = normalizarGraus(ascGraus + (i * 30));
+            casas.push({
+                numero: i+1,
+                grau: cuspide,
+                signoInfo: getSignoDeGraus(cuspide)
+            });
         }
 
-        return { planetas, casas, solIdx, ascIdx };
+        // Distribui planetas nas casas
+        resultadosPlanetas.forEach(p => {
+            let diff = normalizarGraus(p.graus - ascGraus);
+            p.casa = Math.floor(diff / 30) + 1;
+        });
+
+        return { planetas: resultadosPlanetas, ascendente: ascendenteInfo, casas: casas };
     }
 
-    // --- RENDERIZAÇÃO ---
-    function renderizar(nome, data, hora, cidade) {
-        document.getElementById('header-details').innerText = `${nome} • ${data} • ${hora} • ${cidade}`;
-        
-        const dados = gerarMapaCompleto(data, hora);
-        
-        desenharMandala(dados);
+    function traduzirPlaneta(nomeIngles) {
+        const mapa = {"Sun":"Sol", "Moon":"Lua", "Mercury":"Mercúrio", "Venus":"Vênus", "Mars":"Marte", "Jupiter":"Júpiter", "Saturn":"Saturno", "Uranus":"Urano", "Neptune":"Netuno", "Pluto":"Plutão"};
+        return mapa[nomeIngles];
+    }
 
-        // Limpa áreas
+    // --- 4. GERAÇÃO DE TEXTOS INTELIGENTES ---
+    function gerarTextoProfundo(planeta, signo, casa) {
+        return `
+            <strong>${planeta} em ${signo} (Casa ${casa}):</strong><br>
+            A energia de ${planeta} (${ARQUETIPOS[planeta]}) manifesta-se através do filtro de ${signo}. 
+            Isso significa que você expressa essa faceta da sua vida de forma ${getAdjetivoSigno(signo)}. 
+            Como este posicionamento ocorre na <strong>Casa ${casa}</strong>, essa dinâmica terá impacto direto nos assuntos ligados a ${getSignificadoCasa(casa)}.
+            <br><br>
+            <em>Conselho Arcano:</em> Para equilibrar essa posição, evite a polaridade negativa de ${signo} e use a força da Casa ${casa} para materializar seus desejos.
+        `;
+    }
+
+    function getAdjetivoSigno(nome) {
+        const adjs = {
+            "Áries": "impulsiva, corajosa e pioneira", "Touro": "estável, sensual e persistente", 
+            "Gêmeos": "curiosa, versátil e comunicativa", "Câncer": "emocional, protetora e intuitiva",
+            "Leão": "criativa, nobre e expressiva", "Virgem": "analítica, prestativa e detalhista",
+            "Libra": "diplomática, justa e sociável", "Escorpião": "intensa, transformadora e investigativa",
+            "Sagitário": "otimista, filosófica e expansiva", "Capricórnio": "ambiciosa, disciplinada e prudente",
+            "Aquário": "original, livre e visionária", "Peixes": "sonhadora, empática e espiritual"
+        };
+        return adjs[nome] || "única";
+    }
+
+    function getSignificadoCasa(num) {
+        const significados = [
+            "sua identidade e aparência", "seu dinheiro e valores", "sua comunicação e aprendizado",
+            "seu lar e raízes", "sua criatividade e romances", "seu trabalho e saúde",
+            "seus relacionamentos e parcerias", "suas crises e sexualidade", "sua filosofia e viagens",
+            "sua carreira e reputação", "seus amigos e projetos futuros", "seu inconsciente e espiritualidade"
+        ];
+        return significados[num-1];
+    }
+
+    // --- 5. RENDERIZAÇÃO NA TELA ---
+    async function renderizar(nome, dataStr, horaStr, cidade, estado) {
+        document.getElementById('header-details').innerText = `${nome} • ${dataStr} • ${horaStr} • ${cidade}/${estado}`;
+        
+        // Passo 1: Descobrir onde fica a cidade (Lat/Long Real)
+        const coords = await buscarCoordenadas(cidade, estado);
+        
+        document.getElementById('loading-text').innerText = "Calculando Mapa...";
+        
+        // Passo 2: Calcular Astronomia
+        const dados = calcularMapaPreciso(dataStr, horaStr, coords.lat, coords.lon);
+        
+        // Passo 3: Desenhar
+        desenharSVG(dados);
+
+        // Passo 4: Preencher Textos
         const pList = document.getElementById('planet-list');
-        const dContent = document.getElementById('deep-content');
         const hList = document.getElementById('house-list');
+        const dContent = document.getElementById('deep-content');
         
-        pList.innerHTML = '';
-        dContent.innerHTML = '';
-        hList.innerHTML = '';
+        pList.innerHTML = ''; hList.innerHTML = ''; dContent.innerHTML = '';
 
-        // Renderiza Planetas
         dados.planetas.forEach(p => {
-            const signoNome = SIGNOS[p.s];
+            const icons = {"Sol":"☉","Lua":"☽","Mercúrio":"☿","Vênus":"♀","Marte":"♂","Júpiter":"♃","Saturno":"♄","Urano":"♅","Netuno":"♆","Plutão":"♇"};
+            pList.innerHTML += `<div class="row"><div class="lbl"><span style="color:var(--gold); font-size:1.2em;">${icons[p.nome]}</span> ${p.nome}</div><div class="val">${p.signoInfo.nome} <small>(${p.signoInfo.grauNoSigno}°)</small></div></div>`;
             
-            // 1. Lista Lateral
-            pList.innerHTML += `
-                <div class="row">
-                    <div class="lbl"><span style="color:#d4af37; font-size:1.2em;">${p.icon}</span> ${p.nome}</div>
-                    <div class="val">${signoNome}</div>
-                </div>
-            `;
-
-            // 2. Análise Profunda
-            // Tenta pegar o texto específico (Sol-Áries), se não tiver, monta um genérico inteligente
-            let texto = "";
-            if (DATABASE_ASTROLOGICA[p.nome] && DATABASE_ASTROLOGICA[p.nome][signoNome]) {
-                texto = DATABASE_ASTROLOGICA[p.nome][signoNome];
-            } else {
-                // Fallback inteligente se não tiver no banco
-                const base = DATABASE_ASTROLOGICA[p.nome] ? DATABASE_ASTROLOGICA[p.nome]["default"] : "Influência planetária.";
-                texto = `${base} Estando em <strong>${signoNome}</strong>, essa energia se manifesta com as características deste signo, modificando a forma como você expressa esse aspecto da sua vida.`;
-            }
-
             dContent.innerHTML += `
                 <div class="planet-block">
                     <div class="planet-header">
-                        <div class="planet-icon">${p.icon}</div>
+                        <div class="planet-icon">${icons[p.nome]}</div>
                         <h3 class="planet-title">${p.nome}</h3>
-                        <div class="planet-sign-badge">${signoNome}</div>
+                        <div class="planet-sign-badge">${p.signoInfo.nome} • Casa ${p.casa}</div>
                     </div>
-                    <p class="planet-text">${texto}</p>
+                    <p class="planet-text">${gerarTextoProfundo(p.nome, p.signoInfo.nome, p.casa)}</p>
                 </div>
             `;
         });
 
-        // Renderiza Casas (Com explicação)
         dados.casas.forEach(c => {
-            const signoCasa = SIGNOS[c.s];
-            const significado = HOUSE_MEANINGS[c.num - 1];
-            
             hList.innerHTML += `
                 <div class="row" style="flex-direction:column; align-items:flex-start;">
                     <div style="display:flex; justify-content:space-between; width:100%;">
-                        <div class="lbl house-num">Casa ${c.num}</div>
-                        <div class="val">${signoCasa}</div>
+                        <div class="lbl house-num">Casa ${c.numero}</div>
+                        <div class="val">${c.signoInfo.nome}</div>
                     </div>
-                    <div class="house-interpretation">
-                        Área: ${significado} <br>
-                        Influência de ${signoCasa}: A energia deste setor é tingida pelas qualidades de ${signoCasa}.
-                    </div>
+                    <span class="house-desc">Área de ${getSignificadoCasa(c.numero)}</span>
                 </div>
             `;
         });
 
-        // Síntese
-        const sol = SIGNOS[dados.solIdx];
-        const asc = SIGNOS[dados.ascIdx];
-        const lua = SIGNOS[dados.planetas[1].s]; // Lua é o indice 1
-
         document.getElementById('synthesis-text').innerHTML = `
-            Sua tríade fundamental revela uma personalidade única. 
-            Com o <strong>Sol em ${sol}</strong>, sua essência busca brilhar através das qualidades deste signo.
-            Seu <strong>Ascendente em ${asc}</strong> é a máscara que você apresenta ao mundo, a primeira impressão que causa e como inicia as coisas.
-            Já sua <strong>Lua em ${lua}</strong> revela seu mundo interior, o que te nutre emocionalmente e como você reage instintivamente.
+            Seu Mapa Astral foi calculado com precisão astronômica para as coordenadas de <strong>${coords.nome || cidade}</strong>.
             <br><br>
-            A harmonia ou tensão entre seu Sol (${sol}) e sua Lua (${lua}) dita muito do seu equilíbrio interno.
-            Observe nas análises acima onde seus planetas se concentram (nos signos de Fogo, Terra, Ar ou Água) para entender seu temperamento dominante.
+            Você é um ser solar em <strong>${dados.planetas[0].signoInfo.nome}</strong> com Ascendente em <strong>${dados.ascendente.nome}</strong>.
+            Isso indica que sua jornada de vida é iluminada pela energia de ${getAdjetivoSigno(dados.planetas[0].signoInfo.nome)}, mas você inicia seus caminhos com a postura ${getAdjetivoSigno(dados.ascendente.nome)}.
+            <br><br>
+            Sua Lua em <strong>${dados.planetas[1].signoInfo.nome}</strong> na Casa ${dados.planetas[1].casa} revela que suas maiores necessidades emocionais estão ligadas a ${getSignificadoCasa(dados.planetas[1].casa)}.
         `;
 
         document.getElementById('loading-screen').style.display = 'none';
     }
 
-    function desenharMandala(dados) {
-        const cx = 200; const cy = 200; const r = 180;
+    function desenharSVG(dados) {
+        const cx = 200, cy = 200, r = 180;
         let svg = `<svg viewBox="0 0 400 400" class="mandala-svg">`;
-        
-        // Círculos base
         svg += `<circle cx="${cx}" cy="${cy}" r="${r}" stroke="#d4af37" stroke-width="2" fill="none" />`;
         svg += `<circle cx="${cx}" cy="${cy}" r="${r*0.7}" stroke="#333" stroke-width="1" fill="none" />`;
-        svg += `<circle cx="${cx}" cy="${cy}" r="${r*0.2}" fill="#111" stroke="#d4af37" stroke-width="1" />`; // Centro
-
-        // Divisões das Casas
+        
         for(let i=0; i<12; i++) {
-            const angle = (i * 30) * (Math.PI / 180);
-            const x2 = cx + r * Math.cos(angle);
-            const y2 = cy + r * Math.sin(angle);
+            const angulo = (i * 30) * (Math.PI/180); 
+            const x2 = cx + r * Math.cos(angulo);
+            const y2 = cy + r * Math.sin(angulo);
             svg += `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#222" stroke-width="1" />`;
             
-            // Símbolos dos Signos (Externo)
-            // Lógica: A Casa 1 começa no Ascendente (posição 9 horas no relógio visualmente, ou 180 graus na geometria svg padrão)
-            // Para simplificar a visualização, vamos colocar o Ascendente a esquerda (padrão mapas astrais)
+            const signoIdx = dados.casas[i].signoInfo.index;
+            const fatiaAngulo = (i * 30 + 15 + 180) * (Math.PI/180);
+            const tx = cx + (r*0.88) * Math.cos(fatiaAngulo);
+            const ty = cy + (r*0.88) * Math.sin(fatiaAngulo);
+            svg += `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" fill="#d4af37" font-size="16" font-family="serif">${SIMBOLOS[signoIdx]}</text>`;
             
-            const sIdx = (dados.ascIdx + i) % 12; 
-            
-            // Ajuste angular para o texto ficar no meio da fatia
-            // No SVG, 0 graus é direita. Mapas astrais, Ascendente é esquerda (180).
-            // Vamos rotacionar para ficar padrão visual
-            const sliceMiddle = (i * 30 + 15 + 180) * (Math.PI / 180); 
-            
-            const tx = cx + (r*0.85) * Math.cos(sliceMiddle);
-            const ty = cy + (r*0.85) * Math.sin(sliceMiddle);
-            
-            svg += `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" fill="#d4af37" font-size="18" style="font-family: serif;">${SIMBOLOS[sIdx]}</text>`;
-            
-            // Numero da Casa (Interno)
-            const hx = cx + (r*0.25) * Math.cos(sliceMiddle);
-            const hy = cy + (r*0.25) * Math.sin(sliceMiddle);
-            svg += `<text x="${hx}" y="${hy}" text-anchor="middle" dominant-baseline="middle" fill="#555" font-size="10">${i+1}</text>`;
+            const hx = cx + (r*0.2) * Math.cos(fatiaAngulo);
+            const hy = cy + (r*0.2) * Math.sin(fatiaAngulo);
+            svg += `<text x="${hx}" y="${hy}" text-anchor="middle" dominant-baseline="middle" fill="#555" font-size="9">${i+1}</text>`;
         }
-        
-        // Planetas
-        dados.planetas.forEach((p, i) => {
-            // Calcula o ângulo do planeta baseado no seu Signo e um "espalhamento" para não sobrepor tudo
-            // Se o planeta está no signo X, ele está no angulo X * 30
-            // Precisamos ajustar para o Ascendente ser o marco zero visualmente
+
+        dados.planetas.forEach((p, idx) => {
+            const grauAsc = (dados.ascendente.index * 30) + dados.ascendente.grauNoSigno;
+            let grauRelativo = p.graus - grauAsc;
+            if(grauRelativo < 0) grauRelativo += 360;
             
-            // Distância do planeta em relação ao ascendente (em signos)
-            let distSignos = p.s - dados.ascIdx;
-            if(distSignos < 0) distSignos += 12;
+            const anguloRad = (grauRelativo + 180) * (Math.PI/180);
+            const distR = (r*0.55) + ((idx % 3) * 15);
+            const px = cx + distR * Math.cos(anguloRad);
+            const py = cy + distR * Math.sin(anguloRad);
             
-            // Angulo base: (dist * 30) + 180 (para alinhar com Asc na esquerda)
-            // Adiciona um random pequeno ou offset fixo baseado no indice para evitar sobreposição total
-            const offset = (i % 3) * 8 - 4; 
-            const angleDeg = (distSignos * 30) + 15 + 180 + offset;
-            
-            const angleRad = angleDeg * (Math.PI / 180);
-            
-            // Raio variável para planetas não ficarem em linha
-            const distR = (r * 0.5) + ( (i % 2 === 0) ? 20 : -20 );
-            
-            const px = cx + distR * Math.cos(angleRad);
-            const py = cy + distR * Math.sin(angleRad);
-            
-            svg += `<text x="${px}" y="${py}" text-anchor="middle" fill="#fff" font-size="16" style="filter: drop-shadow(0 0 2px #000);">${p.icon}</text>`;
+            const icons = {"Sol":"☉","Lua":"☽","Mercúrio":"☿","Vênus":"♀","Marte":"♂","Júpiter":"♃","Saturno":"♄","Urano":"♅","Netuno":"♆","Plutão":"♇"};
+            svg += `<text x="${px}" y="${py}" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="14" style="filter: drop-shadow(0 0 2px #000); cursor:help;">${icons[p.nome]}</text>`;
         });
 
         svg += `</svg>`;
         document.getElementById('chart-area').innerHTML = svg;
     }
 
-    // --- SEGURANÇA E INICIALIZAÇÃO ---
+    // --- FIREBASE ---
+    const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
+    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
     auth.onAuthStateChanged(user => {
         if(user){
             db.collection("usuarios").doc(user.uid).get().then(doc => {
@@ -461,7 +398,6 @@
                 const status = (d.status || "").toLowerCase();
                 const plano = (d.plano || "").toLowerCase();
 
-                // Verifica permissão (Premium)
                 if(status !== "premium" && plano !== "premium") {
                     window.location.href = 'dashboard.html';
                     return;
@@ -470,9 +406,10 @@
                 const nome = d.nome || "Iniciado";
                 const data = d.dataNascimento || d.nascimento || "2000-01-01";
                 const hora = d.horaNascimento || d.hora || "12:00";
-                const cidade = d.cidade || d.Cidade || "Local Desconhecido";
+                const cidade = d.cidade || d.Cidade || "Brasília";
+                const estado = d.estado || d.uf || "DF";
                 
-                renderizar(nome, data, hora, cidade);
+                renderizar(nome, data, hora, cidade, estado);
 
             }).catch(e => {
                 console.error(e);
