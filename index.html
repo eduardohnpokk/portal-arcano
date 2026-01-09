@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Arcano | Acesso</title>
+    <title>Portal Arcano | Início</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -14,122 +14,93 @@
     
     <style>
         :root { --gold: #d4af37; --bg-dark: #050505; }
-        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: url('https://www.transparenttextures.com/patterns/stardust.png'), var(--bg-dark); color: #e0e0e0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
-        
-        .login-container {
-            background: rgba(10, 10, 10, 0.95); border: 1px solid var(--gold);
-            padding: 40px; border-radius: 8px; width: 100%; max-width: 500px;
-            text-align: center; box-shadow: 0 0 50px rgba(212,175,55,0.15);
-            position: relative; margin: auto;
-        }
-
-        .portal-logo { font-family: 'Cinzel'; font-size: 2.5em; color: var(--gold); margin-bottom: 10px; text-shadow: 0 0 20px rgba(212,175,55,0.5); }
-        .portal-sub { color: #888; margin-bottom: 30px; letter-spacing: 2px; text-transform: uppercase; font-size: 0.8em; }
-
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        .login-container { background: rgba(10, 10, 10, 0.95); border: 1px solid var(--gold); padding: 40px; border-radius: 8px; width: 100%; max-width: 500px; text-align: center; box-shadow: 0 0 50px rgba(212,175,55,0.15); }
+        .portal-logo { font-family: 'Cinzel'; font-size: 2.5em; color: var(--gold); margin-bottom: 10px; }
         .input-group { margin-bottom: 15px; text-align: left; }
         .input-group label { display: block; color: var(--gold); font-family: 'Cinzel'; margin-bottom: 5px; font-size: 0.9em; }
         .form-control { width: 94%; padding: 12px; background: #000; border: 1px solid #333; color: #fff; border-radius: 4px; }
-        
-        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-
         .btn-main { background: linear-gradient(45deg, #d4af37, #b8860b); color: #000; border: none; padding: 15px; width: 100%; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border-radius: 4px; margin-top: 10px; }
-        .toggle-link { margin-top: 20px; font-size: 0.9em; color: #666; cursor: pointer; text-decoration: underline; }
         
-        #loading-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); display: flex; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 10; display: none; border-radius: 8px;
-        }
-        .error-msg { color: #ff4444; font-size: 0.9em; margin-top: 15px; display: none; }
+        /* Área Logada (Escondida por padrão) */
+        #logged-area { display: none; }
+        .welcome-msg { color: var(--gold); font-size: 1.2em; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
 <div class="login-container">
-    <div id="loading-overlay">
-        <i class="fas fa-compass fa-spin" style="font-size:3em; color:var(--gold);"></i>
-        <p style="margin-top:20px; color:#fff; font-family:'Cinzel';" id="loading-text">Conectando...</p>
-    </div>
-
     <div class="portal-logo">PORTAL ARCANO</div>
-    <p class="portal-sub">Acesso aos Mistérios</p>
 
     <div id="login-form">
         <div class="input-group"><label>E-mail</label><input type="email" id="login-email" class="form-control"></div>
         <div class="input-group"><label>Senha</label><input type="password" id="login-pass" class="form-control"></div>
-        <button class="btn-main" onclick="fazerLogin()">ENTRAR NO TEMPLO</button>
-        <p class="error-msg" id="login-error"></p>
-        <div class="toggle-link" onclick="alternarForm('cadastro')">Não possui cadastro? Criar Conta</div>
-        
-        <button class="btn-main" onclick="forçarLogout()" style="background: #333; color: #aaa; margin-top: 20px; font-size: 0.8em;">LIMPAR SESSÃO / SAIR</button>
+        <button class="btn-main" onclick="fazerLogin()">ENTRAR</button>
+        <p style="margin-top:15px; cursor:pointer; text-decoration:underline;" onclick="document.getElementById('login-form').style.display='none';document.getElementById('register-form').style.display='block'">Criar Conta</p>
     </div>
 
     <div id="register-form" style="display:none;">
-        <h3 style="color:#fff; font-family:'Cinzel'; margin-top:0;">Registro de Iniciado</h3>
-        <div class="input-group"><label>Nome Completo</label><input type="text" id="reg-nome" class="form-control"></div>
-        <div class="input-group"><label>E-mail</label><input type="email" id="reg-email" class="form-control"></div>
-        <div class="input-group"><label>Senha</label><input type="password" id="reg-pass" class="form-control"></div>
-        <div class="row-2">
-            <div class="input-group"><label>Nascimento</label><input type="date" id="reg-nasc" class="form-control"></div>
-            <div class="input-group"><label>Hora</label><input type="time" id="reg-hora" class="form-control"></div>
-        </div>
-        <div class="row-2">
-            <div class="input-group"><label>Cidade</label><input type="text" id="reg-cidade" class="form-control"></div>
-            <div class="input-group"><label>Estado (UF)</label><input type="text" id="reg-uf" class="form-control" maxlength="2"></div>
-        </div>
-        <div class="input-group"><label>Telefone</label><input type="tel" id="reg-tel" class="form-control"></div>
-        <button class="btn-main" onclick="criarConta()">FINALIZAR CADASTRO</button>
-        <p class="error-msg" id="reg-error"></p>
-        <div class="toggle-link" onclick="alternarForm('login')">Já possui conta? Fazer Login</div>
+        <h3 style="color:var(--gold)">Novo Iniciado</h3>
+        <input type="text" id="reg-nome" class="form-control" placeholder="Nome" style="margin-bottom:10px;">
+        <input type="email" id="reg-email" class="form-control" placeholder="E-mail" style="margin-bottom:10px;">
+        <input type="password" id="reg-pass" class="form-control" placeholder="Senha" style="margin-bottom:10px;">
+        <button class="btn-main" onclick="criarConta()">CADASTRAR</button>
+        <p style="margin-top:15px; cursor:pointer; text-decoration:underline;" onclick="document.getElementById('register-form').style.display='none';document.getElementById('login-form').style.display='block'">Voltar para Login</p>
+    </div>
+
+    <div id="logged-area">
+        <p class="welcome-msg">Sessão Ativa Detectada</p>
+        <p>Você já está logado. Para evitar erros de redirecionamento, escolha uma opção:</p>
+        
+        <button class="btn-main" onclick="irParaDashboard()">ACESSAR MEU PAINEL</button>
+        
+        <button class="btn-main" onclick="fazerLogout()" style="background: #333; color: #aaa; margin-top: 15px;">SAIR DA CONTA</button>
     </div>
 </div>
 
 <script>
     const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
-    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+    firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // --- ROTEAMENTO INTELIGENTE (CORRIGIDO PARA 'users') ---
+    // 1. CHECAGEM SEGURA: NÃO REDIRECIONA SOZINHO
     auth.onAuthStateChanged(user => {
         if (user) {
-            mostrarLoading("Verificando destino...");
-            
-            // Busca na coleção users (onde o pagamento cai)
-            db.collection("users").doc(user.uid).get()
-            .then(doc => {
-                if (doc.exists) {
-                    const d = doc.data();
-                    // Verifica se é premium
-                    if (d.premium === true || String(d.status).toLowerCase() === "premium") {
-                        window.location.href = "dashboard-premium.html";
-                    } else {
-                        window.location.href = "dashboard.html";
-                    }
-                } else {
-                    // Sem doc? Manda para o dashboard free
-                    window.location.href = "dashboard.html";
-                }
-            }).catch(err => {
-                // Erro? Manda para o dashboard free
-                window.location.href = "dashboard.html";
-            });
+            // Se logado, mostra os botões em vez de redirecionar
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('logged-area').style.display = 'block';
         } else {
-            esconderLoading();
-            mostrarLogin();
+            // Se não logado, mostra login
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('logged-area').style.display = 'none';
         }
     });
+
+    function irParaDashboard() {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        // Verifica status antes de ir
+        db.collection("users").doc(user.uid).get().then(doc => {
+            if (doc.exists) {
+                const d = doc.data();
+                if (d.premium === true || String(d.status).toLowerCase() === "premium") {
+                    window.location.href = "dashboard-premium.html";
+                } else {
+                    window.location.href = "dashboard.html";
+                }
+            } else {
+                window.location.href = "dashboard.html";
+            }
+        });
+    }
 
     function fazerLogin() {
         const email = document.getElementById('login-email').value;
         const pass = document.getElementById('login-pass').value;
-        if(!email || !pass) return alert("Preencha tudo.");
-        mostrarLoading("Entrando...");
-        auth.signInWithEmailAndPassword(email, pass).catch(e => {
-            esconderLoading();
-            document.getElementById('login-error').innerText = e.message;
-            document.getElementById('login-error').style.display = 'block';
-        });
+        auth.signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
     }
 
     function criarConta() {
@@ -137,53 +108,16 @@
         const pass = document.getElementById('reg-pass').value;
         const nome = document.getElementById('reg-nome').value;
         
-        let planoInicial = "gratuito";
-        let statusInicial = "free";
-        if (email.toLowerCase().includes("eduardo.pokk")) {
-            planoInicial = "premium"; statusInicial = "premium";
-        }
-
-        if(!email || !pass || !nome) return alert("Preencha os campos obrigatórios.");
-        mostrarLoading("Criando conta...");
-
         auth.createUserWithEmailAndPassword(email, pass).then(cred => {
-            // Salva na coleção 'users'
-            return db.collection("users").doc(cred.user.uid).set({
-                nome: nome,
-                email: email,
-                dataNascimento: document.getElementById('reg-nasc').value,
-                horaNascimento: document.getElementById('reg-hora').value || "12:00",
-                cidade: document.getElementById('reg-cidade').value,
-                estado: document.getElementById('reg-uf').value,
-                telefone: document.getElementById('reg-tel').value,
-                plano: planoInicial,
-                status: statusInicial,
-                premium: (statusInicial === "premium"),
-                data_cadastro: new Date().toISOString()
-            });
-        }).catch(e => {
-            esconderLoading();
-            document.getElementById('reg-error').innerText = e.message;
-            document.getElementById('reg-error').style.display = 'block';
-        });
+            db.collection("users").doc(cred.user.uid).set({
+                nome: nome, email: email, premium: false, status: "free"
+            }).then(() => location.reload());
+        }).catch(e => alert(e.message));
     }
 
-    function forçarLogout() {
-        auth.signOut().then(() => {
-            window.location.reload();
-        });
+    function fazerLogout() {
+        auth.signOut().then(() => location.reload());
     }
-
-    function alternarForm(tipo) {
-        document.getElementById('login-form').style.display = (tipo === 'login') ? 'block' : 'none';
-        document.getElementById('register-form').style.display = (tipo === 'cadastro') ? 'block' : 'none';
-    }
-    function mostrarLoading(txt) {
-        document.getElementById('loading-text').innerText = txt;
-        document.getElementById('loading-overlay').style.display = 'flex';
-    }
-    function esconderLoading() { document.getElementById('loading-overlay').style.display = 'none'; }
-    function mostrarLogin() { document.getElementById('login-form').style.display = 'block'; }
 </script>
 </body>
 </html>

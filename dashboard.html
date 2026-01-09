@@ -3,188 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Arcano | Meu Destino</title>
-    
+    <title>Portal Arcano | Painel</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-functions-compat.js"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <style>
-        :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
-        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; line-height: 1.6; }
-        
-        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
-        
-        /* HEADER */
-        .header { text-align: center; margin-bottom: 50px; }
-        .welcome-text { font-family: 'Cinzel'; color: var(--gold); font-size: 2.2em; margin: 0; }
-        .user-sign { font-size: 1.1em; color: #888; text-transform: uppercase; letter-spacing: 3px; margin-top: 5px; }
-
-        /* SEÇÕES DE CONTEÚDO (RESUMOS) */
-        .destiny-section { 
-            background: var(--card-bg); border-left: 3px solid var(--gold); 
-            padding: 30px; margin-bottom: 30px; border-radius: 0 8px 8px 0;
-        }
-        .destiny-section h3 { font-family: 'Cinzel'; color: var(--gold); margin-top: 0; font-size: 1.4em; }
-        .destiny-section p { font-size: 1.1em; color: #ccc; margin-bottom: 10px; }
-        .read-more-dots { color: var(--gold); font-weight: bold; letter-spacing: 2px; }
-
-        /* ÁREA DE CONVITE PREMIUM */
-        .premium-callout {
-            background: linear-gradient(180deg, #0a0a0a 0%, #151108 100%);
-            border: 1px solid #333; padding: 50px 30px; text-align: center; 
-            border-radius: 12px; margin-top: 60px; position: relative;
-        }
-        .premium-callout h2 { font-family: 'Cinzel'; color: var(--gold); font-size: 1.8em; margin-bottom: 15px; }
-        .premium-callout p { font-size: 1.2em; max-width: 700px; margin: 0 auto 30px auto; color: #aaa; }
-        
-        .benefits-list { 
-            display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; 
-            margin-bottom: 35px; color: var(--gold); font-family: 'Cinzel'; font-size: 0.85em; 
-        }
-
-        .btn-upgrade {
-            background: var(--gold); color: #000; border: none; padding: 18px 50px;
-            font-family: 'Cinzel'; font-size: 1.2em; font-weight: bold; cursor: pointer;
-            border-radius: 4px; transition: 0.3s; text-transform: uppercase; letter-spacing: 2px;
-        }
-        .btn-upgrade:hover { background: #fff; box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); transform: translateY(-2px); }
-
-        /* FOOTER */
-        .footer { margin-top: 80px; text-align: center; border-top: 1px solid #222; padding: 40px 0; }
-        .logout-link { color: #555; text-decoration: none; font-size: 0.9em; cursor: pointer; border: 1px solid #333; padding: 10px 20px; border-radius: 4px; }
-        .logout-link:hover { color: #fff; border-color: #fff; }
-
-        /* ESCONDER QUANDO JÁ FOR PREMIUM */
-        #area-premium-ativa { display: none; text-align: center; margin-top: 40px; border: 1px solid var(--gold); padding: 40px; border-radius: 10px; }
+        :root { --gold: #d4af37; --bg-dark: #050505; }
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; padding: 20px; text-align: center; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .welcome { font-family: 'Cinzel'; font-size: 2em; color: var(--gold); margin-top: 40px; }
+        .card { background: #111; border: 1px solid #333; padding: 30px; margin-top: 30px; border-radius: 8px; }
+        .btn-buy { background: var(--gold); color: #000; padding: 15px 30px; font-weight: bold; font-family: 'Cinzel'; border: none; cursor: pointer; font-size: 1.1em; margin-top: 20px; width: 100%; }
+        .btn-logout { background: transparent; border: 1px solid #444; color: #888; padding: 10px 20px; margin-top: 50px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header">
-        <h1 class="welcome-text" id="user-name">Saudações</h1>
-        <div class="user-sign" id="user-sign">Sincronizando seu destino...</div>
+    <h1 class="welcome" id="user-name">Carregando...</h1>
+    
+    <div class="card" id="offer-card">
+        <h2>Complete sua Jornada</h2>
+        <p>Você está no plano gratuito. Libere todas as ferramentas agora.</p>
+        <button class="btn-buy" id="btn-comprar">Liberar Acesso Premium (R$ 29,90)</button>
     </div>
 
-    <div class="destiny-section">
-        <h3><i class="fas fa-star" style="margin-right: 10px; font-size: 0.8em;"></i> Sua Essência Astral</h3>
-        <p id="mapa-resumo">
-            A posição do Sol no momento do seu nascimento revela uma alma em busca de propósito. Suas casas astrológicas sugerem uma grande inclinação para a espiritualidade...
-        </p>
-        <span class="read-more-dots">. . .</span>
-    </div>
-
-    <div class="destiny-section">
-        <h3><i class="fas fa-infinity" style="margin-right: 10px; font-size: 0.8em;"></i> O Código do seu Nome</h3>
-        <p id="num-resumo">
-            As letras do seu nome vibram na frequência do número 8. Isso indica que você nasceu para liderar e prosperar...
-        </p>
-        <span class="read-more-dots">. . .</span>
-    </div>
-
-    <div class="destiny-section">
-        <h3><i class="fas fa-yin-yang" style="margin-right: 10px; font-size: 0.8em;"></i> Zodíaco Chinês</h3>
-        <p id="zodiaco-resumo">
-            Sob a regência do seu signo chinês, este ciclo favorece as conexões emocionais e a harmonia no lar...
-        </p>
-        <span class="read-more-dots">. . .</span>
-    </div>
-
-    <div class="premium-callout" id="venda-container">
-        <h2>Desbloqueie o Conhecimento Completo</h2>
-        <p>
-            Estes são apenas os primeiros passos. Assine agora para ler sua análise profunda e receber orientações exclusivas.
-        </p>
-        
-        <div class="benefits-list">
-            <span><i class="fas fa-magic"></i> CONSULTA AO ORÁCULO</span>
-            <span><i class="fas fa-tint"></i> RITUAIS DE BANHO</span>
-            <span><i class="fas fa-gem"></i> GUIA DE CRISTAIS</span>
-        </div>
-
-        <button class="btn-upgrade" id="btn-comprar">Acessar Tudo por R$ 29,90</button>
-        <p style="font-size: 0.8em; color: #555; margin-top: 15px;">Liberação imediata via PIX ou Cartão.</p>
-    </div>
-
-    <div id="area-premium-ativa">
-        <h2 style="font-family:'Cinzel'; color:var(--gold);">Acesso Sagrado Liberado</h2>
-        <p style="color:#ccc; margin-bottom: 20px;">Você já é um membro iniciado.</p>
-        <button class="btn-upgrade" onclick="window.location.href='dashboard-premium.html'">ENTRAR NO DASHBOARD PREMIUM</button>
-    </div>
-
-    <div class="footer">
-        <div class="logout-link" onclick="fazerLogout()">ENCERRAR SESSÃO</div>
-    </div>
+    <button class="btn-logout" onclick="auth.signOut()">SAIR DO SISTEMA</button>
 </div>
 
 <script>
     const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
-    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+    firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
     const functions = firebase.functions();
 
     auth.onAuthStateChanged(user => {
         if (user) {
-            verificarStatus(user);
+            // Verifica na coleção certa: USERS
+            db.collection("users").doc(user.uid).get().then(doc => {
+                if (doc.exists) {
+                    const d = doc.data();
+                    document.getElementById('user-name').innerText = `Olá, ${d.nome || 'Iniciado'}`;
+                    
+                    // Se já for premium, manda pro Premium
+                    if (d.premium === true || d.status === 'premium') {
+                        window.location.href = "dashboard-premium.html";
+                    }
+                }
+            });
         } else {
-            window.location.href = 'index.html';
+            window.location.href = "index.html";
         }
     });
 
-    async function verificarStatus(user) {
-        // CORRIGIDO: Agora busca na coleção 'users'
-        const doc = await db.collection('users').doc(user.uid).get();
-        
-        if (doc.exists) {
-            const data = doc.data();
-            const nomeUser = data.nome ? data.nome.split(' ')[0] : 'Iniciado';
-            const signoUser = data.signo || 'Desconhecido';
-
-            document.getElementById('user-name').innerText = `Saudações, ${nomeUser}`;
-            document.getElementById('user-sign').innerText = `Signo de ${signoUser}`;
-
-            // Se for PREMIUM, esconde a venda e mostra botão de ir pro premium
-            if (data.premium === true || data.status === 'premium') {
-                document.getElementById('venda-container').style.display = 'none';
-                document.getElementById('area-premium-ativa').style.display = 'block';
-                
-                const dots = document.querySelectorAll('.read-more-dots');
-                dots.forEach(d => d.style.display = 'none');
-            }
-        }
-    }
-
-    // LOGOUT FUNCIONAL
-    function fazerLogout() {
-        auth.signOut().then(() => {
-            window.location.href = "index.html";
-        });
-    }
-
-    // BOTÃO DE COMPRA
     document.getElementById('btn-comprar').addEventListener('click', async () => {
         const btn = document.getElementById('btn-comprar');
-        btn.innerText = "PROCESSANDO...";
-        btn.disabled = true;
-
+        btn.innerText = "Processando...";
         try {
             const criarPagamento = functions.httpsCallable('criarPagamento');
             const result = await criarPagamento();
             window.location.href = result.data.link;
         } catch (error) {
-            console.error(error);
-            alert("Erro ao conectar com o servidor.");
-            btn.innerText = "Acessar Tudo por R$ 29,90";
-            btn.disabled = false;
+            alert("Erro no pagamento: " + error.message);
+            btn.innerText = "Tentar Novamente";
         }
     });
 </script>
-
 </body>
 </html>
