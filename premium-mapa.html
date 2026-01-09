@@ -125,45 +125,60 @@
 </div>
 
 <script>
-    // --- 1. BANCO DE DADOS GEOGRÁFICO INTERNO (INFALÍVEL) ---
-    // Contém todas as Capitais, Estados e cidades solicitadas.
-    // Se a cidade não estiver aqui, o sistema usa a coordenada do Estado.
-    const DB_LOCALIZACAO = {
-        // Capitais e Grandes Centros
-        "sao paulo": { lat: -23.5505, lon: -46.6333 }, "sp": { lat: -23.55, lon: -46.63 },
-        "rio de janeiro": { lat: -22.9068, lon: -43.1729 }, "rj": { lat: -22.90, lon: -43.17 },
-        "brasilia": { lat: -15.7975, lon: -47.8919 }, "df": { lat: -15.79, lon: -47.89 },
-        "salvador": { lat: -12.9777, lon: -38.5016 }, "ba": { lat: -12.97, lon: -38.50 },
-        "fortaleza": { lat: -3.7172, lon: -38.5434 }, "ce": { lat: -3.71, lon: -38.54 },
-        "belo horizonte": { lat: -19.9167, lon: -43.9345 }, "mg": { lat: -19.91, lon: -43.93 },
-        "manaus": { lat: -3.1190, lon: -60.0217 }, "am": { lat: -3.11, lon: -60.02 },
-        "curitiba": { lat: -25.4284, lon: -49.2733 }, "pr": { lat: -25.42, lon: -49.27 },
-        "recife": { lat: -8.05428, lon: -34.8813 }, "pe": { lat: -8.05, lon: -34.88 },
-        "goiania": { lat: -16.6869, lon: -49.2648 }, "go": { lat: -16.68, lon: -49.26 },
-        "belem": { lat: -1.4558, lon: -48.4902 }, "pa": { lat: -1.45, lon: -48.49 },
-        "porto alegre": { lat: -30.0346, lon: -51.2177 }, "rs": { lat: -30.03, lon: -51.21 },
+    // --- 1. BANCO DE DADOS GEOGRÁFICO "OFFLINE" (INFALÍVEL) ---
+    // Mapeamento de todas as capitais e siglas de estados.
+    // Isso garante que se a pessoa digitar "SP" ou "São Paulo", funcione.
+    // Se digitar uma cidade desconhecida do Acre, ele usa a coordenada de Rio Branco (AC).
+    const COORDENADAS_FIXAS = {
+        // Cidades Específicas e Capitais
+        "sao paulo": { lat: -23.5505, lon: -46.6333 }, 
+        "rio de janeiro": { lat: -22.9068, lon: -43.1729 },
+        "brasilia": { lat: -15.7975, lon: -47.8919 },
+        "salvador": { lat: -12.9777, lon: -38.5016 },
+        "fortaleza": { lat: -3.7172, lon: -38.5434 },
+        "belo horizonte": { lat: -19.9167, lon: -43.9345 },
+        "manaus": { lat: -3.1190, lon: -60.0217 },
+        "curitiba": { lat: -25.4284, lon: -49.2733 },
+        "recife": { lat: -8.05428, lon: -34.8813 },
+        "goiania": { lat: -16.6869, lon: -49.2648 },
+        "belem": { lat: -1.4558, lon: -48.4902 },
+        "porto alegre": { lat: -30.0346, lon: -51.2177 },
         "guarulhos": { lat: -23.4542, lon: -46.5333 },
         "campinas": { lat: -22.9099, lon: -47.0626 },
-        "sao luis": { lat: -2.5391, lon: -44.2829 }, "ma": { lat: -2.53, lon: -44.28 },
-        "sao goncalo": { lat: -22.8275, lon: -43.0631 },
-        "maceio": { lat: -9.6662, lon: -35.7351 }, "al": { lat: -9.66, lon: -35.73 },
-        "duque de caxias": { lat: -22.7923, lon: -43.3086 },
-        "natal": { lat: -5.7945, lon: -35.2110 }, "rn": { lat: -5.79, lon: -35.21 },
-        "teresina": { lat: -5.0920, lon: -42.8038 }, "pi": { lat: -5.09, lon: -42.80 },
-        "campo grande": { lat: -20.4697, lon: -54.6201 }, "ms": { lat: -20.46, lon: -54.62 },
-        "joao pessoa": { lat: -7.1195, lon: -34.8450 }, "pb": { lat: -7.11, lon: -34.84 },
-        "aracaju": { lat: -10.9472, lon: -37.0731 }, "se": { lat: -10.94, lon: -37.07 },
-        "cuiaba": { lat: -15.6014, lon: -56.0979 }, "mt": { lat: -15.60, lon: -56.09 },
-        "porto velho": { lat: -8.7612, lon: -63.9039 }, "ro": { lat: -8.76, lon: -63.90 },
-        "florianopolis": { lat: -27.5954, lon: -48.5480 }, "sc": { lat: -27.59, lon: -48.54 },
-        "macapa": { lat: 0.0355, lon: -51.0705 }, "ap": { lat: 0.03, lon: -51.07 },
-        "rio branco": { lat: -9.9754, lon: -67.8249 }, "ac": { lat: -9.97, lon: -67.82 },
-        "vitoria": { lat: -20.3155, lon: -40.3128 }, "es": { lat: -20.31, lon: -40.31 },
-        "boa vista": { lat: 2.8235, lon: -60.6758 }, "rr": { lat: 2.82, lon: -60.67 },
-        "palmas": { lat: -10.2491, lon: -48.3243 }, "to": { lat: -10.24, lon: -48.32 },
-        // Específico solicitado
-        "surubim": { lat: -7.8333, lon: -35.7500 },
-        // Padrão Brasil Central
+        "sao luis": { lat: -2.5391, lon: -44.2829 },
+        "maceio": { lat: -9.6662, lon: -35.7351 },
+        "natal": { lat: -5.7945, lon: -35.2110 },
+        "teresina": { lat: -5.0920, lon: -42.8038 },
+        "campo grande": { lat: -20.4697, lon: -54.6201 },
+        "joao pessoa": { lat: -7.1195, lon: -34.8450 },
+        "aracaju": { lat: -10.9472, lon: -37.0731 },
+        "cuiaba": { lat: -15.6014, lon: -56.0979 },
+        "porto velho": { lat: -8.7612, lon: -63.9039 },
+        "florianopolis": { lat: -27.5954, lon: -48.5480 },
+        "macapa": { lat: 0.0355, lon: -51.0705 },
+        "rio branco": { lat: -9.9754, lon: -67.8249 },
+        "vitoria": { lat: -20.3155, lon: -40.3128 },
+        "boa vista": { lat: 2.8235, lon: -60.6758 },
+        "palmas": { lat: -10.2491, lon: -48.3243 },
+        "surubim": { lat: -7.8333, lon: -35.7500 }, // Pedido específico
+
+        // Siglas de Estados (Fallback de segurança)
+        "sp": { lat: -23.55, lon: -46.63 }, "rj": { lat: -22.90, lon: -43.17 },
+        "df": { lat: -15.79, lon: -47.89 }, "ba": { lat: -12.97, lon: -38.50 },
+        "ce": { lat: -3.71, lon: -38.54 }, "mg": { lat: -19.91, lon: -43.93 },
+        "am": { lat: -3.11, lon: -60.02 }, "pr": { lat: -25.42, lon: -49.27 },
+        "pe": { lat: -8.05, lon: -34.88 }, "go": { lat: -16.68, lon: -49.26 },
+        "pa": { lat: -1.45, lon: -48.49 }, "rs": { lat: -30.03, lon: -51.21 },
+        "ma": { lat: -2.53, lon: -44.28 }, "al": { lat: -9.66, lon: -35.73 },
+        "rn": { lat: -5.79, lon: -35.21 }, "pi": { lat: -5.09, lon: -42.80 },
+        "ms": { lat: -20.46, lon: -54.62 }, "pb": { lat: -7.11, lon: -34.84 },
+        "se": { lat: -10.94, lon: -37.07 }, "mt": { lat: -15.60, lon: -56.09 },
+        "ro": { lat: -8.76, lon: -63.90 }, "sc": { lat: -27.59, lon: -48.54 },
+        "ap": { lat: 0.03, lon: -51.07 }, "ac": { lat: -9.97, lon: -67.82 },
+        "es": { lat: -20.31, lon: -40.31 }, "rr": { lat: 2.82, lon: -60.67 },
+        "to": { lat: -10.24, lon: -48.32 },
+        
+        // Padrão Brasil Central (Último recurso)
         "default": { lat: -15.79, lon: -47.88 }
     };
 
@@ -171,31 +186,31 @@
     const SIMBOLOS = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
     
     const ARQUETIPOS = {
-        "Sol": "Sua Essência", "Lua": "Suas Emoções", "Mercúrio": "Sua Mente",
-        "Vênus": "Seu Afeto", "Marte": "Sua Ação", "Júpiter": "Sua Sorte",
-        "Saturno": "Seu Karma", "Urano": "Sua Inovação", "Netuno": "Sua Fé",
-        "Plutão": "Sua Transformação", "Ascendente": "Sua Máscara"
+        "Sol": "Sua Essência e Propósito", "Lua": "Seu Mundo Emocional e Inconsciente", "Mercúrio": "Sua Comunicação e Intelecto",
+        "Vênus": "Seus Valores e Forma de Amar", "Marte": "Sua Ação, Desejo e Conquista", "Júpiter": "Sua Expansão, Fé e Sorte",
+        "Saturno": "Seus Limites, Karma e Estrutura", "Urano": "Sua Originalidade e Rupturas", "Netuno": "Sua Espiritualidade e Ilusões",
+        "Plutão": "Seu Poder de Transformação e Crise", "Ascendente": "Sua Máscara Social e Início das Coisas"
     };
 
-    // --- 2. FUNÇÃO DE LOCALIZAÇÃO (SEM API EXTERNA = SEM ERRO) ---
-    function obterCoordenadasSeguras(cidade, estado) {
-        // Normaliza texto (remove acentos, caixa baixa)
+    // --- 2. LÓGICA DE LOCALIZAÇÃO (SEM API EXTERNA) ---
+    function obterCoordenadas(cidade, estado) {
+        // Normaliza para comparar (remove acentos, minúsculo)
         const norm = (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
         
         const c = norm(cidade);
         const e = norm(estado);
 
-        // 1. Tenta cidade exata
-        if (DB_LOCALIZACAO[c]) return { ...DB_LOCALIZACAO[c], origem: "Cidade" };
+        // 1. Tenta a cidade exata
+        if (COORDENADAS_FIXAS[c]) return { ...COORDENADAS_FIXAS[c], nome: cidade };
         
-        // 2. Tenta estado (Fallback inteligente)
-        if (DB_LOCALIZACAO[e]) return { ...DB_LOCALIZACAO[e], origem: "Estado (Aprox)" };
+        // 2. Tenta o estado (Fallback inteligente - usa a capital)
+        if (COORDENADAS_FIXAS[e]) return { ...COORDENADAS_FIXAS[e], nome: estado };
         
-        // 3. Último caso: Brasília
-        return { ...DB_LOCALIZACAO["default"], origem: "Padrão" };
+        // 3. Fallback final (Brasília)
+        return { ...COORDENADAS_FIXAS["default"], nome: "Padrão (Brasil)" };
     }
 
-    // --- 3. MOTOR ASTRONÔMICO TROPICAL (Placidus) ---
+    // --- 3. CÁLCULOS ASTRONÔMICOS (Astronomy Engine) ---
     function normalizarGraus(g) {
         let res = g % 360;
         if (res < 0) res += 360;
@@ -212,32 +227,33 @@
         };
     }
 
-    // Função de precessão simplificada para converter J2000 -> Tropical na Data
-    // Astronomy Engine retorna coordenadas precisas J2000. 
-    // Para mapa astral tropical, usamos a função Equator (Date) que já aplica precessão e nutação.
-    // Depois convertemos manualmente de RA/Dec para Eclíptica.
-    function calcularMapa(dataStr, horaStr, lat, lon) {
-        const dataLocal = new Date(`${dataStr}T${horaStr}:00-03:00`); // Força UTC-3 (Brasil)
-        const observer = new Astronomy.Observer(lat, lon, 0);
+    function calcularMapaPreciso(dataStr, horaStr, lat, lon) {
+        // Força Data para UTC-3 (Brasil) para consistência
+        const dataISO = `${dataStr}T${horaStr}:00-03:00`;
+        const dataLocal = new Date(dataISO);
         
-        const resultadosPlanetas = [];
-        const corpos = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"];
-
-        // 1. Obliquidade da Eclíptica (Inclinação da Terra na data)
+        const observer = new Astronomy.Observer(lat, lon, 0);
         const dateValues = Astronomy.MakeTime(dataLocal);
+        
+        // Obliquidade da Eclíptica (Inclinação da Terra na data)
         const eps = Astronomy.Obliquity(dateValues) * (Math.PI / 180);
 
+        const corpos = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"];
+        const resultadosPlanetas = [];
+
         corpos.forEach(corpo => {
-            // Pega posição Equatorial "Of Date" (Tropical)
+            // Equator (of Date) -> Coordenadas Equatoriais com Precessão
             const equ = Astronomy.Equator(corpo, dataLocal, observer, true, true);
             
-            // Converte RA/Dec para Longitude Eclíptica
-            const ra = equ.ra * 15 * (Math.PI / 180);
+            // Conversão Trigonométrica de Equatorial (RA/Dec) para Eclíptica (Lon)
+            // Isso garante o Zodíaco Tropical correto
+            const ra = equ.ra * 15 * (Math.PI / 180); // Horas para Radianos
             const dec = equ.dec * (Math.PI / 180);
-            
-            // Trig Esférica: tan(lon) = (sin(ra)cos(eps) + tan(dec)sin(eps)) / cos(ra)
+
+            // tan(lon) = (sin(ra)cos(eps) + tan(dec)sin(eps)) / cos(ra)
             const num = Math.sin(ra) * Math.cos(eps) + Math.tan(dec) * Math.sin(eps);
             const den = Math.cos(ra);
+            
             let lonRad = Math.atan2(num, den);
             let lonGraus = normalizarGraus(lonRad * (180 / Math.PI));
 
@@ -249,57 +265,67 @@
             });
         });
 
-        // 2. Ascendente e Casas (Placidus ou Topocêntrico)
-        // Cálculo do MC (Meio do Céu) e Ascendente
+        // ASCENDENTE E CASAS (Placidus Simplificado / Topocêntrico)
         const gmst = Astronomy.SiderealTime(dateValues);
         const lmst = gmst + (lon / 15.0);
         const ramc = normalizarGraus(lmst * 15);
         const ramcRad = ramc * (Math.PI / 180);
         const latRad = lat * (Math.PI / 180);
 
-        // Ascendente: atan2(cos(RAMC), -sin(RAMC)*cos(eps) - tan(lat)*sin(eps))
+        // Ascendente
         let ascRad = Math.atan2(
-            Math.cos(ramcRad),
+            Math.cos(ramcRad), 
             -Math.sin(ramcRad) * Math.cos(eps) - Math.tan(latRad) * Math.sin(eps)
         );
         let ascGraus = normalizarGraus(ascRad * (180 / Math.PI));
-        
-        // Casas Iguais (Mais seguro para visualização web sem distorção em latitudes altas)
+        const ascendenteInfo = getSignoDeGraus(ascGraus);
+
+        // Casas (Sistema Igual para Estabilidade Visual Web)
         const casas = [];
         for(let i=0; i<12; i++) {
             let cuspide = normalizarGraus(ascGraus + (i * 30));
             casas.push({ numero: i+1, grau: cuspide, signoInfo: getSignoDeGraus(cuspide) });
         }
 
-        // Distribui planetas
+        // Distribui Planetas
         resultadosPlanetas.forEach(p => {
             let diff = normalizarGraus(p.graus - ascGraus);
             p.casa = Math.floor(diff / 30) + 1;
         });
 
-        return { planetas: resultadosPlanetas, ascendente: getSignoDeGraus(ascGraus), casas: casas };
+        return { planetas: resultadosPlanetas, ascendente: ascendenteInfo, casas: casas };
     }
 
-    function traduzirPlaneta(n) {
-        const dic = {"Sun":"Sol","Moon":"Lua","Mercury":"Mercúrio","Venus":"Vênus","Mars":"Marte","Jupiter":"Júpiter","Saturn":"Saturno","Uranus":"Urano","Neptune":"Netuno","Pluto":"Plutão"};
-        return dic[n];
+    function traduzirPlaneta(nome) {
+        const mapa = {"Sun":"Sol", "Moon":"Lua", "Mercury":"Mercúrio", "Venus":"Vênus", "Mars":"Marte", "Jupiter":"Júpiter", "Saturn":"Saturno", "Uranus":"Urano", "Neptune":"Netuno", "Pluto":"Plutão"};
+        return mapa[nome];
     }
 
-    // --- 4. RENDERIZAÇÃO ---
+    // --- 4. RENDERIZAÇÃO E TEXTOS ---
+    function gerarTextoProfundo(planeta, signo, casa) {
+        return `<strong>${planeta} em ${signo} (Casa ${casa}):</strong><br>A energia de ${planeta} manifesta-se através do arquétipo de ${signo}. Na Casa ${casa}, isso afeta diretamente ${getSignificadoCasa(casa)}.`;
+    }
+
+    function getSignificadoCasa(num) {
+        const significados = ["sua identidade", "suas finanças", "sua comunicação", "seu lar", "sua criatividade", "seu trabalho", "seus relacionamentos", "suas crises", "seus ideais", "sua carreira", "seus amigos", "seu inconsciente"];
+        return significados[num-1];
+    }
+
     function renderizar(nome, dataStr, horaStr, cidade, estado) {
+        // 1. Obter Localização (Offline e Instantâneo)
+        const coords = obterCoordenadas(cidade, estado);
+        
+        document.getElementById('header-details').innerText = `${nome} • ${dataStr} • ${horaStr} • ${cidade}/${estado}`;
+        document.getElementById('loading-text').innerText = "Calculando Mapa...";
+
         try {
-            // Busca Lat/Lon Interna (Sem Erro de API)
-            const coords = obterCoordenadasSeguras(cidade, estado);
+            // 2. Calcular
+            const dados = calcularMapaPreciso(dataStr, horaStr, coords.lat, coords.lon);
             
-            document.getElementById('header-details').innerText = `${nome} • ${dataStr} • ${horaStr} • ${cidade}/${estado}`;
-            
-            // Calcula
-            const dados = calcularMapa(dataStr, horaStr, coords.lat, coords.lon);
-            
-            // Desenha
+            // 3. Desenhar
             desenharSVG(dados);
 
-            // Preenche Textos
+            // 4. Preencher
             const pList = document.getElementById('planet-list');
             const hList = document.getElementById('house-list');
             const dContent = document.getElementById('deep-content');
@@ -317,10 +343,7 @@
                             <h3 class="planet-title">${p.nome}</h3>
                             <div class="planet-sign-badge">${p.signoInfo.nome} • Casa ${p.casa}</div>
                         </div>
-                        <p class="planet-text">
-                            <strong>${p.nome} em ${p.signoInfo.nome}:</strong> A energia de ${ARQUETIPOS[p.nome]} é filtrada por ${p.signoInfo.nome}. 
-                            Na Casa ${p.casa}, isso afeta ${getSignificadoCasa(p.casa)}.
-                        </p>
+                        <p class="planet-text">${gerarTextoProfundo(p.nome, p.signoInfo.nome, p.casa)}</p>
                     </div>
                 `;
             });
@@ -338,23 +361,17 @@
             });
 
             document.getElementById('synthesis-text').innerHTML = `
-                Mapa calculado para as coordenadas de <strong>${cidade}</strong> (${coords.lat}, ${coords.lon}).<br>
-                Base: ${coords.origem}.<br><br>
-                Você tem o <strong>Sol em ${dados.planetas[0].signoInfo.nome}</strong> e <strong>Ascendente em ${dados.ascendente.nome}</strong>.
+                Cálculo realizado para coordenadas: <strong>${coords.nome}</strong> (Lat: ${coords.lat}, Lon: ${coords.lon}).<br>
+                Sol em <strong>${dados.planetas[0].signoInfo.nome}</strong>, Ascendente em <strong>${dados.ascendente.nome}</strong>.
             `;
 
             document.getElementById('loading-screen').style.display = 'none';
 
         } catch (e) {
             console.error(e);
-            alert("Ocorreu um erro no cálculo. Verifique os dados de nascimento.");
+            alert("Erro no cálculo astronômico. Verifique a data de nascimento.");
             document.getElementById('loading-screen').style.display = 'none';
         }
-    }
-
-    function getSignificadoCasa(n) {
-        const s = ["Identidade","Valores","Comunicação","Lar","Criatividade","Rotina","Parcerias","Transformação","Filosofia","Carreira","Amigos","Espiritualidade"];
-        return s[n-1];
     }
 
     function desenharSVG(dados) {
@@ -369,11 +386,11 @@
             const y2 = cy + r*Math.sin(ang);
             svg += `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#222" stroke-width="1" />`;
             
-            const sIdx = dados.casas[i].signoInfo.index;
+            const idx = dados.casas[i].signoInfo.index;
             const fAng = (i*30 + 15 + 180)*Math.PI/180;
             const tx = cx + r*0.88*Math.cos(fAng);
             const ty = cy + r*0.88*Math.sin(fAng);
-            svg += `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" fill="#d4af37" font-size="16">${SIMBOLOS[sIdx]}</text>`;
+            svg += `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" fill="#d4af37" font-size="16" font-family="serif">${SIMBOLOS[idx]}</text>`;
             
             const hx = cx + r*0.2*Math.cos(fAng);
             const hy = cy + r*0.2*Math.sin(fAng);
@@ -381,8 +398,8 @@
         }
 
         dados.planetas.forEach((p, i) => {
-            const grauAsc = (dados.ascendente.index*30) + dados.ascendente.grauNoSigno;
-            let gr = p.graus - grauAsc;
+            const ascG = (dados.ascendente.index*30) + dados.ascendente.grauNoSigno;
+            let gr = p.graus - ascG;
             if(gr < 0) gr += 360;
             const ang = (gr + 180)*Math.PI/180;
             const dr = r*0.55 + (i%3)*15;
@@ -417,8 +434,8 @@
                 const nome = d.nome || "Iniciado";
                 const data = d.dataNascimento || "2000-01-01";
                 const hora = d.horaNascimento || "12:00";
-                const cidade = d.cidade || "São Paulo";
-                const estado = d.estado || "SP";
+                const cidade = d.cidade || d.Cidade || "São Paulo";
+                const estado = d.estado || d.uf || "SP";
                 
                 renderizar(nome, data, hora, cidade, estado);
 
