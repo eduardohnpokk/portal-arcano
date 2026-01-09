@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Arcano | Acesso Iniciado</title>
+    <title>Portal Arcano | Área Iniciada</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -13,93 +13,197 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* ESTRUTURA ORIGINAL MANTIDA */
-        :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
-        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; line-height: 1.6; }
+        :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #111; }
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; padding-bottom: 40px; }
         
-        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
         
-        /* HEADER */
-        .header { text-align: center; margin-bottom: 50px; }
-        .welcome-text { font-family: 'Cinzel'; color: var(--gold); font-size: 2.2em; margin: 0; }
-        .user-sign { font-size: 1.1em; color: #888; text-transform: uppercase; letter-spacing: 3px; margin-top: 5px; }
-
-        /* SEÇÕES DE CONTEÚDO (Mantendo o design original) */
-        .destiny-section { 
-            background: var(--card-bg); border-left: 3px solid var(--gold); 
-            padding: 30px; margin-bottom: 30px; border-radius: 0 8px 8px 0;
+        /* CABEÇALHO COM DADOS PESSOAIS */
+        .profile-header {
+            text-align: center; margin-bottom: 50px; border-bottom: 1px solid #333; padding: 40px 0;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+            border-radius: 0 0 20px 20px;
+            border: 1px solid #222;
         }
-        .destiny-section h3 { font-family: 'Cinzel'; color: var(--gold); margin-top: 0; font-size: 1.4em; }
-        .destiny-section p { font-size: 1.1em; color: #ccc; margin-bottom: 10px; }
-        /* Removemos as reticências visuais pois é premium */
+        .user-name { font-family: 'Cinzel'; font-size: 2.5em; color: var(--gold); margin: 0; text-transform: uppercase; }
         
-        /* BOTÕES DE ACESSO (Estilo original do botão upgrade, adaptado para acesso) */
-        .btn-upgrade {
-            background: var(--gold); color: #000; border: none; padding: 18px 50px;
-            font-family: 'Cinzel'; font-size: 1.2em; font-weight: bold; cursor: pointer;
-            border-radius: 4px; transition: 0.3s; text-transform: uppercase; letter-spacing: 2px;
-            text-decoration: none; display: inline-block; margin-top: 20px;
+        .stats-row { 
+            display: flex; justify-content: center; gap: 40px; margin-top: 20px; flex-wrap: wrap; 
         }
-        .btn-upgrade:hover { background: #fff; box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); transform: translateY(-2px); }
+        .stat-item { text-align: center; }
+        .stat-label { font-family: 'Cinzel'; font-size: 0.8em; color: #666; letter-spacing: 2px; text-transform: uppercase; display: block; }
+        .stat-value { font-size: 1.4em; color: #fff; font-weight: bold; }
+        .stat-number { font-size: 2em; color: var(--gold); font-family: 'Cinzel'; }
 
-        /* AREA DE FERRAMENTAS (Substitui a área de vendas) */
-        .tools-area {
-            background: linear-gradient(180deg, #0a0a0a 0%, #151108 100%);
-            border: 1px solid #333; padding: 50px 30px; text-align: center; 
-            border-radius: 12px; margin-top: 60px;
+        /* GRID DE BLOCOS (LINKS) */
+        .modules-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 30px;
         }
-        .tools-area h2 { font-family: 'Cinzel'; color: var(--gold); font-size: 1.8em; margin-bottom: 15px; }
-        .tools-area p { font-size: 1.2em; color: #aaa; margin-bottom: 30px; }
+        
+        .module-card {
+            background: var(--card-bg); border: 1px solid #333; padding: 30px; border-radius: 8px;
+            text-decoration: none; transition: 0.3s; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+        }
+        .module-card:hover { border-color: var(--gold); transform: translateY(-5px); background: #161616; }
+        
+        .card-icon { font-size: 2.5em; color: var(--gold); margin-bottom: 15px; }
+        .card-title { font-family: 'Cinzel'; color: #fff; font-size: 1.3em; margin: 0 0 10px 0; }
+        .card-desc { color: #888; font-size: 0.95em; line-height: 1.4; }
+        
+        /* DESTAQUE PARA PERGUNTAS */
+        .card-highlight { border: 1px solid var(--gold); background: linear-gradient(45deg, #111, #1a1500); }
 
-        /* FOOTER */
-        .footer { margin-top: 80px; text-align: center; border-top: 1px solid #222; padding: 40px 0; }
-        .logout-link { color: #555; text-decoration: none; font-size: 0.9em; cursor: pointer; border: 1px solid #333; padding: 10px 20px; border-radius: 4px; }
-        .logout-link:hover { color: #fff; border-color: #fff; }
+        /* LOADING & ERROR */
+        #loading-screen { position: fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-dark); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:9999; }
+        .error-btn { margin-top: 20px; color: #888; text-decoration: underline; background: none; border: none; cursor: pointer; display: none; }
 
-        /* Loading */
-        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .footer-logout { text-align: center; margin-top: 60px; }
+        .btn-logout { background: transparent; border: 1px solid #444; color: #aaa; padding: 10px 30px; cursor: pointer; font-family: 'Cinzel'; transition: 0.3s; }
+        .btn-logout:hover { border-color: #fff; color: #fff; }
     </style>
 </head>
 <body>
 
     <div id="loading-screen">
         <i class="fas fa-circle-notch fa-spin" style="font-size: 3em; color: var(--gold);"></i>
+        <p style="margin-top: 15px; color: #666; font-family: 'Cinzel';">Sincronizando frequências...</p>
+        <button class="error-btn" onclick="auth.signOut()">Demorando muito? Clique para Sair</button>
     </div>
 
-    <div class="container" id="content-area" style="display:none;">
-        <div class="header">
-            <h1 class="welcome-text" id="user-name">Saudações</h1>
-            <div class="user-sign" id="user-sign">Carregando destino...</div>
+    <div id="main-content" style="display:none;">
+        
+        <div class="profile-header">
+            <div class="container">
+                <h1 class="user-name" id="display-nome">Iniciado</h1>
+                
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <span class="stat-label">Signo</span>
+                        <span class="stat-value" id="display-signo">...</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Ascendente</span>
+                        <span class="stat-value" id="display-asc">...</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Numerologia</span>
+                        <span class="stat-number" id="display-num">...</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="destiny-section">
-            <h3><i class="fas fa-star" style="margin-right: 10px; font-size: 0.8em;"></i> Sua Essência Astral</h3>
-            <p id="mapa-resumo">
-                [ANÁLISE COMPLETA LIBERADA] A posição do Sol no momento do seu nascimento revela uma alma em busca de propósito. Saturno confirma que este é o momento de colher o que plantou nos últimos 7 anos.
-            </p>
-        </div>
+        <div class="container">
+            <div class="modules-grid">
+                
+                <a href="perguntas.html" class="module-card card-highlight">
+                    <div class="card-icon"><i class="fas fa-eye"></i></div>
+                    <h3 class="card-title">Oráculo Sagrado</h3>
+                    <p class="card-desc">Faça perguntas diretas à IA Mística (Tarot, Búzios, Cigano).</p>
+                </a>
 
-        <div class="destiny-section">
-            <h3><i class="fas fa-infinity" style="margin-right: 10px; font-size: 0.8em;"></i> O Código do seu Nome</h3>
-            <p id="num-resumo">
-                [ANÁLISE COMPLETA LIBERADA] As letras do seu nome vibram na frequência do número 8. Prosperidade e liderança são seus dons naturais. Use-os com sabedoria nesta semana.
-            </p>
-        </div>
+                <a href="premium-mapa.html" class="module-card">
+                    <div class="card-icon"><i class="fas fa-star"></i></div>
+                    <h3 class="card-title">Mapa Astral Completo</h3>
+                    <p class="card-desc">Sua mandala astrológica detalhada.</p>
+                </a>
 
-        <div class="destiny-section">
-            <h3><i class="fas fa-yin-yang" style="margin-right: 10px; font-size: 0.8em;"></i> Zodíaco Chinês</h3>
-            <p id="zodiaco-resumo">
-                [ANÁLISE COMPLETA LIBERADA] Sob a regência do seu signo chinês, o ciclo favorece conexões emocionais. Harmonia no lar será restaurada com elementos de Água.
-            </p>
-        </div>
+                <a href="premium-numerologia.html" class="module-card">
+                    <div class="card-icon"><i class="fas fa-sort-numeric-up-alt"></i></div>
+                    <h3 class="card-title">Numerologia Cabalística</h3>
+                    <p class="card-desc">O poder oculto do seu nome e data.</p>
+                </a>
 
-        <div class="tools-area">
-            <h2>Acesso Sagrado</h2>
-            <p>O portal está aberto para você. Consulte os mestres agora.</p>
-            
-            <a href="premium-perguntas.html" class="btn-upgrade">CONSULTAR ORÁCULO</a>
-        </div>
+                <a href="premium-chines.html" class="module-card">
+                    <div class="card-icon"><i class="fas fa-dragon"></i></div>
+                    <h3 class="card-title">Zodíaco Chinês</h3>
+                    <p class="card-desc">Sua regência animal e elementos.</p>
+                </a>
 
-        <div class="footer">
-            <div class="logout-link" onclick="fazerLogout()">ENCERRAR SESSÃO</div>
+                <a href="premium-banhos.html" class="module-card">
+                    <div class="card-icon"><i class="fas fa-tint"></i></div>
+                    <h3 class="card-title">Banhos & Ervas</h3>
+                    <p class="card-desc">Receitas para limpeza e proteção.</p>
+                </a>
+
+                <a href="premium-fengshui.html" class="module-card">
+                    <div class="card-icon"><i class="fas fa-home"></i></div>
+                    <h3 class="card-title">Feng Shui</h3>
+                    <p class="card-desc">Harmonização do seu ambiente.</p>
+                </a>
+
+                <a href="premium-oraculos.html" class="module-card">
+                    <div class="card-icon"><i class="fas fa-scroll"></i></div>
+                    <h3 class="card-title">Estudos dos Oráculos</h3>
+                    <p class="card-desc">Aprofunde-se nos métodos divinatórios.</p>
+                </a>
+
+            </div>
+
+            <div class="footer-logout">
+                <button class="btn-logout" onclick="fazerLogout()">ENCERRAR SESSÃO</button>
+            </div>
         </div>
+    </div>
+
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
+        try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Timeout de segurança: Se travar por 6s, mostra botão de sair
+        setTimeout(() => { document.querySelector('.error-btn').style.display = 'block'; }, 6000);
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                carregarDadosUsuario(user.uid);
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        function carregarDadosUsuario(uid) {
+            // Busca na coleção 'users'
+            db.collection("users").doc(uid).get()
+            .then(doc => {
+                if (doc.exists) {
+                    const d = doc.data();
+                    
+                    // VERIFICAÇÃO PREMIUM
+                    if (d.premium === true || d.status === 'premium' || d.plano === 'premium') {
+                        
+                        // PREENCHE DADOS NO HTML
+                        // Se não tiver no banco, coloca um placeholder padrão
+                        document.getElementById('display-nome').innerText = d.nome || "Iniciado";
+                        document.getElementById('display-signo').innerText = d.signo || "A Definir";
+                        document.getElementById('display-asc').innerText = d.ascendente || "A Definir"; // Campo 'ascendente' deve existir no cadastro ou ser "A Definir"
+                        document.getElementById('display-num').innerText = d.numeroNumerologia || d.numero_vida || "8"; // Exemplo, se não tiver, mostra 8
+
+                        // LIBERA A TELA
+                        document.getElementById('loading-screen').style.display = 'none';
+                        document.getElementById('main-content').style.display = 'block';
+
+                    } else {
+                        // Se não for premium, tchau
+                        window.location.href = "dashboard.html";
+                    }
+                } else {
+                    // Sem cadastro, tchau
+                    window.location.href = "dashboard.html";
+                }
+            })
+            .catch(error => {
+                console.error("Erro:", error);
+                alert("Erro ao carregar seus dados.");
+                auth.signOut();
+            });
+        }
+
+        function fazerLogout() {
+            auth.signOut().then(() => window.location.href = "index.html");
+        }
+    </script>
+</body>
+</html>
