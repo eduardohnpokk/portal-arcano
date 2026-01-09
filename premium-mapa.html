@@ -125,7 +125,7 @@
 </div>
 
 <script>
-    // --- 1. BANCO DE DADOS GEOGRÁFICO INTERNO (OFFLINE) ---
+    // --- 1. BANCO DE DADOS GEOGRÁFICO INTERNO ---
     const COORDENADAS_FIXAS = {
         "sao paulo": { lat: -23.5505, lon: -46.6333 }, "sp": { lat: -23.5505, lon: -46.6333 },
         "rio de janeiro": { lat: -22.9068, lon: -43.1729 }, "rj": { lat: -22.9068, lon: -43.1729 },
@@ -163,15 +163,49 @@
     const SIGNOS = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
     const SIMBOLOS = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
     
-    const ARQUETIPOS = {
-        "Sol": "Sua Essência e Propósito", "Lua": "Seu Mundo Emocional", "Mercúrio": "Sua Comunicação",
-        "Vênus": "Seus Valores", "Marte": "Sua Ação", "Júpiter": "Sua Expansão", "Saturno": "Seu Karma", 
-        "Urano": "Sua Inovação", "Netuno": "Sua Espiritualidade", "Plutão": "Sua Transformação"
-    };
+    // --- 2. PARSER DE DATA (CORREÇÃO DE ERRO) ---
+    function parseDataSegura(dataInput, horaInput) {
+        try {
+            // Se vier nulo, cria data padrão
+            if (!dataInput) return new Date();
 
-    // --- 2. HELPERS ---
+            let d = 1, m = 1, y = 2000;
+            let str = String(dataInput).trim();
+
+            // Detecta formato e extrai números manualmente (sem depender do Date.parse)
+            if (str.includes('/')) { // DD/MM/AAAA
+                const parts = str.split('/');
+                if(parts.length === 3) {
+                    d = parseInt(parts[0]);
+                    m = parseInt(parts[1]);
+                    y = parseInt(parts[2]);
+                }
+            } else if (str.includes('-')) { // AAAA-MM-DD
+                const parts = str.split('-');
+                if(parts.length === 3) {
+                    y = parseInt(parts[0]);
+                    m = parseInt(parts[1]);
+                    d = parseInt(parts[2]);
+                }
+            }
+
+            // Parse Hora
+            const hStr = horaInput || "12:00";
+            const hParts = hStr.split(':');
+            const h = parseInt(hParts[0] || 12);
+            const min = parseInt(hParts[1] || 0);
+
+            // Cria objeto Date nativo (Mes começa em 0 no JS)
+            return new Date(y, m - 1, d, h, min);
+
+        } catch (e) {
+            console.error("Erro data:", e);
+            return new Date(); // Fallback
+        }
+    }
+
     function obterCoordenadas(cidade, estado) {
-        const norm = (str) => str ? String(str).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
+        const norm = (s) => s ? String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
         const c = norm(cidade);
         const e = norm(estado);
         if (COORDENADAS_FIXAS[c]) return COORDENADAS_FIXAS[c];
@@ -179,41 +213,7 @@
         return COORDENADAS_FIXAS["default"];
     }
 
-    // --- 3. PARSER DE DATA BLINDADO (FIX DEFINITIVO) ---
-    function parseDataSegura(dataStr, horaStr) {
-        try {
-            if (!dataStr) return new Date(); // Fallback imediato
-
-            let dia, mes, ano;
-            const str = String(dataStr).trim();
-
-            // Formato DD/MM/AAAA
-            if (str.includes('/')) {
-                const parts = str.split('/');
-                if (parts.length === 3) { dia = parts[0]; mes = parts[1]; ano = parts[2]; }
-            } 
-            // Formato AAAA-MM-DD
-            else if (str.includes('-')) {
-                const parts = str.split('-');
-                if (parts.length === 3) { ano = parts[0]; mes = parts[1]; dia = parts[2]; }
-            }
-
-            // Se falhou o parser, retorna data padrão silenciosamente
-            if (!dia || !mes || !ano) return new Date();
-
-            // Constrói objeto Date nativo (Ano, Mes Index 0-11, Dia, Hora, Min)
-            // Hora default 12:00 se vazia
-            const hParts = (horaStr || "12:00").split(':');
-            const h = parseInt(hParts[0] || 12);
-            const min = parseInt(hParts[1] || 0);
-
-            return new Date(ano, mes - 1, dia, h, min); 
-        } catch (e) {
-            return new Date(); // Última barreira
-        }
-    }
-
-    // --- 4. MOTOR ASTRONÔMICO TROPICAL ---
+    // --- 3. CÁLCULOS ASTRONÔMICOS ---
     function normalizarGraus(g) {
         let res = g % 360;
         if (res < 0) res += 360;
@@ -232,14 +232,16 @@
 
     function calcularMapaPreciso(dataObj, lat, lon) {
         // Verifica se a lib carregou
-        if (typeof Astronomy === 'undefined') throw new Error("Lib não carregada");
+        if (typeof Astronomy === 'undefined') throw new Error("Biblioteca Astronomy não carregada.");
 
         const observer = new Astronomy.Observer(lat, lon, 0);
         const dateValues = Astronomy.MakeTime(dataObj);
+        
+        // Obliquidade
         const eps = Astronomy.Obliquity(dateValues) * (Math.PI / 180);
 
-        const corpos = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"];
         const planetas = [];
+        const corpos = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"];
 
         corpos.forEach(corpo => {
             const equ = Astronomy.Equator(corpo, dataObj, observer, true, true);
@@ -295,29 +297,29 @@
         return dic[n];
     }
 
-    // --- 5. RENDERIZAÇÃO ---
     function gerarTextoProfundo(planeta, signo, casa) {
-        return `<strong>${planeta} em ${signo} (Casa ${casa}):</strong><br>A energia de ${planeta} se expressa no estilo de ${signo}, impactando a área da vida referente à Casa ${casa}.`;
+        return `<strong>${planeta} em ${signo} (Casa ${casa}):</strong><br>A energia de ${planeta} se expressa através de ${signo}, impactando a área da vida referente à Casa ${casa}.`;
     }
 
+    // --- RENDER ---
     function renderizar(nome, dataStr, horaStr, cidade, estado) {
         try {
             document.getElementById('loading-text').innerText = "Calculando...";
             document.getElementById('header-details').innerText = `${nome} • ${dataStr} • ${horaStr} • ${cidade}/${estado}`;
 
-            // Coordenadas
-            const coords = obterCoordenadas(cidade, estado);
-            
-            // Data Segura
+            // 1. Data Segura (Objeto Date)
             const dataObj = parseDataSegura(dataStr, horaStr);
+            
+            // 2. Coordenadas
+            const coords = obterCoordenadas(cidade, estado);
 
-            // Cálculo
+            // 3. Cálculo
             const dados = calcularMapaPreciso(dataObj, coords.lat, coords.lon);
             
-            // Desenho
+            // 4. SVG
             desenharSVG(dados);
 
-            // Tabelas
+            // 5. Tabelas
             const pList = document.getElementById('planet-list');
             const hList = document.getElementById('house-list');
             const dContent = document.getElementById('deep-content');
@@ -337,9 +339,9 @@
             document.getElementById('loading-screen').style.display = 'none';
 
         } catch (e) {
-            console.error("Erro interno:", e);
-            document.getElementById('loading-text').innerText = "Erro ao renderizar.";
-            // Não bloqueia a tela preta, deixa o usuário ver o que carregou
+            console.error("Erro render:", e);
+            document.getElementById('loading-text').innerText = "Erro no cálculo.";
+            // Libera tela para não travar
             setTimeout(() => document.getElementById('loading-screen').style.display = 'none', 1000);
         }
     }
@@ -349,17 +351,16 @@
         let svg = `<svg viewBox="0 0 400 400" class="mandala-svg"><circle cx="${cx}" cy="${cy}" r="${r}" stroke="#d4af37" stroke-width="2" fill="none" /><circle cx="${cx}" cy="${cy}" r="${r*0.7}" stroke="#333" stroke-width="1" fill="none" />`;
         
         for(let i=0; i<12; i++) {
-            const ang = (i*30)*Math.PI/180;
-            const x2 = cx + r*Math.cos(ang), y2 = cy + r*Math.sin(ang);
-            svg += `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#222" stroke-width="1" />`;
-            
-            const idx = dados.casas[i].signoInfo.index;
             const fAng = (i*30 + 15 + 180)*Math.PI/180;
             const tx = cx + r*0.88*Math.cos(fAng), ty = cy + r*0.88*Math.sin(fAng);
-            svg += `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" fill="#d4af37" font-size="16" font-family="serif">${SIMBOLOS[idx]}</text>`;
-            
             const hx = cx + r*0.2*Math.cos(fAng), hy = cy + r*0.2*Math.sin(fAng);
-            svg += `<text x="${hx}" y="${hy}" text-anchor="middle" dominant-baseline="middle" fill="#555" font-size="9">${i+1}</text>`;
+            
+            // Linha divisória
+            const angLine = (i*30)*Math.PI/180;
+            const lx = cx + r*Math.cos(angLine), ly = cy + r*Math.sin(angLine);
+            svg += `<line x1="${cx}" y1="${cy}" x2="${lx}" y2="${ly}" stroke="#222" stroke-width="1" />`;
+
+            svg += `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" fill="#d4af37" font-size="16" font-family="serif">${SIMBOLOS[dados.casas[i].signoInfo.index]}</text><text x="${hx}" y="${hy}" text-anchor="middle" dominant-baseline="middle" fill="#555" font-size="9">${i+1}</text>`;
         }
 
         dados.planetas.forEach((p, i) => {
@@ -368,7 +369,7 @@
             const ang = (gr + 180)*Math.PI/180;
             const dr = r*0.55 + (i%3)*15;
             const px = cx + dr*Math.cos(ang), py = cy + dr*Math.sin(ang);
-            const icons = {"Sol":"☉","Lua":"☽","Mercúrio":"☿","Vênus":"♀","Marte":"♂","Júpiter":"♃","Saturno":"♄","Urano":"♅","Netuno":"♆","Plutão":"♇"};
+            const icons = {"Sol":"☉","Lua":"☽","Mercúrio":"☿","Vênus":"♀","Marte":"♂","Júpiter":"♃","Saturno":"♄","Urano":"♅","Neptune":"♆","Pluto":"♇"}; // Neptune corrigido key
             svg += `<text x="${px}" y="${py}" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="14" style="filter:drop-shadow(0 0 2px #000)">${icons[p.nome]}</text>`;
         });
         document.getElementById('chart-area').innerHTML = svg + `</svg>`;
