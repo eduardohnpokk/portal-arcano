@@ -1,318 +1,112 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Arcano | Área Iniciada</title>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+<script>
+    const firebaseConfig = { 
+        apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", 
+        authDomain: "portal-mistico-6532b.firebaseapp.com", 
+        projectId: "portal-mistico-6532b", 
+        storageBucket: "portal-mistico-6532b.firebasestorage.app", 
+        messagingSenderId: "925159229004", 
+        appId: "1:925159229004:web:5d9dc758474789085016e9" 
+    };
+    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <style>
-        :root { --gold: #d4af37; --bg-dark: #050505; }
-        
-        body { 
-            margin: 0; 
-            font-family: 'Cormorant Garamond', serif; 
-            background: url('https://www.transparenttextures.com/patterns/stardust.png'), var(--bg-dark); 
-            color: #e0e0e0; 
-            min-height: 100vh; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            verificarPermissao(user.uid);
+        } else {
+            window.location.href = "index.html";
         }
+    });
 
-        /* HEADER */
-        .header-container {
-            text-align: center;
-            padding-top: 60px;
-            width: 100%;
-            margin-bottom: 40px;
-        }
+    async function verificarPermissao(uid) {
+        try {
+            const doc = await db.collection("usuarios").doc(uid).get();
+            if (doc.exists) {
+                const data = doc.data();
+                const status = (data.status || "").toLowerCase();
+                const plano = (data.plano || "").toLowerCase();
 
-        .main-title {
-            font-family: 'Cinzel', serif;
-            font-size: 3.5em;
-            color: var(--gold);
-            text-shadow: 0 0 20px rgba(212,175,55,0.4);
-            margin: 0;
-            letter-spacing: 2px;
-        }
+                // --- TRAVA DE SEGURANÇA ---
+                // Se NÃO for premium, chuta para o painel gratuito
+                if (status !== "premium" && plano !== "premium") {
+                    alert("Acesso restrito a Iniciados Premium.");
+                    window.location.href = "dashboard.html"; 
+                    return; 
+                }
 
-        .stats-row {
-            display: flex;
-            justify-content: center;
-            gap: 60px;
-            margin-top: 30px;
-        }
+                // Se passou, carrega os dados
+                if (data.dataNascimento) {
+                    const signo = getSigno(data.dataNascimento);
+                    const numerologia = getNumerologia(data.dataNascimento);
+                    const ascendente = getAscendenteEstimado(data.horaNascimento, signo);
 
-        .stat-box {
-            text-align: center;
-        }
+                    setText('user-signo', signo);
+                    setText('user-numerologia', numerologia);
+                    setText('user-ascendente', ascendente);
+                } else {
+                    setText('user-signo', "Indefinido");
+                }
+                
+                // Libera a tela
+                document.getElementById('loading').style.display = 'none';
 
-        .stat-label {
-            font-family: 'Cinzel', serif;
-            font-size: 0.75em;
-            color: #666;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .stat-value {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.8em;
-            color: #fff;
-        }
-
-        .stat-value.num-highlight {
-            color: var(--gold);
-            font-family: 'Cinzel', serif;
-            font-weight: bold;
-        }
-
-        /* GRID DE CARDS */
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            max-width: 1200px;
-            width: 90%;
-            padding: 20px 20px 60px 20px;
-        }
-
-        .card {
-            background: rgba(10, 10, 10, 0.8);
-            border: 1px solid #333;
-            border-radius: 6px;
-            padding: 35px 20px;
-            text-align: center;
-            transition: 0.3s;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .card:hover {
-            border-color: var(--gold);
-            box-shadow: 0 0 30px rgba(212,175,55,0.1);
-            transform: translateY(-5px);
-        }
-
-        .card::before {
-            content: ''; position: absolute; top:0; left:0; width:100%; height:4px;
-            background: var(--gold); transform: scaleX(0); transition: 0.3s;
-        }
-        .card:hover::before { transform: scaleX(1); }
-
-        .card-icon {
-            font-size: 2.2em;
-            color: var(--gold);
-            margin-bottom: 20px;
-        }
-
-        .card h3 {
-            font-family: 'Cinzel', serif;
-            font-size: 1em;
-            margin: 0 0 10px 0;
-            color: #fff;
-            text-transform: uppercase;
-        }
-
-        .card p {
-            font-size: 0.85em;
-            color: #888;
-            margin: 0;
-        }
-
-        #loading {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 999;
-            display: flex; justify-content: center; align-items: center;
-            flex-direction: column;
-        }
-
-        @media(max-width: 768px) {
-            .cards-grid { grid-template-columns: 1fr; }
-            .stats-row { gap: 20px; flex-wrap: wrap; }
-            .main-title { font-size: 2.5em; }
-        }
-    </style>
-</head>
-<body>
-
-    <div id="loading">
-        <i class="fas fa-compass fa-spin" style="font-size: 3em; color: var(--gold);"></i>
-        <p style="color: #666; font-family: 'Cinzel'; margin-top: 20px;">Alinhando os Astros...</p>
-    </div>
-
-    <div class="header-container">
-        <h1 class="main-title">INICIADO</h1>
-        
-        <div class="stats-row">
-            <div class="stat-box">
-                <span class="stat-label">SIGNO</span>
-                <span class="stat-value" id="user-signo">Calculando...</span>
-            </div>
-            <div class="stat-box">
-                <span class="stat-label">ASCENDENTE</span>
-                <span class="stat-value" id="user-ascendente">Calculando...</span>
-            </div>
-            <div class="stat-box">
-                <span class="stat-label">NUMEROLOGIA</span>
-                <span class="stat-value num-highlight" id="user-numerologia">...</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="cards-grid">
-        <div class="card" onclick="window.location.href='premium-oraculos.html'">
-            <div class="card-icon"><i class="fas fa-eye"></i></div>
-            <h3>Oráculo Sagrado</h3>
-            <p>Respostas da IA Mística (Tarot, Búzios).</p>
-        </div>
-
-        <div class="card" onclick="window.location.href='premium-mapa.html'">
-            <div class="card-icon"><i class="fas fa-star"></i></div>
-            <h3>Mapa Astral</h3>
-            <p>Sua mandala astrológica detalhada.</p>
-        </div>
-
-        <div class="card" onclick="window.location.href='premium-numerologia.html'">
-            <div class="card-icon"><i class="fas fa-arrow-up-9-1"></i></div>
-            <h3>Numerologia</h3>
-            <p>O poder oculto do seu nome e data.</p>
-        </div>
-
-        <div class="card" onclick="window.location.href='premium-chines.html'">
-            <div class="card-icon"><i class="fas fa-dragon"></i></div>
-            <h3>Horóscopo Chinês</h3>
-            <p>Sabedoria oriental ancestral.</p>
-        </div>
-
-        <div class="card" onclick="window.location.href='premium-banhos.html'">
-            <div class="card-icon"><i class="fas fa-leaf"></i></div>
-            <h3>Banhos & Ervas</h3>
-            <p>Rituais de limpeza e proteção.</p>
-        </div>
-
-        <div class="card" onclick="window.location.href='premium-fengshui.html'">
-            <div class="card-icon"><i class="fas fa-wind"></i></div>
-            <h3>Feng Shui</h3>
-            <p>Harmonização de ambientes.</p>
-        </div>
-
-        <div class="card" onclick="window.location.href='perguntas.html'">
-            <div class="card-icon"><i class="fas fa-question-circle"></i></div>
-            <h3>Perguntas</h3>
-            <p>Central de dúvidas e aprendizado.</p>
-        </div>
-    </div>
-
-    <script>
-        const firebaseConfig = { 
-            apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", 
-            authDomain: "portal-mistico-6532b.firebaseapp.com", 
-            projectId: "portal-mistico-6532b", 
-            storageBucket: "portal-mistico-6532b.firebasestorage.app", 
-            messagingSenderId: "925159229004", 
-            appId: "1:925159229004:web:5d9dc758474789085016e9" 
-        };
-        try { firebase.initializeApp(firebaseConfig); } catch(e) {}
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                carregarDadosUsuario(user.uid);
             } else {
                 window.location.href = "index.html";
             }
-        });
-
-        async function carregarDadosUsuario(uid) {
-            try {
-                const doc = await db.collection("usuarios").doc(uid).get();
-                if (doc.exists) {
-                    const data = doc.data();
-                    
-                    if (data.dataNascimento) {
-                        const signo = getSigno(data.dataNascimento);
-                        const numerologia = getNumerologia(data.dataNascimento);
-                        const ascendente = getAscendenteEstimado(data.horaNascimento, signo);
-
-                        setText('user-signo', signo);
-                        setText('user-numerologia', numerologia);
-                        setText('user-ascendente', ascendente);
-                    } else {
-                        setText('user-signo', "Indefinido");
-                    }
-                }
-            } catch (error) {
-                console.error(error);
-            }
-            document.getElementById('loading').style.display = 'none';
+        } catch (error) {
+            console.error(error);
+            window.location.href = "index.html";
         }
+    }
 
-        function setText(id, text) {
-            const el = document.getElementById(id);
-            if(el) el.innerText = text;
+    function setText(id, text) {
+        const el = document.getElementById(id);
+        if(el) el.innerText = text;
+    }
+
+    // --- FUNÇÕES DE CÁLCULO ---
+    function getSigno(dateString) {
+        const date = new Date(dateString + "T12:00:00");
+        const day = date.getDate();
+        const month = date.getMonth() + 1;
+        if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) return "Aquário";
+        if ((month == 2 && day >= 19) || (month == 3 && day <= 20)) return "Peixes";
+        if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) return "Áries";
+        if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) return "Touro";
+        if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) return "Gêmeos";
+        if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) return "Câncer";
+        if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) return "Leão";
+        if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) return "Virgem";
+        if ((month == 9 && day >= 23) || (month == 10 && day <= 22)) return "Libra";
+        if ((month == 10 && day >= 23) || (month == 11 && day <= 21)) return "Escorpião";
+        if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) return "Sagitário";
+        if ((month == 12 && day >= 22) || (month == 1 && day <= 19)) return "Capricórnio";
+        return "Indefinido";
+    }
+
+    function getNumerologia(dateString) {
+        let str = dateString.replace(/\D/g, '');
+        let sum = 0;
+        for(let char of str) sum += parseInt(char);
+        while(sum > 9 && sum !== 11 && sum !== 22) {
+            let tempStr = sum.toString();
+            let tempSum = 0;
+            for(let char of tempStr) tempSum += parseInt(char);
+            sum = tempSum;
         }
+        return sum;
+    }
 
-        // FUNÇÕES DE CÁLCULO
-        function getSigno(dateString) {
-            const date = new Date(dateString + "T12:00:00");
-            const day = date.getDate();
-            const month = date.getMonth() + 1;
-
-            if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) return "Aquário";
-            if ((month == 2 && day >= 19) || (month == 3 && day <= 20)) return "Peixes";
-            if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) return "Áries";
-            if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) return "Touro";
-            if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) return "Gêmeos";
-            if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) return "Câncer";
-            if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) return "Leão";
-            if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) return "Virgem";
-            if ((month == 9 && day >= 23) || (month == 10 && day <= 22)) return "Libra";
-            if ((month == 10 && day >= 23) || (month == 11 && day <= 21)) return "Escorpião";
-            if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) return "Sagitário";
-            if ((month == 12 && day >= 22) || (month == 1 && day <= 19)) return "Capricórnio";
-            return "Indefinido";
-        }
-
-        function getNumerologia(dateString) {
-            let str = dateString.replace(/\D/g, '');
-            let sum = 0;
-            for(let char of str) sum += parseInt(char);
-            while(sum > 9 && sum !== 11 && sum !== 22) {
-                let tempStr = sum.toString();
-                let tempSum = 0;
-                for(let char of tempStr) tempSum += parseInt(char);
-                sum = tempSum;
-            }
-            return sum;
-        }
-
-        function getAscendenteEstimado(timeString, signoSolar) {
-            if(!timeString) return "Desconhecido";
-            const signos = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
-            const [hora, min] = timeString.split(':').map(Number);
-            const indexSolar = signos.indexOf(signoSolar);
-            let diff = hora - 6;
-            let casas = Math.floor(diff / 2);
-            let indexAsc = (indexSolar + casas) % 12;
-            if (indexAsc < 0) indexAsc += 12;
-            return signos[indexAsc];
-        }
-    </script>
-</body>
-</html>
+    function getAscendenteEstimado(timeString, signoSolar) {
+        if(!timeString) return "Desconhecido";
+        const signos = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
+        const [hora, min] = timeString.split(':').map(Number);
+        const indexSolar = signos.indexOf(signoSolar);
+        let diff = hora - 6;
+        let casas = Math.floor(diff / 2);
+        let indexAsc = (indexSolar + casas) % 12;
+        if (indexAsc < 0) indexAsc += 12;
+        return signos[indexAsc];
+    }
+</script>
