@@ -26,12 +26,12 @@
             align-items: center;
         }
 
-        /* HEADER ESTILO SCREENSHOT */
+        /* HEADER */
         .header-container {
             text-align: center;
             padding-top: 60px;
             width: 100%;
-            margin-bottom: 50px;
+            margin-bottom: 40px;
         }
 
         .main-title {
@@ -83,19 +83,23 @@
             gap: 20px;
             max-width: 1200px;
             width: 90%;
-            padding: 20px;
+            padding: 20px 20px 60px 20px;
         }
 
         .card {
             background: rgba(10, 10, 10, 0.8);
             border: 1px solid #333;
             border-radius: 6px;
-            padding: 40px 20px;
+            padding: 35px 20px;
             text-align: center;
             transition: 0.3s;
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .card:hover {
@@ -104,7 +108,6 @@
             transform: translateY(-5px);
         }
 
-        /* Efeito de brilho dourado no hover */
         .card::before {
             content: ''; position: absolute; top:0; left:0; width:100%; height:4px;
             background: var(--gold); transform: scaleX(0); transition: 0.3s;
@@ -112,20 +115,21 @@
         .card:hover::before { transform: scaleX(1); }
 
         .card-icon {
-            font-size: 2.5em;
+            font-size: 2.2em;
             color: var(--gold);
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .card h3 {
             font-family: 'Cinzel', serif;
-            font-size: 1.1em;
+            font-size: 1em;
             margin: 0 0 10px 0;
             color: #fff;
+            text-transform: uppercase;
         }
 
         .card p {
-            font-size: 0.9em;
+            font-size: 0.85em;
             color: #888;
             margin: 0;
         }
@@ -171,27 +175,50 @@
     </div>
 
     <div class="cards-grid">
-        <div class="card" onclick="alert('Funcionalidade do Oráculo em manutenção pelos espíritos.')">
+        <div class="card" onclick="window.location.href='premium-oraculos.html'">
             <div class="card-icon"><i class="fas fa-eye"></i></div>
-            <h3>ORÁCULO SAGRADO</h3>
-            <p>Faça perguntas diretas à IA Mística (Tarot, Búzios, Cigano).</p>
+            <h3>Oráculo Sagrado</h3>
+            <p>Respostas da IA Mística (Tarot, Búzios).</p>
         </div>
 
-        <div class="card">
+        <div class="card" onclick="window.location.href='premium-mapa.html'">
             <div class="card-icon"><i class="fas fa-star"></i></div>
-            <h3>MAPA ASTRAL COMPLETO</h3>
+            <h3>Mapa Astral</h3>
             <p>Sua mandala astrológica detalhada.</p>
         </div>
 
-        <div class="card">
+        <div class="card" onclick="window.location.href='premium-numerologia.html'">
             <div class="card-icon"><i class="fas fa-arrow-up-9-1"></i></div>
-            <h3>NUMEROLOGIA CABALÍSTICA</h3>
+            <h3>Numerologia</h3>
             <p>O poder oculto do seu nome e data.</p>
+        </div>
+
+        <div class="card" onclick="window.location.href='premium-chines.html'">
+            <div class="card-icon"><i class="fas fa-dragon"></i></div>
+            <h3>Horóscopo Chinês</h3>
+            <p>Sabedoria oriental ancestral.</p>
+        </div>
+
+        <div class="card" onclick="window.location.href='premium-banhos.html'">
+            <div class="card-icon"><i class="fas fa-leaf"></i></div>
+            <h3>Banhos & Ervas</h3>
+            <p>Rituais de limpeza e proteção.</p>
+        </div>
+
+        <div class="card" onclick="window.location.href='premium-fengshui.html'">
+            <div class="card-icon"><i class="fas fa-wind"></i></div>
+            <h3>Feng Shui</h3>
+            <p>Harmonização de ambientes.</p>
+        </div>
+
+        <div class="card" onclick="window.location.href='perguntas.html'">
+            <div class="card-icon"><i class="fas fa-question-circle"></i></div>
+            <h3>Perguntas</h3>
+            <p>Central de dúvidas e aprendizado.</p>
         </div>
     </div>
 
     <script>
-        // Configuração original do seu Portal Arcano
         const firebaseConfig = { 
             apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", 
             authDomain: "portal-mistico-6532b.firebaseapp.com", 
@@ -217,27 +244,22 @@
                 const doc = await db.collection("usuarios").doc(uid).get();
                 if (doc.exists) {
                     const data = doc.data();
-                    console.log("Dados brutos:", data);
-
-                    // A MÁGICA ACONTECE AQUI:
-                    // Se o documento tem dataNascimento, calculamos tudo agora
+                    
                     if (data.dataNascimento) {
                         const signo = getSigno(data.dataNascimento);
                         const numerologia = getNumerologia(data.dataNascimento);
                         const ascendente = getAscendenteEstimado(data.horaNascimento, signo);
 
-                        // Atualiza tela
                         setText('user-signo', signo);
                         setText('user-numerologia', numerologia);
                         setText('user-ascendente', ascendente);
                     } else {
-                        setText('user-signo', "Data ausente");
+                        setText('user-signo', "Indefinido");
                     }
                 }
             } catch (error) {
                 console.error(error);
             }
-            // Remove loading
             document.getElementById('loading').style.display = 'none';
         }
 
@@ -246,10 +268,9 @@
             if(el) el.innerText = text;
         }
 
-        // --- MOTORES DE CÁLCULO ---
-
+        // FUNÇÕES DE CÁLCULO
         function getSigno(dateString) {
-            const date = new Date(dateString + "T12:00:00"); // Força meio dia pra evitar fuso
+            const date = new Date(dateString + "T12:00:00");
             const day = date.getDate();
             const month = date.getMonth() + 1;
 
@@ -269,14 +290,9 @@
         }
 
         function getNumerologia(dateString) {
-            // Ex: 2009-03-20 -> 20090320
             let str = dateString.replace(/\D/g, '');
             let sum = 0;
-            
-            // Soma inicial
             for(let char of str) sum += parseInt(char);
-            
-            // Redução recursiva até 1 digito (ou 11/22 se quiser, mas aqui simplificado)
             while(sum > 9 && sum !== 11 && sum !== 22) {
                 let tempStr = sum.toString();
                 let tempSum = 0;
@@ -288,24 +304,13 @@
 
         function getAscendenteEstimado(timeString, signoSolar) {
             if(!timeString) return "Desconhecido";
-            
-            // Lógica Simplificada de Ascendente (Sem Lat/Long)
-            // Regra: O ascendente muda a cada ~2 horas.
-            // Assumimos nascer do sol as 06:00 = Signo Solar no Ascendente
-            
             const signos = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
-            
             const [hora, min] = timeString.split(':').map(Number);
             const indexSolar = signos.indexOf(signoSolar);
-            
-            // Diferença horas em relação as 06:00
             let diff = hora - 6;
-            // Cada 2 horas avança 1 signo
             let casas = Math.floor(diff / 2);
-            
             let indexAsc = (indexSolar + casas) % 12;
-            if (indexAsc < 0) indexAsc += 12; // Ajuste para horas antes das 6 da manha
-            
+            if (indexAsc < 0) indexAsc += 12;
             return signos[indexAsc];
         }
     </script>
