@@ -56,10 +56,11 @@
 
         /* FOOTER */
         .footer { margin-top: 80px; text-align: center; border-top: 1px solid #222; padding: 40px 0; }
-        .logout-link { color: #555; text-decoration: none; font-size: 0.9em; cursor: pointer; }
+        .logout-link { color: #555; text-decoration: none; font-size: 0.9em; cursor: pointer; border: 1px solid #333; padding: 10px 20px; border-radius: 4px; }
+        .logout-link:hover { color: #fff; border-color: #fff; }
 
         /* ESCONDER QUANDO JÁ FOR PREMIUM */
-        #area-premium-ativa { display: none; text-align: center; margin-top: 40px; }
+        #area-premium-ativa { display: none; text-align: center; margin-top: 40px; border: 1px solid var(--gold); padding: 40px; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -73,7 +74,7 @@
     <div class="destiny-section">
         <h3><i class="fas fa-star" style="margin-right: 10px; font-size: 0.8em;"></i> Sua Essência Astral</h3>
         <p id="mapa-resumo">
-            A posição do Sol no momento do seu nascimento revela uma alma em busca de propósito. Suas casas astrológicas sugerem uma grande inclinação para a espiritualidade, porém, há uma quadratura em Marte que pode estar travando sua vida financeira...
+            A posição do Sol no momento do seu nascimento revela uma alma em busca de propósito. Suas casas astrológicas sugerem uma grande inclinação para a espiritualidade...
         </p>
         <span class="read-more-dots">. . .</span>
     </div>
@@ -81,15 +82,15 @@
     <div class="destiny-section">
         <h3><i class="fas fa-infinity" style="margin-right: 10px; font-size: 0.8em;"></i> O Código do seu Nome</h3>
         <p id="num-resumo">
-            As letras do seu nome vibram na frequência do número 8. Isso indica que você nasceu para liderar e prosperar, mas seu ano pessoal atual exige uma introspecção profunda antes de qualquer investimento...
+            As letras do seu nome vibram na frequência do número 8. Isso indica que você nasceu para liderar e prosperar...
         </p>
         <span class="read-more-dots">. . .</span>
     </div>
 
     <div class="destiny-section">
-        <h3><i class="fas fa-yin-yang" style="margin-right: 10px; font-size: 0.8em;"></i> Zodíaco Chinês e Harmonia</h3>
+        <h3><i class="fas fa-yin-yang" style="margin-right: 10px; font-size: 0.8em;"></i> Zodíaco Chinês</h3>
         <p id="zodiaco-resumo">
-            Sob a regência do seu signo chinês, este ciclo favorece as conexões emocionais. No entanto, a energia "Chi" do seu ambiente atual parece estagnada, necessitando de uma correção elemental urgente no setor leste da sua casa...
+            Sob a regência do seu signo chinês, este ciclo favorece as conexões emocionais e a harmonia no lar...
         </p>
         <span class="read-more-dots">. . .</span>
     </div>
@@ -97,7 +98,7 @@
     <div class="premium-callout" id="venda-container">
         <h2>Desbloqueie o Conhecimento Completo</h2>
         <p>
-            Estes são apenas os primeiros passos. Assine agora para ler sua análise profunda e receber orientações exclusivas dos nossos mestres para transformar sua realidade.
+            Estes são apenas os primeiros passos. Assine agora para ler sua análise profunda e receber orientações exclusivas.
         </p>
         
         <div class="benefits-list">
@@ -112,19 +113,19 @@
 
     <div id="area-premium-ativa">
         <h2 style="font-family:'Cinzel'; color:var(--gold);">Acesso Sagrado Liberado</h2>
-        <p>Você agora faz parte do círculo interno do Portal Arcano.</p>
-        <button class="btn-upgrade" onclick="window.location.href='premium-perguntas.html'">Ir para Consultas com Oráculo</button>
+        <p style="color:#ccc; margin-bottom: 20px;">Seu pagamento foi confirmado. Você faz parte do círculo interno.</p>
+        <button class="btn-upgrade" onclick="window.location.href='dashboard-premium.html'">ENTRAR NO DASHBOARD PREMIUM</button>
     </div>
 
     <div class="footer">
-        <div class="logout-link" onclick="firebase.auth().signOut()">ENCERRAR SESSÃO</div>
+        <div class="logout-link" onclick="fazerLogout()">ENCERRAR SESSÃO</div>
     </div>
 </div>
 
 <script>
-    // Configurações do seu Firebase (NÃO ALTERAR)
+    // Configurações do seu Firebase
     const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
-    firebase.initializeApp(firebaseConfig);
+    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const auth = firebase.auth();
     const db = firebase.firestore();
     const functions = firebase.functions();
@@ -133,45 +134,60 @@
         if (user) {
             verificarStatus(user);
         } else {
+            // Se não estiver logado, volta pro index
             window.location.href = 'index.html';
         }
     });
 
     async function verificarStatus(user) {
+        // CORRIGIDO: Agora busca na coleção 'users' para achar seu pagamento
         const doc = await db.collection('users').doc(user.uid).get();
+        
         if (doc.exists) {
             const data = doc.data();
-            document.getElementById('user-name').innerText = `Saudações, ${data.nome.split(' ')[0]}`;
-            document.getElementById('user-sign').innerText = `Signo de ${data.signo} | Guardião da Luz`;
+            const nomeUser = data.nome ? data.nome.split(' ')[0] : 'Iniciado';
+            const signoUser = data.signo || 'Desconhecido';
 
-            // Se for PREMIUM, altera o visual para o usuário
-            if (data.premium === true) {
+            document.getElementById('user-name').innerText = `Saudações, ${nomeUser}`;
+            document.getElementById('user-sign').innerText = `Signo de ${signoUser}`;
+
+            // VERIFICAÇÃO ROBUSTA DE PREMIUM
+            if (data.premium === true || data.status === 'premium' || data.plano === 'premium') {
+                // Esconde a venda e mostra o botão de acesso
                 document.getElementById('venda-container').style.display = 'none';
                 document.getElementById('area-premium-ativa').style.display = 'block';
                 
-                // Remove as reticências e mostra que o conteúdo é completo (Simulando a liberação)
+                // Esconde as reticências
                 const dots = document.querySelectorAll('.read-more-dots');
                 dots.forEach(d => d.style.display = 'none');
             }
         }
     }
 
-    // BOTÃO DE COMPRA (MERCADO PAGO)
+    // FUNÇÃO DE LOGOUT QUE FUNCIONA
+    function fazerLogout() {
+        auth.signOut().then(() => {
+            window.location.href = "index.html";
+        }).catch((error) => {
+            console.error("Erro ao sair", error);
+            // Força o reload mesmo com erro
+            window.location.href = "index.html";
+        });
+    }
+
+    // BOTÃO DE COMPRA
     document.getElementById('btn-comprar').addEventListener('click', async () => {
         const btn = document.getElementById('btn-comprar');
-        btn.innerText = "SINCRONIZANDO PAGAMENTO...";
+        btn.innerText = "PROCESSANDO...";
         btn.disabled = true;
 
         try {
-            // Chama a função do seu servidor
             const criarPagamento = functions.httpsCallable('criarPagamento');
             const result = await criarPagamento();
-            
-            // Vai para o Checkout do Mercado Pago
             window.location.href = result.data.link;
         } catch (error) {
             console.error(error);
-            alert("Erro ao conectar ao Portal. Tente novamente.");
+            alert("Erro ao gerar pagamento. Tente novamente.");
             btn.innerText = "Acessar Tudo por R$ 29,90";
             btn.disabled = false;
         }
