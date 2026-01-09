@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
+        /* ESTILO MANTIDO INTACTO */
         :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
         
         body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; line-height: 1.6; }
@@ -120,8 +121,8 @@
 </div>
 
 <script>
-    // --- 1. BANCO DE DADOS GEOGRÁFICO INTERNO (SEM API) ---
-    // Mapeamento de todas as capitais e cidades comuns para evitar erro de requisição
+    // --- 1. BANCO DE DADOS GEOGRÁFICO "OFFLINE" ---
+    // Mapeamento normalizado para evitar erros de acentos e casing
     const COORDENADAS_FIXAS = {
         "sao paulo": { lat: -23.5505, lon: -46.6333 }, "sp": { lat: -23.5505, lon: -46.6333 },
         "rio de janeiro": { lat: -22.9068, lon: -43.1729 }, "rj": { lat: -22.9068, lon: -43.1729 },
@@ -168,46 +169,65 @@
         "Plutão": "Seu Poder de Transformação e Crise", "Ascendente": "Sua Máscara Social e Início das Coisas"
     };
 
-    // --- 2. LOCALIZAÇÃO SEGURA ---
+    // --- 2. LOCALIZAÇÃO SEGURA (NORMALIZAÇÃO) ---
     function obterCoordenadas(cidade, estado) {
+        // Normaliza para comparar (remove acentos, minúsculo, remove espaços extras)
         const norm = (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
+        
         const c = norm(cidade);
         const e = norm(estado);
 
+        // Busca com segurança
         if (COORDENADAS_FIXAS[c]) return { ...COORDENADAS_FIXAS[c], origem: "Cidade" };
         if (COORDENADAS_FIXAS[e]) return { ...COORDENADAS_FIXAS[e], origem: "Estado (Aprox)" };
+        
+        // Retorna padrão se não achar
         return { ...COORDENADAS_FIXAS["default"], origem: "Padrão" };
     }
 
-    // --- 3. SANITIZAÇÃO DE DATA (CRUCIAL PARA CORRIGIR O ERRO) ---
+    // --- 3. SANITIZAÇÃO DE DATA (CRUCIAL) ---
     function sanitizarData(dataStr, horaStr) {
-        if (!dataStr) return new Date(); // Segurança contra data vazia
+        // Se a data vier vazia ou indefinida, usa a data atual
+        if (!dataStr) return new Date();
 
-        let isoDate = "";
-        
-        // Verifica se é formato Brasileiro DD/MM/YYYY
+        let ano, mes, dia;
+
+        // Verifica formato BR (DD/MM/AAAA)
         if (dataStr.includes('/')) {
             const parts = dataStr.split('/');
-            // Garante que temos dia, mes e ano
             if (parts.length === 3) {
-                // Inverte para YYYY-MM-DD
-                isoDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                dia = parts[0];
+                mes = parts[1];
+                ano = parts[2];
             }
-        } else {
-            // Assume que já está em ISO ou tenta usar direto
-            isoDate = dataStr;
+        } 
+        // Verifica formato ISO (AAAA-MM-DD)
+        else if (dataStr.includes('-')) {
+            const parts = dataStr.split('-');
+            if (parts.length === 3) {
+                ano = parts[0];
+                mes = parts[1];
+                dia = parts[2];
+            }
         }
 
-        // Monta a string final ISO 8601 com Fuso Horário fixo do Brasil (-03:00)
-        // Isso evita que o navegador converta para UTC e mude o dia
-        const finalString = `${isoDate}T${horaStr || "12:00"}:00-03:00`;
-        
-        const dataObj = new Date(finalString);
+        // Se não conseguiu parsear, usa valores padrão
+        if (!ano || !mes || !dia) {
+            console.warn("Formato de data desconhecido:", dataStr);
+            return new Date();
+        }
 
-        // Se deu erro na conversão (ex: dataStr era inválida), retorna data padrão
+        // Garante 2 dígitos para dia e mês
+        mes = mes.toString().padStart(2, '0');
+        dia = dia.toString().padStart(2, '0');
+
+        // Monta string ISO segura com fuso horário fixo (-03:00)
+        const isoString = `${ano}-${mes}-${dia}T${horaStr || "12:00"}:00-03:00`;
+        const dataObj = new Date(isoString);
+
+        // Verificação final
         if (isNaN(dataObj.getTime())) {
-            console.warn("Data inválida recebida:", dataStr, "Usando padrão.");
-            return new Date("2000-01-01T12:00:00-03:00");
+            return new Date(); // Data válida de fallback
         }
 
         return dataObj;
@@ -231,7 +251,7 @@
     }
 
     function calcularMapaPreciso(dataStr, horaStr, lat, lon) {
-        // Usa a função sanitizada, garantindo que não quebra
+        // Usa a data limpa e validada
         const dataLocal = sanitizarData(dataStr, horaStr);
         
         const observer = new Astronomy.Observer(lat, lon, 0);
@@ -313,7 +333,7 @@
             const coords = obterCoordenadas(cidade, estado);
             document.getElementById('header-details').innerText = `${nome} • ${dataStr} • ${horaStr} • ${cidade}/${estado}`;
             
-            // 2. Calcular (Agora seguro contra erros de data)
+            // 2. Calcular (Com data sanitizada)
             const dados = calcularMapaPreciso(dataStr, horaStr, coords.lat, coords.lon);
             
             // 3. Desenhar
@@ -355,7 +375,7 @@
             });
 
             document.getElementById('synthesis-text').innerHTML = `
-                Cálculo realizado para <strong>${coords.nome || cidade}</strong> (Lat: ${coords.lat}, Lon: ${coords.lon}).<br>
+                Cálculo realizado para <strong>${cidade}</strong> (Lat: ${coords.lat}, Lon: ${coords.lon}).<br>
                 Sol em <strong>${dados.planetas[0].signoInfo.nome}</strong>, Ascendente em <strong>${dados.ascendente.nome}</strong>.
             `;
 
@@ -363,7 +383,6 @@
 
         } catch (e) {
             console.error(e);
-            // Fallback de emergência (Nunca deve acontecer agora)
             alert("Erro inesperado. Recarregue.");
             document.getElementById('loading-screen').style.display = 'none';
         }
@@ -426,12 +445,11 @@
                     return;
                 }
 
-                // DADOS DO BANCO (COM FALLBACKS)
                 const nome = d.nome || "Iniciado";
-                const data = d.dataNascimento || "2000-01-01"; // Se vazio, usa padrão
+                const data = d.dataNascimento || "2000-01-01";
                 const hora = d.horaNascimento || "12:00";
                 const cidade = d.cidade || "São Paulo";
-                const estado = d.estado || d.uf || "SP";
+                const estado = d.estado || "SP";
                 
                 renderizar(nome, data, hora, cidade, estado);
 
