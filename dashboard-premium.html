@@ -85,6 +85,23 @@
             display: flex; justify-content: center; align-items: center;
             flex-direction: column;
         }
+        
+        /* ESTILO DO BOTÃO DE SAIR (ADICIONADO) */
+        .btn-logout {
+            background: transparent;
+            border: 1px solid #333;
+            color: #666;
+            padding: 10px 30px;
+            font-family: 'Cinzel';
+            cursor: pointer;
+            border-radius: 4px;
+            transition: 0.3s;
+            margin-bottom: 40px;
+        }
+        .btn-logout:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
 
         @media(max-width: 768px) {
             .cards-grid { grid-template-columns: 1fr; }
@@ -162,6 +179,8 @@
             <p>Central de dúvidas e aprendizado.</p>
         </div>
     </div>
+
+    <button class="btn-logout" onclick="firebase.auth().signOut()">ENCERRAR SESSÃO</button>
 
     <script>
         const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
