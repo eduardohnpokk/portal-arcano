@@ -18,7 +18,7 @@
         body { 
             margin: 0; 
             font-family: 'Cormorant Garamond', serif; 
-            background-color: var(--bg-dark); /* Garante fundo preto se a imagem falhar */
+            background-color: var(--bg-dark);
             background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
             color: #e0e0e0; 
             min-height: 100vh; 
@@ -135,6 +135,7 @@
             margin: 0;
         }
 
+        /* LOADING */
         #loading {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 999;
@@ -153,7 +154,7 @@
 
     <div id="loading">
         <i class="fas fa-compass fa-spin" style="font-size: 3em; color: var(--gold);"></i>
-        <p style="color: #666; font-family: 'Cinzel'; margin-top: 20px;">Verificando Credenciais...</p>
+        <p style="color: #666; font-family: 'Cinzel'; margin-top: 20px;">Acessando Mistérios...</p>
     </div>
 
     <div class="header-container">
@@ -176,6 +177,7 @@
     </div>
 
     <div class="cards-grid">
+        
         <div class="card" onclick="window.location.href='premium-oraculos.html'">
             <div class="card-icon"><i class="fas fa-eye"></i></div>
             <h3>Oráculo Sagrado</h3>
@@ -233,17 +235,17 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // Monitora o Login
+        // --- VERIFICAÇÃO DE LOGIN E PLANO ---
         auth.onAuthStateChanged(user => {
             if (user) {
-                verificarStatusPremium(user.uid);
+                verificarAcesso(user.uid);
             } else {
-                // Se não estiver logado, tchau
+                // Não logado -> Home
                 window.location.href = "index.html";
             }
         });
 
-        async function verificarStatusPremium(uid) {
+        async function verificarAcesso(uid) {
             try {
                 const doc = await db.collection("usuarios").doc(uid).get();
                 
@@ -252,14 +254,14 @@
                     const status = (data.status || "").toLowerCase();
                     const plano = (data.plano || "").toLowerCase();
 
-                    // --- SEGURANÇA: Se não for premium, expulsa ---
+                    // REGRA DE NEGÓCIO: 
+                    // Se NÃO for premium, redireciona para dashboard.html (Versão Free)
                     if (status !== "premium" && plano !== "premium") {
-                        alert("Acesso exclusivo para membros Premium.");
-                        window.location.href = "dashboard.html"; // Manda pro painel free
-                        return; // Para tudo aqui
+                        window.location.href = "dashboard.html";
+                        return;
                     }
 
-                    // Se for premium, calcula e exibe
+                    // Se for PREMIUM, permanece aqui e calcula os dados
                     if (data.dataNascimento) {
                         const signo = getSigno(data.dataNascimento);
                         const numerologia = getNumerologia(data.dataNascimento);
@@ -269,24 +271,23 @@
                         setText('user-numerologia', numerologia);
                         setText('user-ascendente', ascendente);
                     } else {
-                        setText('user-signo', "Indefinido");
+                        setText('user-signo', "A Definir");
                     }
 
-                    // Remove a tela preta de loading
+                    // Remove tela de loading
                     document.getElementById('loading').style.display = 'none';
 
                 } else {
-                    // Se não achar o usuário no banco, manda pro login
+                    // Erro no cadastro -> Home
                     window.location.href = "index.html";
                 }
             } catch (error) {
                 console.error("Erro:", error);
-                // Se der erro, por segurança, manda pro inicio
                 window.location.href = "index.html";
             }
         }
 
-        // --- FUNÇÕES DE AJUDA ---
+        // --- FUNÇÕES DE CÁLCULO ---
         function setText(id, text) {
             const el = document.getElementById(id);
             if(el) el.innerText = text;
