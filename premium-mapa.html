@@ -15,11 +15,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
+        /* ESTRUTURA VISUAL MANTIDA 100% INTACTA */
         :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
         
         body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; line-height: 1.6; }
         
-        /* LOADING */
         #loading-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 9999;
@@ -28,7 +28,6 @@
         .spinner { font-size: 4em; color: var(--gold); animation: spin 2s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* LAYOUT */
         .container { max-width: 1000px; margin: 0 auto; padding: 20px 20px 100px 20px; }
         
         .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
@@ -40,12 +39,10 @@
         .page-title { font-family: 'Cinzel'; color: var(--gold); font-size: 2.8em; margin: 0; text-shadow: 0 0 20px rgba(212,175,55,0.3); }
         .user-details { color: #888; margin-top: 5px; font-size: 1.1em; letter-spacing: 1px; }
 
-        /* MANDALA */
         .chart-container { display: flex; justify-content: center; margin: 40px 0; position: relative; }
         .mandala-svg { width: 100%; max-width: 500px; height: auto; filter: drop-shadow(0 0 20px rgba(212,175,55,0.1)); animation: rotateIn 2s ease-out; }
         @keyframes rotateIn { from { transform: rotate(-10deg); opacity: 0; } to { transform: rotate(0); opacity: 1; } }
 
-        /* TABELAS */
         .data-section { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 60px; }
         .panel { background: #111; border: 1px solid #333; border-radius: 8px; overflow: hidden; }
         .panel-header { background: #1a1a1a; padding: 15px; border-bottom: 1px solid var(--gold); font-family: 'Cinzel'; color: var(--gold); text-align: center; font-size: 1.2em; }
@@ -55,7 +52,6 @@
         .lbl { color: #fff; display: flex; align-items: center; gap: 10px; }
         .val { color: #ccc; font-family: 'Cinzel'; }
 
-        /* INTERPRETAÇÃO */
         .deep-analysis { display: flex; flex-direction: column; gap: 40px; }
         
         .planet-block { 
@@ -125,60 +121,43 @@
 </div>
 
 <script>
-    // --- 1. BANCO DE DADOS GEOGRÁFICO "OFFLINE" (INFALÍVEL) ---
-    // Mapeamento de todas as capitais e siglas de estados.
-    // Isso garante que se a pessoa digitar "SP" ou "São Paulo", funcione.
-    // Se digitar uma cidade desconhecida do Acre, ele usa a coordenada de Rio Branco (AC).
+    // --- 1. BANCO DE DADOS GEOGRÁFICO INTERNO (SEM API) ---
+    // Coordenadas fixas para evitar erros de conexão.
     const COORDENADAS_FIXAS = {
-        // Cidades Específicas e Capitais
-        "sao paulo": { lat: -23.5505, lon: -46.6333 }, 
-        "rio de janeiro": { lat: -22.9068, lon: -43.1729 },
-        "brasilia": { lat: -15.7975, lon: -47.8919 },
-        "salvador": { lat: -12.9777, lon: -38.5016 },
-        "fortaleza": { lat: -3.7172, lon: -38.5434 },
-        "belo horizonte": { lat: -19.9167, lon: -43.9345 },
-        "manaus": { lat: -3.1190, lon: -60.0217 },
-        "curitiba": { lat: -25.4284, lon: -49.2733 },
-        "recife": { lat: -8.05428, lon: -34.8813 },
-        "goiania": { lat: -16.6869, lon: -49.2648 },
-        "belem": { lat: -1.4558, lon: -48.4902 },
-        "porto alegre": { lat: -30.0346, lon: -51.2177 },
+        // Cidades
+        "sao paulo": { lat: -23.5505, lon: -46.6333 }, "sp": { lat: -23.5505, lon: -46.6333 },
+        "rio de janeiro": { lat: -22.9068, lon: -43.1729 }, "rj": { lat: -22.9068, lon: -43.1729 },
+        "brasilia": { lat: -15.7975, lon: -47.8919 }, "df": { lat: -15.7975, lon: -47.8919 },
+        "salvador": { lat: -12.9777, lon: -38.5016 }, "ba": { lat: -12.9777, lon: -38.5016 },
+        "fortaleza": { lat: -3.7172, lon: -38.5434 }, "ce": { lat: -3.7172, lon: -38.5434 },
+        "belo horizonte": { lat: -19.9167, lon: -43.9345 }, "mg": { lat: -19.9167, lon: -43.9345 },
+        "manaus": { lat: -3.1190, lon: -60.0217 }, "am": { lat: -3.1190, lon: -60.0217 },
+        "curitiba": { lat: -25.4284, lon: -49.2733 }, "pr": { lat: -25.4284, lon: -49.2733 },
+        "recife": { lat: -8.05428, lon: -34.8813 }, "pe": { lat: -8.05428, lon: -34.8813 },
+        "goiania": { lat: -16.6869, lon: -49.2648 }, "go": { lat: -16.6869, lon: -49.2648 },
+        "belem": { lat: -1.4558, lon: -48.4902 }, "pa": { lat: -1.4558, lon: -48.4902 },
+        "porto alegre": { lat: -30.0346, lon: -51.2177 }, "rs": { lat: -30.0346, lon: -51.2177 },
         "guarulhos": { lat: -23.4542, lon: -46.5333 },
         "campinas": { lat: -22.9099, lon: -47.0626 },
-        "sao luis": { lat: -2.5391, lon: -44.2829 },
-        "maceio": { lat: -9.6662, lon: -35.7351 },
-        "natal": { lat: -5.7945, lon: -35.2110 },
-        "teresina": { lat: -5.0920, lon: -42.8038 },
-        "campo grande": { lat: -20.4697, lon: -54.6201 },
-        "joao pessoa": { lat: -7.1195, lon: -34.8450 },
-        "aracaju": { lat: -10.9472, lon: -37.0731 },
-        "cuiaba": { lat: -15.6014, lon: -56.0979 },
-        "porto velho": { lat: -8.7612, lon: -63.9039 },
-        "florianopolis": { lat: -27.5954, lon: -48.5480 },
-        "macapa": { lat: 0.0355, lon: -51.0705 },
-        "rio branco": { lat: -9.9754, lon: -67.8249 },
-        "vitoria": { lat: -20.3155, lon: -40.3128 },
-        "boa vista": { lat: 2.8235, lon: -60.6758 },
-        "palmas": { lat: -10.2491, lon: -48.3243 },
-        "surubim": { lat: -7.8333, lon: -35.7500 }, // Pedido específico
-
-        // Siglas de Estados (Fallback de segurança)
-        "sp": { lat: -23.55, lon: -46.63 }, "rj": { lat: -22.90, lon: -43.17 },
-        "df": { lat: -15.79, lon: -47.89 }, "ba": { lat: -12.97, lon: -38.50 },
-        "ce": { lat: -3.71, lon: -38.54 }, "mg": { lat: -19.91, lon: -43.93 },
-        "am": { lat: -3.11, lon: -60.02 }, "pr": { lat: -25.42, lon: -49.27 },
-        "pe": { lat: -8.05, lon: -34.88 }, "go": { lat: -16.68, lon: -49.26 },
-        "pa": { lat: -1.45, lon: -48.49 }, "rs": { lat: -30.03, lon: -51.21 },
-        "ma": { lat: -2.53, lon: -44.28 }, "al": { lat: -9.66, lon: -35.73 },
-        "rn": { lat: -5.79, lon: -35.21 }, "pi": { lat: -5.09, lon: -42.80 },
-        "ms": { lat: -20.46, lon: -54.62 }, "pb": { lat: -7.11, lon: -34.84 },
-        "se": { lat: -10.94, lon: -37.07 }, "mt": { lat: -15.60, lon: -56.09 },
-        "ro": { lat: -8.76, lon: -63.90 }, "sc": { lat: -27.59, lon: -48.54 },
-        "ap": { lat: 0.03, lon: -51.07 }, "ac": { lat: -9.97, lon: -67.82 },
-        "es": { lat: -20.31, lon: -40.31 }, "rr": { lat: 2.82, lon: -60.67 },
-        "to": { lat: -10.24, lon: -48.32 },
-        
-        // Padrão Brasil Central (Último recurso)
+        "sao luis": { lat: -2.5391, lon: -44.2829 }, "ma": { lat: -2.5391, lon: -44.2829 },
+        "sao goncalo": { lat: -22.8275, lon: -43.0631 },
+        "maceio": { lat: -9.6662, lon: -35.7351 }, "al": { lat: -9.6662, lon: -35.7351 },
+        "duque de caxias": { lat: -22.7923, lon: -43.3086 },
+        "natal": { lat: -5.7945, lon: -35.2110 }, "rn": { lat: -5.7945, lon: -35.2110 },
+        "teresina": { lat: -5.0920, lon: -42.8038 }, "pi": { lat: -5.0920, lon: -42.8038 },
+        "campo grande": { lat: -20.4697, lon: -54.6201 }, "ms": { lat: -20.4697, lon: -54.6201 },
+        "joao pessoa": { lat: -7.1195, lon: -34.8450 }, "pb": { lat: -7.1195, lon: -34.8450 },
+        "aracaju": { lat: -10.9472, lon: -37.0731 }, "se": { lat: -10.9472, lon: -37.0731 },
+        "cuiaba": { lat: -15.6014, lon: -56.0979 }, "mt": { lat: -15.6014, lon: -56.0979 },
+        "porto velho": { lat: -8.7612, lon: -63.9039 }, "ro": { lat: -8.7612, lon: -63.9039 },
+        "florianopolis": { lat: -27.5954, lon: -48.5480 }, "sc": { lat: -27.5954, lon: -48.5480 },
+        "macapa": { lat: 0.0355, lon: -51.0705 }, "ap": { lat: 0.0355, lon: -51.0705 },
+        "rio branco": { lat: -9.9754, lon: -67.8249 }, "ac": { lat: -9.9754, lon: -67.8249 },
+        "vitoria": { lat: -20.3155, lon: -40.3128 }, "es": { lat: -20.3155, lon: -40.3128 },
+        "boa vista": { lat: 2.8235, lon: -60.6758 }, "rr": { lat: 2.8235, lon: -60.6758 },
+        "palmas": { lat: -10.2491, lon: -48.3243 }, "to": { lat: -10.2491, lon: -48.3243 },
+        "surubim": { lat: -7.8333, lon: -35.7500 },
+        // Fallback
         "default": { lat: -15.79, lon: -47.88 }
     };
 
@@ -192,25 +171,20 @@
         "Plutão": "Seu Poder de Transformação e Crise", "Ascendente": "Sua Máscara Social e Início das Coisas"
     };
 
-    // --- 2. LÓGICA DE LOCALIZAÇÃO (SEM API EXTERNA) ---
+    // --- 2. LOCALIZAÇÃO SEGURA (SEM API) ---
     function obterCoordenadas(cidade, estado) {
-        // Normaliza para comparar (remove acentos, minúsculo)
+        // Normaliza (remove acentos, minúsculo)
         const norm = (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
         
         const c = norm(cidade);
         const e = norm(estado);
 
-        // 1. Tenta a cidade exata
-        if (COORDENADAS_FIXAS[c]) return { ...COORDENADAS_FIXAS[c], nome: cidade };
-        
-        // 2. Tenta o estado (Fallback inteligente - usa a capital)
-        if (COORDENADAS_FIXAS[e]) return { ...COORDENADAS_FIXAS[e], nome: estado };
-        
-        // 3. Fallback final (Brasília)
-        return { ...COORDENADAS_FIXAS["default"], nome: "Padrão (Brasil)" };
+        if (COORDENADAS_FIXAS[c]) return { ...COORDENADAS_FIXAS[c], origem: "Cidade" };
+        if (COORDENADAS_FIXAS[e]) return { ...COORDENADAS_FIXAS[e], origem: "Estado (Aprox)" };
+        return { ...COORDENADAS_FIXAS["default"], origem: "Padrão" };
     }
 
-    // --- 3. CÁLCULOS ASTRONÔMICOS (Astronomy Engine) ---
+    // --- 3. MOTOR ASTRONÔMICO (Astronomy Engine) ---
     function normalizarGraus(g) {
         let res = g % 360;
         if (res < 0) res += 360;
@@ -227,30 +201,42 @@
         };
     }
 
-    function calcularMapaPreciso(dataStr, horaStr, lat, lon) {
-        // Força Data para UTC-3 (Brasil) para consistência
-        const dataISO = `${dataStr}T${horaStr}:00-03:00`;
-        const dataLocal = new Date(dataISO);
-        
-        const observer = new Astronomy.Observer(lat, lon, 0);
-        const dateValues = Astronomy.MakeTime(dataLocal);
-        
-        // Obliquidade da Eclíptica (Inclinação da Terra na data)
-        const eps = Astronomy.Obliquity(dateValues) * (Math.PI / 180);
+    // SANITIZAÇÃO DE DATA (CORREÇÃO DO ERRO PRINCIPAL)
+    function prepararDataISO(dataStr, horaStr) {
+        let dataISO = dataStr;
+        // Se vier DD/MM/YYYY, converte para YYYY-MM-DD
+        if (dataStr.includes('/')) {
+            const partes = dataStr.split('/');
+            if (partes.length === 3) {
+                dataISO = `${partes[2]}-${partes[1]}-${partes[0]}`;
+            }
+        }
+        return `${dataISO}T${horaStr}:00-03:00`; // Fuso BR
+    }
 
+    function calcularMapaPreciso(dataStr, horaStr, lat, lon) {
+        // 1. Data Segura
+        const isoString = prepararDataISO(dataStr, horaStr);
+        const dataLocal = new Date(isoString);
+        
+        if (isNaN(dataLocal.getTime())) throw new Error("Data inválida");
+
+        const observer = new Astronomy.Observer(lat, lon, 0);
         const corpos = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"];
         const resultadosPlanetas = [];
 
+        // 2. Obliquidade (Inclinação da Terra)
+        const dateValues = Astronomy.MakeTime(dataLocal);
+        const eps = Astronomy.Obliquity(dateValues) * (Math.PI / 180);
+
         corpos.forEach(corpo => {
-            // Equator (of Date) -> Coordenadas Equatoriais com Precessão
+            // Posição Equatorial (Tropical)
             const equ = Astronomy.Equator(corpo, dataLocal, observer, true, true);
             
-            // Conversão Trigonométrica de Equatorial (RA/Dec) para Eclíptica (Lon)
-            // Isso garante o Zodíaco Tropical correto
-            const ra = equ.ra * 15 * (Math.PI / 180); // Horas para Radianos
+            // Conversão Equatorial -> Eclíptica
+            const ra = equ.ra * 15 * (Math.PI / 180);
             const dec = equ.dec * (Math.PI / 180);
-
-            // tan(lon) = (sin(ra)cos(eps) + tan(dec)sin(eps)) / cos(ra)
+            
             const num = Math.sin(ra) * Math.cos(eps) + Math.tan(dec) * Math.sin(eps);
             const den = Math.cos(ra);
             
@@ -265,29 +251,30 @@
             });
         });
 
-        // ASCENDENTE E CASAS (Placidus Simplificado / Topocêntrico)
+        // 3. Ascendente
         const gmst = Astronomy.SiderealTime(dateValues);
         const lmst = gmst + (lon / 15.0);
         const ramc = normalizarGraus(lmst * 15);
-        const ramcRad = ramc * (Math.PI / 180);
+        
+        const epsRad = eps; // Já em rad
         const latRad = lat * (Math.PI / 180);
+        const ramcRad = ramc * (Math.PI / 180);
 
-        // Ascendente
         let ascRad = Math.atan2(
             Math.cos(ramcRad), 
-            -Math.sin(ramcRad) * Math.cos(eps) - Math.tan(latRad) * Math.sin(eps)
+            -Math.sin(ramcRad) * Math.cos(epsRad) - Math.tan(latRad) * Math.sin(epsRad)
         );
         let ascGraus = normalizarGraus(ascRad * (180 / Math.PI));
         const ascendenteInfo = getSignoDeGraus(ascGraus);
 
-        // Casas (Sistema Igual para Estabilidade Visual Web)
+        // 4. Casas Iguais
         const casas = [];
         for(let i=0; i<12; i++) {
             let cuspide = normalizarGraus(ascGraus + (i * 30));
             casas.push({ numero: i+1, grau: cuspide, signoInfo: getSignoDeGraus(cuspide) });
         }
 
-        // Distribui Planetas
+        // Distribuição
         resultadosPlanetas.forEach(p => {
             let diff = normalizarGraus(p.graus - ascGraus);
             p.casa = Math.floor(diff / 30) + 1;
@@ -301,24 +288,24 @@
         return mapa[nome];
     }
 
-    // --- 4. RENDERIZAÇÃO E TEXTOS ---
+    // --- 4. RENDERIZAÇÃO ---
     function gerarTextoProfundo(planeta, signo, casa) {
         return `<strong>${planeta} em ${signo} (Casa ${casa}):</strong><br>A energia de ${planeta} manifesta-se através do arquétipo de ${signo}. Na Casa ${casa}, isso afeta diretamente ${getSignificadoCasa(casa)}.`;
     }
 
     function getSignificadoCasa(num) {
-        const significados = ["sua identidade", "suas finanças", "sua comunicação", "seu lar", "sua criatividade", "seu trabalho", "seus relacionamentos", "suas crises", "seus ideais", "sua carreira", "seus amigos", "seu inconsciente"];
+        const significados = ["sua identidade", "suas finanças", "sua comunicação", "seu lar", "sua criatividade", "seu trabalho", "seus relacionamentos", "suas transformações", "seus ideais", "sua carreira", "seus amigos", "seu inconsciente"];
         return significados[num-1];
     }
 
     function renderizar(nome, dataStr, horaStr, cidade, estado) {
-        // 1. Obter Localização (Offline e Instantâneo)
-        const coords = obterCoordenadas(cidade, estado);
-        
-        document.getElementById('header-details').innerText = `${nome} • ${dataStr} • ${horaStr} • ${cidade}/${estado}`;
-        document.getElementById('loading-text').innerText = "Calculando Mapa...";
-
         try {
+            document.getElementById('header-details').innerText = `${nome} • ${dataStr} • ${horaStr} • ${cidade}/${estado}`;
+            document.getElementById('loading-text').innerText = "Calculando Mapa...";
+
+            // 1. Obter Coordenadas (Interno)
+            const coords = obterCoordenadas(cidade, estado);
+            
             // 2. Calcular
             const dados = calcularMapaPreciso(dataStr, horaStr, coords.lat, coords.lon);
             
@@ -361,7 +348,7 @@
             });
 
             document.getElementById('synthesis-text').innerHTML = `
-                Cálculo realizado para coordenadas: <strong>${coords.nome}</strong> (Lat: ${coords.lat}, Lon: ${coords.lon}).<br>
+                Cálculo realizado para <strong>${cidade}</strong> (Lat: ${coords.lat}, Lon: ${coords.lon}).<br>
                 Sol em <strong>${dados.planetas[0].signoInfo.nome}</strong>, Ascendente em <strong>${dados.ascendente.nome}</strong>.
             `;
 
@@ -369,7 +356,7 @@
 
         } catch (e) {
             console.error(e);
-            alert("Erro no cálculo astronômico. Verifique a data de nascimento.");
+            alert("Erro no cálculo. Verifique se a data de nascimento está correta.");
             document.getElementById('loading-screen').style.display = 'none';
         }
     }
@@ -434,8 +421,8 @@
                 const nome = d.nome || "Iniciado";
                 const data = d.dataNascimento || "2000-01-01";
                 const hora = d.horaNascimento || "12:00";
-                const cidade = d.cidade || d.Cidade || "São Paulo";
-                const estado = d.estado || d.uf || "SP";
+                const cidade = d.cidade || "São Paulo";
+                const estado = d.estado || "SP";
                 
                 renderizar(nome, data, hora, cidade, estado);
 
