@@ -13,41 +13,51 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* MESMA ESTRUTURA DO DASHBOARD ORIGINAL */
+        /* ESTRUTURA ORIGINAL MANTIDA */
         :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
         body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; line-height: 1.6; }
         
         .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
         
         /* HEADER */
-        .header { text-align: center; margin-bottom: 50px; border-bottom: 1px solid #222; padding-bottom: 20px; }
+        .header { text-align: center; margin-bottom: 50px; }
         .welcome-text { font-family: 'Cinzel'; color: var(--gold); font-size: 2.2em; margin: 0; }
         .user-sign { font-size: 1.1em; color: #888; text-transform: uppercase; letter-spacing: 3px; margin-top: 5px; }
 
-        /* SEÇÕES DE CONTEÚDO (Mantendo o layout original) */
+        /* SEÇÕES DE CONTEÚDO (Mantendo o design original) */
         .destiny-section { 
             background: var(--card-bg); border-left: 3px solid var(--gold); 
             padding: 30px; margin-bottom: 30px; border-radius: 0 8px 8px 0;
         }
         .destiny-section h3 { font-family: 'Cinzel'; color: var(--gold); margin-top: 0; font-size: 1.4em; }
         .destiny-section p { font-size: 1.1em; color: #ccc; margin-bottom: 10px; }
+        /* Removemos as reticências visuais pois é premium */
         
-        /* Botão de Ação Principal (Oráculo) */
-        .action-area { text-align: center; margin-top: 50px; padding: 40px; background: #111; border: 1px solid var(--gold); border-radius: 8px; }
-        .btn-oracle {
+        /* BOTÕES DE ACESSO (Estilo original do botão upgrade, adaptado para acesso) */
+        .btn-upgrade {
             background: var(--gold); color: #000; border: none; padding: 18px 50px;
             font-family: 'Cinzel'; font-size: 1.2em; font-weight: bold; cursor: pointer;
-            border-radius: 4px; transition: 0.3s; text-transform: uppercase; letter-spacing: 2px; text-decoration: none; display: inline-block;
+            border-radius: 4px; transition: 0.3s; text-transform: uppercase; letter-spacing: 2px;
+            text-decoration: none; display: inline-block; margin-top: 20px;
         }
-        .btn-oracle:hover { background: #fff; box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); transform: translateY(-2px); }
+        .btn-upgrade:hover { background: #fff; box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); transform: translateY(-2px); }
+
+        /* AREA DE FERRAMENTAS (Substitui a área de vendas) */
+        .tools-area {
+            background: linear-gradient(180deg, #0a0a0a 0%, #151108 100%);
+            border: 1px solid #333; padding: 50px 30px; text-align: center; 
+            border-radius: 12px; margin-top: 60px;
+        }
+        .tools-area h2 { font-family: 'Cinzel'; color: var(--gold); font-size: 1.8em; margin-bottom: 15px; }
+        .tools-area p { font-size: 1.2em; color: #aaa; margin-bottom: 30px; }
 
         /* FOOTER */
         .footer { margin-top: 80px; text-align: center; border-top: 1px solid #222; padding: 40px 0; }
         .logout-link { color: #555; text-decoration: none; font-size: 0.9em; cursor: pointer; border: 1px solid #333; padding: 10px 20px; border-radius: 4px; }
         .logout-link:hover { color: #fff; border-color: #fff; }
-        
-        /* Loading para evitar piscada */
-        #loading-screen { position: fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-dark); display:flex; justify-content:center; align-items:center; z-index:999; }
+
+        /* Loading */
+        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); display: flex; justify-content: center; align-items: center; z-index: 1000; }
     </style>
 </head>
 <body>
@@ -56,89 +66,40 @@
         <i class="fas fa-circle-notch fa-spin" style="font-size: 3em; color: var(--gold);"></i>
     </div>
 
-    <div class="container" id="main-content" style="display:none;">
+    <div class="container" id="content-area" style="display:none;">
         <div class="header">
             <h1 class="welcome-text" id="user-name">Saudações</h1>
-            <div class="user-sign" id="user-sign">Carregando dados...</div>
+            <div class="user-sign" id="user-sign">Carregando destino...</div>
         </div>
 
         <div class="destiny-section">
-            <h3><i class="fas fa-star" style="margin-right: 10px; font-size: 0.8em;"></i> Sua Essência Astral (Completa)</h3>
-            <p id="mapa-full">
-                Sua posição solar indica uma missão de vida voltada para a estruturação. Diferente do resumo, a análise completa revela que Saturno na casa 4 exige resolução de pendências familiares para desbloquear a prosperidade financeira. Seu elemento dominante é a Terra, pedindo pragmatismo nas decisões deste mês.
+            <h3><i class="fas fa-star" style="margin-right: 10px; font-size: 0.8em;"></i> Sua Essência Astral</h3>
+            <p id="mapa-resumo">
+                [ANÁLISE COMPLETA LIBERADA] A posição do Sol no momento do seu nascimento revela uma alma em busca de propósito. Saturno confirma que este é o momento de colher o que plantou nos últimos 7 anos.
             </p>
         </div>
 
         <div class="destiny-section">
             <h3><i class="fas fa-infinity" style="margin-right: 10px; font-size: 0.8em;"></i> O Código do seu Nome</h3>
-            <p id="num-full">
-                A vibração completa do seu nome aponta para o Arcano "A Força". Você possui uma resiliência natural que intimida opositores. O ciclo atual favorece contratos e assinaturas, desde que feitos antes da lua minguante. Seus números de poder para hoje são: 3, 8 e 21.
+            <p id="num-resumo">
+                [ANÁLISE COMPLETA LIBERADA] As letras do seu nome vibram na frequência do número 8. Prosperidade e liderança são seus dons naturais. Use-os com sabedoria nesta semana.
             </p>
         </div>
 
         <div class="destiny-section">
-            <h3><i class="fas fa-yin-yang" style="margin-right: 10px; font-size: 0.8em;"></i> Zodíaco Chinês e Harmonia</h3>
-            <p id="zodiaco-full">
-                A energia estagnada mencionada anteriormente pode ser curada com o uso de Metal no setor Oeste da sua casa. Seu animal regente está em ascensão, o que aumenta seu carisma, mas cuidado com a exaustão social. Banhos de Alecrim são recomendados nesta semana.
+            <h3><i class="fas fa-yin-yang" style="margin-right: 10px; font-size: 0.8em;"></i> Zodíaco Chinês</h3>
+            <p id="zodiaco-resumo">
+                [ANÁLISE COMPLETA LIBERADA] Sob a regência do seu signo chinês, o ciclo favorece conexões emocionais. Harmonia no lar será restaurada com elementos de Água.
             </p>
         </div>
 
-        <div class="action-area">
-            <h2 style="font-family: 'Cinzel'; color: var(--gold); margin-bottom: 20px;">Oráculo dos Mestres</h2>
-            <p style="color: #aaa; margin-bottom: 30px;">Faça sua pergunta ao Tarot, Búzios ou Baralho Cigano.</p>
+        <div class="tools-area">
+            <h2>Acesso Sagrado</h2>
+            <p>O portal está aberto para você. Consulte os mestres agora.</p>
             
-            <a href="premium-perguntas.html" class="btn-oracle">INICIAR CONSULTA</a>
+            <a href="premium-perguntas.html" class="btn-upgrade">CONSULTAR ORÁCULO</a>
         </div>
 
         <div class="footer">
             <div class="logout-link" onclick="fazerLogout()">ENCERRAR SESSÃO</div>
         </div>
-    </div>
-
-    <script>
-        const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
-        try { firebase.initializeApp(firebaseConfig); } catch(e) {}
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                // VERIFICAÇÃO NA COLEÇÃO 'users' (Correto)
-                db.collection("users").doc(user.uid).get().then(doc => {
-                    if (doc.exists) {
-                        const d = doc.data();
-                        
-                        // SE FOR PREMIUM, LIBERA A TELA
-                        if (d.premium === true || d.status === 'premium' || d.plano === 'premium') {
-                            const nome = d.nome ? d.nome.split(' ')[0] : 'Iniciado';
-                            document.getElementById('user-name').innerText = `Saudações, ${nome}`;
-                            document.getElementById('user-sign').innerText = `Membro Iniciado | ${d.signo || 'Caminho da Luz'}`;
-                            
-                            document.getElementById('loading-screen').style.display = 'none';
-                            document.getElementById('main-content').style.display = 'block';
-                        } else {
-                            // SE NÃO FOR PREMIUM, MANDA PRO DASHBOARD FREE (SEM ALERTAS CHATOS)
-                            window.location.href = "dashboard.html";
-                        }
-                    } else {
-                        // SEM DADOS, MANDA PRO FREE
-                        window.location.href = "dashboard.html";
-                    }
-                }).catch(() => {
-                    // ERRO, LIMPA E MANDA PRO INDEX
-                    auth.signOut();
-                    window.location.href = "index.html";
-                });
-            } else {
-                window.location.href = "index.html";
-            }
-        });
-
-        function fazerLogout() {
-            auth.signOut().then(() => {
-                window.location.href = "index.html";
-            });
-        }
-    </script>
-</body>
-</html>
