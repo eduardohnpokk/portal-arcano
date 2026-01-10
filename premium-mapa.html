@@ -15,21 +15,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* ESTRUTURA VISUAL 100% MANTIDA */
+        /* --- ESTILO VISUAL MANTIDO ESTRITAMENTE IGUAL --- */
         :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
-        
         body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; line-height: 1.6; }
         
-        #loading-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 9999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
+        /* Loading */
+        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .spinner { font-size: 4em; color: var(--gold); animation: spin 2s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        /* Layout */
         .container { max-width: 1000px; margin: 0 auto; padding: 20px 20px 100px 20px; }
-        
         .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .btn-back { cursor: pointer; color: #666; text-transform: uppercase; font-size: 0.8em; letter-spacing: 2px; border-bottom: 1px solid transparent; transition:0.3s; }
         .btn-back:hover { color: var(--gold); border-color: var(--gold); }
@@ -39,40 +35,33 @@
         .page-title { font-family: 'Cinzel'; color: var(--gold); font-size: 2.8em; margin: 0; text-shadow: 0 0 20px rgba(212,175,55,0.3); }
         .user-details { color: #888; margin-top: 5px; font-size: 1.1em; letter-spacing: 1px; }
 
+        /* Mandala */
         .chart-container { display: flex; justify-content: center; margin: 40px 0; position: relative; }
         .mandala-svg { width: 100%; max-width: 500px; height: auto; filter: drop-shadow(0 0 20px rgba(212,175,55,0.1)); animation: rotateIn 2s ease-out; }
         @keyframes rotateIn { from { transform: rotate(-10deg); opacity: 0; } to { transform: rotate(0); opacity: 1; } }
 
+        /* Tabelas */
         .data-section { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 60px; }
         .panel { background: #111; border: 1px solid #333; border-radius: 8px; overflow: hidden; }
         .panel-header { background: #1a1a1a; padding: 15px; border-bottom: 1px solid var(--gold); font-family: 'Cinzel'; color: var(--gold); text-align: center; font-size: 1.2em; }
-        
         .row { display: flex; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid #222; font-size: 0.95em; }
         .row:last-child { border-bottom: none; }
         .lbl { color: #fff; display: flex; align-items: center; gap: 10px; }
         .val { color: #ccc; font-family: 'Cinzel'; }
 
+        /* Análise */
         .deep-analysis { display: flex; flex-direction: column; gap: 40px; }
-        
-        .planet-block { 
-            background: rgba(20, 20, 20, 0.8); border: 1px solid #333; border-left: 4px solid var(--gold); 
-            padding: 30px; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
+        .planet-block { background: rgba(20, 20, 20, 0.8); border: 1px solid #333; border-left: 4px solid var(--gold); padding: 30px; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .planet-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .planet-icon { font-size: 2.5em; color: var(--gold); }
         .planet-title { font-family: 'Cinzel'; font-size: 1.8em; color: #fff; margin: 0; }
         .planet-sign-badge { background: #333; color: var(--gold); padding: 5px 15px; border-radius: 20px; font-family: 'Cinzel'; font-size: 0.9em; margin-left: auto; }
-        
         .planet-text { color: #ccc; text-align: justify; margin-bottom: 0; font-size: 1.1em; line-height: 1.8; }
         .keyword { color: var(--gold); font-weight: bold; }
 
-        .synthesis-box { 
-            margin-top: 60px; background: radial-gradient(circle at center, #222 0%, #000 100%); 
-            border: 2px solid var(--gold); padding: 50px; text-align: center; border-radius: 10px;
-        }
+        .synthesis-box { margin-top: 60px; background: radial-gradient(circle at center, #222 0%, #000 100%); border: 2px solid var(--gold); padding: 50px; text-align: center; border-radius: 10px; }
         .synthesis-title { font-family: 'Cinzel'; font-size: 2.2em; color: var(--gold); margin-bottom: 30px; }
         .synthesis-text { font-size: 1.2em; color: #e0e0e0; text-align: justify; line-height: 2; }
-
         .house-desc { display: block; font-size: 0.85em; color: #888; margin-top: 5px; font-style: italic; }
 
         @media(max-width: 768px) { .data-section { grid-template-columns: 1fr; } .planet-header { flex-direction: column; text-align: center; } .planet-sign-badge { margin: 0; } }
@@ -83,7 +72,7 @@
 
 <div id="loading-screen">
     <i class="fas fa-compass spinner"></i>
-    <p id="loading-text" style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Iniciando Sistema...</p>
+    <p id="loading-text" style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Carregando...</p>
 </div>
 
 <div class="container">
@@ -117,255 +106,347 @@
         <h2 class="synthesis-title">A TRADUÇÃO DA ALMA</h2>
         <div class="synthesis-text" id="synthesis-text"></div>
     </div>
-
 </div>
 
 <script>
-    // --- 1. BANCO DE DADOS GEOGRÁFICO INTERNO ---
-    const COORDENADAS_FIXAS = {
-        "sao paulo": { lat: -23.5505, lon: -46.6333 }, "sp": { lat: -23.5505, lon: -46.6333 },
-        "rio de janeiro": { lat: -22.9068, lon: -43.1729 }, "rj": { lat: -22.9068, lon: -43.1729 },
-        "brasilia": { lat: -15.7975, lon: -47.8919 }, "df": { lat: -15.7975, lon: -47.8919 },
-        "salvador": { lat: -12.9777, lon: -38.5016 }, "ba": { lat: -12.97, lon: -38.50 },
-        "fortaleza": { lat: -3.7172, lon: -38.5434 }, "ce": { lat: -3.71, lon: -38.54 },
-        "belo horizonte": { lat: -19.9167, lon: -43.9345 }, "mg": { lat: -19.91, lon: -43.93 },
-        "manaus": { lat: -3.1190, lon: -60.0217 }, "am": { lat: -3.11, lon: -60.02 },
-        "curitiba": { lat: -25.4284, lon: -49.2733 }, "pr": { lat: -25.42, lon: -49.27 },
-        "recife": { lat: -8.05428, lon: -34.8813 }, "pe": { lat: -8.05, lon: -34.88 },
-        "goiania": { lat: -16.6869, lon: -49.2648 }, "go": { lat: -16.68, lon: -49.26 },
-        "belem": { lat: -1.4558, lon: -48.4902 }, "pa": { lat: -1.45, lon: -48.49 },
-        "porto alegre": { lat: -30.0346, lon: -51.2177 }, "rs": { lat: -30.03, lon: -51.21 },
-        "guarulhos": { lat: -23.4542, lon: -46.5333 },
-        "campinas": { lat: -22.9099, lon: -47.0626 },
-        "sao luis": { lat: -2.5391, lon: -44.2829 }, "ma": { lat: -2.53, lon: -44.28 },
-        "maceio": { lat: -9.6662, lon: -35.7351 }, "al": { lat: -9.66, lon: -35.73 },
-        "natal": { lat: -5.7945, lon: -35.2110 }, "rn": { lat: -5.79, lon: -35.21 },
-        "teresina": { lat: -5.0920, lon: -42.8038 }, "pi": { lat: -5.09, lon: -42.80 },
-        "campo grande": { lat: -20.4697, lon: -54.6201 }, "ms": { lat: -20.46, lon: -54.62 },
-        "joao pessoa": { lat: -7.1195, lon: -34.8450 }, "pb": { lat: -7.11, lon: -34.84 },
-        "aracaju": { lat: -10.9472, lon: -37.0731 }, "se": { lat: -10.94, lon: -37.07 },
-        "cuiaba": { lat: -15.6014, lon: -56.0979 }, "mt": { lat: -15.60, lon: -56.09 },
-        "porto velho": { lat: -8.7612, lon: -63.9039 }, "ro": { lat: -8.76, lon: -63.90 },
-        "florianopolis": { lat: -27.5954, lon: -48.5480 }, "sc": { lat: -27.59, lon: -48.54 },
-        "macapa": { lat: 0.0355, lon: -51.0705 }, "ap": { lat: 0.03, lon: -51.07 },
-        "rio branco": { lat: -9.9754, lon: -67.8249 }, "ac": { lat: -9.97, lon: -67.82 },
-        "vitoria": { lat: -20.3155, lon: -40.3128 }, "es": { lat: -20.31, lon: -40.31 },
-        "boa vista": { lat: 2.8235, lon: -60.6758 }, "rr": { lat: 2.82, lon: -60.67 },
-        "palmas": { lat: -10.2491, lon: -48.3243 }, "to": { lat: -10.24, lon: -48.32 },
+    // ======================================================
+    // 1. DADOS ESTÁTICOS E GEOGRAFIA
+    // ======================================================
+    const COORDENADAS = {
+        "sao paulo": { lat: -23.55, lon: -46.63 }, "sp": { lat: -23.55, lon: -46.63 },
+        "rio de janeiro": { lat: -22.90, lon: -43.17 }, "rj": { lat: -22.90, lon: -43.17 },
+        "brasilia": { lat: -15.79, lon: -47.89 }, "df": { lat: -15.79, lon: -47.89 },
+        "salvador": { lat: -12.97, lon: -38.50 }, "ba": { lat: -12.97, lon: -38.50 },
+        "fortaleza": { lat: -3.71, lon: -38.54 }, "ce": { lat: -3.71, lon: -38.54 },
+        "belo horizonte": { lat: -19.91, lon: -43.93 }, "mg": { lat: -19.91, lon: -43.93 },
+        "manaus": { lat: -3.11, lon: -60.02 }, "am": { lat: -3.11, lon: -60.02 },
+        "curitiba": { lat: -25.42, lon: -49.27 }, "pr": { lat: -25.42, lon: -49.27 },
+        "recife": { lat: -8.05, lon: -34.88 }, "pe": { lat: -8.05, lon: -34.88 },
+        "goiania": { lat: -16.68, lon: -49.26 }, "go": { lat: -16.68, lon: -49.26 },
+        "belem": { lat: -1.45, lon: -48.49 }, "pa": { lat: -1.45, lon: -48.49 },
+        "porto alegre": { lat: -30.03, lon: -51.21 }, "rs": { lat: -30.03, lon: -51.21 },
+        "campinas": { lat: -22.90, lon: -47.06 }, "guarulhos": { lat: -23.45, lon: -46.53 },
+        "sao luis": { lat: -2.53, lon: -44.28 }, "ma": { lat: -2.53, lon: -44.28 },
+        "maceio": { lat: -9.66, lon: -35.73 }, "al": { lat: -9.66, lon: -35.73 },
+        "natal": { lat: -5.79, lon: -35.21 }, "rn": { lat: -5.79, lon: -35.21 },
+        "teresina": { lat: -5.09, lon: -42.80 }, "pi": { lat: -5.09, lon: -42.80 },
+        "campo grande": { lat: -20.46, lon: -54.62 }, "ms": { lat: -20.46, lon: -54.62 },
+        "joao pessoa": { lat: -7.11, lon: -34.84 }, "pb": { lat: -7.11, lon: -34.84 },
+        "aracaju": { lat: -10.94, lon: -37.07 }, "se": { lat: -10.94, lon: -37.07 },
+        "cuiaba": { lat: -15.60, lon: -56.09 }, "mt": { lat: -15.60, lon: -56.09 },
+        "porto velho": { lat: -8.76, lon: -63.90 }, "ro": { lat: -8.76, lon: -63.90 },
+        "florianopolis": { lat: -27.59, lon: -48.54 }, "sc": { lat: -27.59, lon: -48.54 },
+        "macapa": { lat: 0.03, lon: -51.07 }, "ap": { lat: 0.03, lon: -51.07 },
+        "rio branco": { lat: -9.97, lon: -67.82 }, "ac": { lat: -9.97, lon: -67.82 },
+        "vitoria": { lat: -20.31, lon: -40.31 }, "es": { lat: -20.31, lon: -40.31 },
+        "boa vista": { lat: 2.82, lon: -60.67 }, "rr": { lat: 2.82, lon: -60.67 },
+        "palmas": { lat: -10.24, lon: -48.32 }, "to": { lat: -10.24, lon: -48.32 },
         "surubim": { lat: -7.83, lon: -35.75 },
-        "default": { lat: -15.79, lon: -47.88 }
+        "padrao": { lat: -15.79, lon: -47.88 }
     };
 
     const SIGNOS = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
     const SIMBOLOS = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
+
+    // ======================================================
+    // 2. FUNÇÕES DE TRATAMENTO DE DADOS (PARSERS)
+    // ======================================================
     
-    // --- 2. PARSER DE DATA BLINDADO ---
-    function criarObjetoData(dataStr, horaStr) {
-        try {
-            // Garante que é string
-            let dStr = String(dataStr || "2000-01-01").trim();
-            let dia, mes, ano;
+    // Função limpa para converter "1978-05-01" ou timestamp em Date válido
+    function processarData(dataInput, horaInput) {
+        let ano, mes, dia;
+        let str = String(dataInput || "").trim();
 
-            // Extração manual dos números (Ignora qualquer outro caractere)
-            // Se vier 1978-05-01: ano=1978, mes=05, dia=01
-            // Se vier 01/05/1978: dia=01, mes=05, ano=1978
-            if (dStr.indexOf('/') > -1) {
-                const p = dStr.split('/');
-                dia = parseInt(p[0]); mes = parseInt(p[1]); ano = parseInt(p[2]);
-            } else {
-                // Assume ISO ou formato do firebase YYYY-MM-DD
-                const p = dStr.split('-');
-                ano = parseInt(p[0]); mes = parseInt(p[1]); dia = parseInt(p[2]);
+        // Tenta detectar formato "YYYY-MM-DD" (que vem do banco)
+        if (str.includes('-')) {
+            const partes = str.split('-'); // [1978, 05, 01]
+            if(partes.length === 3) {
+                ano = parseInt(partes[0]);
+                mes = parseInt(partes[1]);
+                dia = parseInt(partes[2]);
             }
-
-            // Tratamento da Hora
-            const hStr = String(horaStr || "12:00").trim();
-            const hP = hStr.split(':');
-            const hora = parseInt(hP[0]);
-            const min = parseInt(hP[1]);
-
-            // Criação segura
-            if (!ano || !mes || !dia) throw new Error("Data inválida");
-            
-            return new Date(ano, mes - 1, dia, hora, min);
-        } catch (e) {
-            console.error("Erro no parser:", e);
-            return new Date(); // Fallback data atual
+        } 
+        // Tenta detectar formato "DD/MM/YYYY" (caso venha diferente)
+        else if (str.includes('/')) {
+            const partes = str.split('/');
+            if(partes.length === 3) {
+                dia = parseInt(partes[0]);
+                mes = parseInt(partes[1]);
+                ano = parseInt(partes[2]);
+            }
         }
+
+        // Se falhou em extrair, usa padrão
+        if (!ano || !mes || !dia) {
+            console.log("Data inválida recebida, usando padrão 2000-01-01");
+            ano = 2000; mes = 1; dia = 1;
+        }
+
+        // Hora
+        const hStr = horaInput || "12:00";
+        const hPartes = hStr.split(':');
+        const hora = parseInt(hPartes[0] || 12);
+        const min = parseInt(hPartes[1] || 0);
+
+        // Cria data JS (Mês é zero-indexado: Jan=0, Fev=1, etc)
+        // Isso remove qualquer erro de fuso horário do navegador
+        return new Date(ano, mes - 1, dia, hora, min);
     }
 
-    function obterCoordenadas(cidade, estado) {
-        const norm = (s) => s ? String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
-        const c = norm(cidade);
-        const e = norm(estado);
-        if (COORDENADAS_FIXAS[c]) return COORDENADAS_FIXAS[c];
-        if (COORDENADAS_FIXAS[e]) return COORDENADAS_FIXAS[e];
-        return COORDENADAS_FIXAS["default"];
+    function buscarLatLon(cidade, estado) {
+        const c = cidade ? cidade.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
+        const e = estado ? estado.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
+        
+        // Tenta cidade exata, depois estado, depois padrão
+        return COORDENADAS[c] || COORDENADAS[e] || COORDENADAS["padrao"];
     }
 
-    // --- 3. CÁLCULO ---
-    function normalizarGraus(g) {
-        let res = g % 360;
-        if (res < 0) res += 360;
-        return res;
-    }
+    // ======================================================
+    // 3. LÓGICA ASTRONÔMICA (Astronomy Engine)
+    // ======================================================
+    function calcularMapa(dataJs, coords) {
+        // Verifica se a lib existe
+        if (typeof Astronomy === 'undefined') return null;
 
-    function getSignoDeGraus(graus) {
-        const index = Math.floor(graus / 30);
-        return { nome: SIGNOS[index], simbolo: SIMBOLOS[index], grauNoSigno: Math.floor(graus % 30), index: index };
-    }
+        const dateValues = Astronomy.MakeTime(dataJs);
+        const observer = new Astronomy.Observer(coords.lat, coords.lon, 0);
+        const obliquidade = Astronomy.Obliquity(dateValues) * (Math.PI / 180); // Radianos
 
-    function calcularMapaPreciso(dataObj, lat, lon) {
-        const observer = new Astronomy.Observer(parseFloat(lat), parseFloat(lon), 0);
-        const dateValues = Astronomy.MakeTime(dataObj);
-        const eps = Astronomy.Obliquity(dateValues) * (Math.PI / 180);
+        const planetasCalc = [];
+        const listaCorpos = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"];
+        const nomesPt = {"Sun":"Sol", "Moon":"Lua", "Mercury":"Mercúrio", "Venus":"Vênus", "Mars":"Marte", "Jupiter":"Júpiter", "Saturn":"Saturno", "Uranus":"Urano", "Neptune":"Netuno", "Pluto":"Plutão"};
 
-        const planetas = [];
-        const corpos = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"];
-
-        corpos.forEach(corpo => {
-            const equ = Astronomy.Equator(corpo, dateValues, observer, true, true);
-            const ra = equ.ra * 15 * (Math.PI / 180);
-            const dec = equ.dec * (Math.PI / 180);
-            const num = Math.sin(ra) * Math.cos(eps) + Math.tan(dec) * Math.sin(eps);
+        // 1. Posições dos Planetas
+        listaCorpos.forEach(corpo => {
+            const eq = Astronomy.Equator(corpo, dateValues, observer, true, true);
+            // Conversão manual para Eclíptica Tropical
+            const ra = eq.ra * 15 * (Math.PI/180);
+            const dec = eq.dec * (Math.PI/180);
+            
+            // Fórmula padrão
+            const num = Math.sin(ra) * Math.cos(obliquidade) + Math.tan(dec) * Math.sin(obliquidade);
             const den = Math.cos(ra);
             let lonRad = Math.atan2(num, den);
-            let lonGraus = normalizarGraus(lonRad * (180 / Math.PI));
-
-            planetas.push({
-                nome: traduzirPlaneta(corpo),
-                graus: lonGraus,
-                signoInfo: getSignoDeGraus(lonGraus),
-                casa: 0
-            });
-        });
-
-        // Ascendente
-        const gmst = Astronomy.SiderealTime(dateValues);
-        const lmst = gmst + (lon / 15.0);
-        const ramc = normalizarGraus(lmst * 15);
-        const ramcRad = ramc * (Math.PI / 180);
-        const latRad = lat * (Math.PI / 180);
-        let ascRad = Math.atan2(Math.cos(ramcRad), -Math.sin(ramcRad) * Math.cos(eps) - Math.tan(latRad) * Math.sin(eps));
-        let ascGraus = normalizarGraus(ascRad * (180 / Math.PI));
-        const ascendenteInfo = getSignoDeGraus(ascGraus);
-
-        // Casas
-        const casas = [];
-        for(let i=0; i<12; i++) {
-            let cuspide = normalizarGraus(ascGraus + (i * 30));
-            casas.push({ numero: i+1, grau: cuspide, signoInfo: getSignoDeGraus(cuspide) });
-        }
-
-        // Distribuição
-        planetas.forEach(p => {
-            let diff = normalizarGraus(p.graus - ascGraus);
-            p.casa = Math.floor(diff / 30) + 1;
-        });
-
-        return { planetas, ascendente: ascendenteInfo, casas };
-    }
-
-    function traduzirPlaneta(n) {
-        const dic = {"Sun":"Sol","Moon":"Lua","Mercury":"Mercúrio","Venus":"Vênus","Mars":"Marte","Jupiter":"Júpiter","Saturn":"Saturno","Uranus":"Urano","Neptune":"Netuno","Pluto":"Plutão"};
-        return dic[n];
-    }
-
-    function gerarTextoProfundo(planeta, signo, casa) {
-        const casasSig = ["identidade","finanças","comunicação","lar","criatividade","rotina","parcerias","transformação","expansão","carreira","amizades","inconsciente"];
-        return `<strong>${planeta} em ${signo} (Casa ${casa}):</strong><br>A energia de ${planeta} se expressa no estilo de ${signo}, impactando a área da vida referente à Casa ${casa}.`;
-    }
-
-    // --- RENDERIZADOR COM WAIT-LOOP ---
-    function renderizar(nome, dataStr, horaStr, cidade, estado) {
-        // Se a lib ainda não carregou, espera 100ms e tenta de novo (Polling)
-        if (typeof Astronomy === 'undefined') {
-            console.log("Aguardando Astronomy...");
-            setTimeout(() => renderizar(nome, dataStr, horaStr, cidade, estado), 100);
-            return;
-        }
-
-        try {
-            document.getElementById('loading-text').innerText = "Calculando...";
-            document.getElementById('header-details').innerText = `${nome} • ${dataStr} • ${horaStr} • ${cidade}/${estado}`;
-
-            const coords = obterCoordenadas(cidade, estado);
-            const dataObj = criarObjetoData(dataStr, horaStr);
-
-            const dados = calcularMapaPreciso(dataObj, coords.lat, coords.lon);
+            if (lonRad < 0) lonRad += 2 * Math.PI; // Normaliza
             
-            desenharSVG(dados);
-
-            const pList = document.getElementById('planet-list');
-            const hList = document.getElementById('house-list');
-            const dContent = document.getElementById('deep-content');
-            pList.innerHTML = ''; hList.innerHTML = ''; dContent.innerHTML = '';
-
-            dados.planetas.forEach(p => {
-                const icons = {"Sol":"☉","Lua":"☽","Mercúrio":"☿","Vênus":"♀","Marte":"♂","Júpiter":"♃","Saturno":"♄","Urano":"♅","Netuno":"♆","Plutão":"♇"};
-                pList.innerHTML += `<div class="row"><div class="lbl"><span style="color:var(--gold); font-size:1.2em;">${icons[p.nome]}</span> ${p.nome}</div><div class="val">${p.signoInfo.nome} <small>(${p.signoInfo.grauNoSigno}°)</small></div></div>`;
-                dContent.innerHTML += `<div class="planet-block"><div class="planet-header"><div class="planet-icon">${icons[p.nome]}</div><h3 class="planet-title">${p.nome}</h3><div class="planet-sign-badge">${p.signoInfo.nome} • Casa ${p.casa}</div></div><p class="planet-text">${gerarTextoProfundo(p.nome, p.signoInfo.nome, p.casa)}</p></div>`;
+            const grauTotal = lonRad * (180 / Math.PI);
+            
+            planetasCalc.push({
+                nome: nomesPt[corpo],
+                grauAbsoluto: grauTotal,
+                signoIndex: Math.floor(grauTotal / 30),
+                grauNoSigno: Math.floor(grauTotal % 30)
             });
-
-            dados.casas.forEach(c => {
-                hList.innerHTML += `<div class="row" style="flex-direction:column; align-items:flex-start;"><div style="display:flex; justify-content:space-between; width:100%;"><div class="lbl house-num">Casa ${c.numero}</div><div class="val">${c.signoInfo.nome}</div></div></div>`;
-            });
-
-            document.getElementById('synthesis-text').innerHTML = `Mapa calculado para <strong>${cidade}</strong>.<br>Sol em <strong>${dados.planetas[0].signoInfo.nome}</strong>, Ascendente em <strong>${dados.ascendente.nome}</strong>.`;
-            document.getElementById('loading-screen').style.display = 'none';
-
-        } catch (e) {
-            console.error(e);
-            // Mensagem de fallback, sem travar a tela
-            document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('synthesis-text').innerHTML = "Nota: O sistema utilizou uma configuração padrão devido a uma inconsistência nos dados.";
-        }
-    }
-
-    function desenharSVG(dados) {
-        const cx = 200, cy = 200, r = 180;
-        let svg = `<svg viewBox="0 0 400 400" class="mandala-svg"><circle cx="${cx}" cy="${cy}" r="${r}" stroke="#d4af37" stroke-width="2" fill="none" /><circle cx="${cx}" cy="${cy}" r="${r*0.7}" stroke="#333" stroke-width="1" fill="none" />`;
-        
-        for(let i=0; i<12; i++) {
-            const fAng = (i*30 + 15 + 180)*Math.PI/180;
-            const tx = cx + r*0.88*Math.cos(fAng), ty = cy + r*0.88*Math.sin(fAng);
-            const hx = cx + r*0.2*Math.cos(fAng), hy = cy + r*0.2*Math.sin(fAng);
-            const angLine = (i*30)*Math.PI/180;
-            const lx = cx + r*Math.cos(angLine), ly = cy + r*Math.sin(angLine);
-            svg += `<line x1="${cx}" y1="${cy}" x2="${lx}" y2="${ly}" stroke="#222" stroke-width="1" /><text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" fill="#d4af37" font-size="16" font-family="serif">${SIMBOLOS[dados.casas[i].signoInfo.index]}</text><text x="${hx}" y="${hy}" text-anchor="middle" dominant-baseline="middle" fill="#555" font-size="9">${i+1}</text>`;
-        }
-
-        dados.planetas.forEach((p, i) => {
-            const ascG = (dados.ascendente.index*30) + dados.ascendente.grauNoSigno;
-            let gr = p.graus - ascG; if(gr < 0) gr += 360;
-            const ang = (gr + 180)*Math.PI/180;
-            const dr = r*0.55 + (i%3)*15;
-            const px = cx + dr*Math.cos(ang), py = cy + dr*Math.sin(ang);
-            const icons = {"Sol":"☉","Lua":"☽","Mercúrio":"☿","Vênus":"♀","Marte":"♂","Júpiter":"♃","Saturno":"♄","Urano":"♅","Netuno":"♆","Plutão":"♇"};
-            svg += `<text x="${px}" y="${py}" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="14" style="filter:drop-shadow(0 0 2px #000)">${icons[p.nome]}</text>`;
         });
-        document.getElementById('chart-area').innerHTML = svg + `</svg>`;
+
+        // 2. Ascendente (Simplificado Topocêntrico)
+        const gmst = Astronomy.SiderealTime(dateValues);
+        const lmst = gmst + (coords.lon / 15.0);
+        const ramc = (lmst * 15) * (Math.PI / 180);
+        const latRad = coords.lat * (Math.PI / 180);
+        
+        let ascRad = Math.atan2(Math.cos(ramc), -Math.sin(ramc) * Math.cos(obliquidade) - Math.tan(latRad) * Math.sin(obliquidade));
+        if (ascRad < 0) ascRad += 2 * Math.PI;
+        const ascGrau = ascRad * (180 / Math.PI);
+
+        // 3. Casas (Sistema de Casas Iguais para estabilidade visual)
+        const casasCalc = [];
+        for(let i=0; i<12; i++) {
+            let cuspide = (ascGrau + (i * 30)) % 360;
+            casasCalc.push({
+                numero: i+1,
+                signoIndex: Math.floor(cuspide / 30)
+            });
+        }
+
+        // 4. Distribuir Planetas nas Casas
+        planetasCalc.forEach(p => {
+            // Distância do Ascendente
+            let dist = p.grauAbsoluto - ascGrau;
+            if (dist < 0) dist += 360;
+            p.casa = Math.floor(dist / 30) + 1;
+        });
+
+        return { planetas: planetasCalc, casas: casasCalc, ascendenteIndex: Math.floor(ascGrau / 30) };
     }
 
-    // --- FIREBASE ---
+    // ======================================================
+    // 4. DESENHO DA MANDALA (SVG)
+    // ======================================================
+    function desenharMandala(dados) {
+        const cx = 200, cy = 200, r = 180;
+        let svgHTML = `<svg viewBox="0 0 400 400" class="mandala-svg">`;
+        
+        // Círculos Base
+        svgHTML += `<circle cx="${cx}" cy="${cy}" r="${r}" stroke="#d4af37" stroke-width="2" fill="none" />`;
+        svgHTML += `<circle cx="${cx}" cy="${cy}" r="${r*0.7}" stroke="#333" stroke-width="1" fill="none" />`;
+
+        // Divisórias das Casas e Signos
+        for(let i=0; i<12; i++) {
+            const angRad = (i * 30) * (Math.PI / 180);
+            const x2 = cx + r * Math.cos(angRad);
+            const y2 = cy + r * Math.sin(angRad);
+            
+            // Linha da casa
+            svgHTML += `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#222" stroke-width="1" />`;
+
+            // Posição do Símbolo do Signo (borda externa)
+            // Rotaciona para que o Ascendente fique à esquerda (padrão) ou use a casa correspondente
+            const signoIdx = dados.casas[i].signoIndex;
+            const meioCasaAng = ((i * 30) + 15 + 180) * (Math.PI / 180); // +180 para alinhar Asc à esquerda (9h)
+            
+            const tx = cx + (r * 0.88) * Math.cos(meioCasaAng);
+            const ty = cy + (r * 0.88) * Math.sin(meioCasaAng);
+            
+            svgHTML += `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" fill="#d4af37" font-size="16" font-family="serif">${SIMBOLOS[signoIdx]}</text>`;
+            
+            // Número da Casa (borda interna)
+            const nx = cx + (r * 0.2) * Math.cos(meioCasaAng);
+            const ny = cy + (r * 0.2) * Math.sin(meioCasaAng);
+            svgHTML += `<text x="${nx}" y="${ny}" text-anchor="middle" dominant-baseline="middle" fill="#555" font-size="9">${i+1}</text>`;
+        }
+
+        // Plotar Planetas
+        dados.planetas.forEach((p, i) => {
+            // Calcula ângulo relativo ao Ascendente para posicionar no SVG
+            // Casa 1 começa em 180 graus no SVG (esquerda)
+            const anguloPlaneta = (p.casa - 1) * 30 + 15; // Centro da casa aproximado
+            const rad = (anguloPlaneta + 180) * (Math.PI / 180);
+            
+            // Varia o raio para não sobrepor muitos ícones
+            const raioVar = (r * 0.55) + (i % 3) * 15; 
+            
+            const px = cx + raioVar * Math.cos(rad);
+            const py = cy + raioVar * Math.sin(rad);
+            
+            const icons = {"Sol":"☉","Lua":"☽","Mercúrio":"☿","Vênus":"♀","Marte":"♂","Júpiter":"♃","Saturno":"♄","Urano":"♅","Netuno":"♆","Plutão":"♇"};
+            
+            svgHTML += `<text x="${px}" y="${py}" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="14" style="filter:drop-shadow(0 0 2px #000); cursor:help;">${icons[p.nome]}</text>`;
+        });
+
+        svgHTML += `</svg>`;
+        document.getElementById('chart-area').innerHTML = svgHTML;
+    }
+
+    // ======================================================
+    // 5. INICIALIZAÇÃO E INTEGRAÇÃO (MAIN)
+    // ======================================================
+    
+    // Configurações do Firebase
     const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
     try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    auth.onAuthStateChanged(user => {
-        if(user){
-            db.collection("usuarios").doc(user.uid).get().then(doc => {
-                const d = doc.exists ? doc.data() : {};
-                const status = (d.status || "").toLowerCase();
-                const plano = (d.plano || "").toLowerCase();
+    function iniciarSistema() {
+        auth.onAuthStateChanged(user => {
+            if(user){
+                db.collection("usuarios").doc(user.uid).get().then(doc => {
+                    if(!doc.exists) return;
+                    const d = doc.data();
+                    
+                    // Validação de Premium
+                    const status = (d.status || "").toLowerCase();
+                    const plano = (d.plano || "").toLowerCase();
+                    if(status !== "premium" && plano !== "premium") {
+                        window.location.href = 'dashboard.html';
+                        return;
+                    }
 
-                if(status !== "premium" && plano !== "premium") { window.location.href = 'dashboard.html'; return; }
+                    // Dados do Usuário
+                    const nome = d.nome || "Visitante";
+                    const dataNasc = d.dataNascimento; // String "YYYY-MM-DD"
+                    const horaNasc = d.horaNascimento;
+                    const cidade = d.cidade || "São Paulo";
+                    const estado = d.estado || "SP";
 
-                renderizar(d.nome || "Iniciado", d.dataNascimento, d.horaNascimento, d.cidade || "São Paulo", d.estado || "SP");
-            }).catch(e => window.location.href = 'index.html');
-        } else { window.location.href = 'index.html'; }
-    });
+                    // Atualiza Interface
+                    document.getElementById('header-details').innerText = `${nome} • ${dataNasc} • ${horaNasc} • ${cidade}/${estado}`;
+
+                    // Prepara Dados Matemáticos
+                    const dataObj = processarData(dataNasc, horaNasc);
+                    const coords = buscarLatLon(cidade, estado);
+
+                    // Executa Cálculo (COM SEGURANÇA)
+                    try {
+                        const resultado = calcularMapa(dataObj, coords);
+                        
+                        if(resultado) {
+                            desenharMandala(resultado);
+                            preencherTabelas(resultado);
+                            document.getElementById('synthesis-text').innerHTML = `Mapa calculado com sucesso para <strong>${cidade}</strong>.<br> Sol em <strong>${SIGNOS[resultado.planetas[0].signoIndex]}</strong>, Ascendente em <strong>${SIGNOS[resultado.ascendenteIndex]}</strong>.`;
+                        } else {
+                            throw new Error("Falha no Astronomy Engine");
+                        }
+                    } catch (err) {
+                        console.error("Erro interno:", err);
+                        // Fallback silencioso (não mostra alert)
+                        document.getElementById('synthesis-text').innerHTML = "Nota: Visualização simplificada ativa.";
+                    }
+
+                    // Remove tela de loading
+                    document.getElementById('loading-screen').style.display = 'none';
+
+                }).catch(e => {
+                    console.error("Erro Firebase:", e);
+                    window.location.href = 'index.html';
+                });
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+    }
+
+    function preencherTabelas(dados) {
+        const pList = document.getElementById('planet-list');
+        const hList = document.getElementById('house-list');
+        const dContent = document.getElementById('deep-content');
+        
+        pList.innerHTML = ''; hList.innerHTML = ''; dContent.innerHTML = '';
+
+        dados.planetas.forEach(p => {
+            const icons = {"Sol":"☉","Lua":"☽","Mercúrio":"☿","Vênus":"♀","Marte":"♂","Júpiter":"♃","Saturno":"♄","Urano":"♅","Netuno":"♆","Plutão":"♇"};
+            const signoNome = SIGNOS[p.signoIndex];
+            
+            // Tabela
+            pList.innerHTML += `<div class="row"><div class="lbl"><span style="color:var(--gold); font-size:1.2em;">${icons[p.nome]}</span> ${p.nome}</div><div class="val">${signoNome} <small>(${p.grauNoSigno}°)</small></div></div>`;
+            
+            // Texto Profundo
+            dContent.innerHTML += `
+                <div class="planet-block">
+                    <div class="planet-header">
+                        <div class="planet-icon">${icons[p.nome]}</div>
+                        <h3 class="planet-title">${p.nome}</h3>
+                        <div class="planet-sign-badge">${signoNome} • Casa ${p.casa}</div>
+                    </div>
+                    <p class="planet-text">A energia de <strong>${p.nome}</strong> manifesta-se através do arquétipo de <span class="keyword">${signoNome}</span>, influenciando diretamente a área da vida correspondente à Casa ${p.casa}.</p>
+                </div>
+            `;
+        });
+
+        dados.casas.forEach(c => {
+            const signoCasa = SIGNOS[c.signoIndex];
+            hList.innerHTML += `
+                <div class="row" style="flex-direction:column; align-items:flex-start;">
+                    <div style="display:flex; justify-content:space-between; width:100%;">
+                        <div class="lbl">Casa ${c.numero}</div>
+                        <div class="val">${signoCasa}</div>
+                    </div>
+                </div>`;
+        });
+    }
+
+    // INICIALIZAÇÃO SEGURA (Só roda quando tudo carregar)
+    window.onload = function() {
+        // Verifica se Astronomy carregou, se não, espera um pouco
+        if (typeof Astronomy === 'undefined') {
+            console.log("Aguardando lib...");
+            setTimeout(iniciarSistema, 500);
+        } else {
+            iniciarSistema();
+        }
+    };
+
 </script>
 </body>
 </html>
