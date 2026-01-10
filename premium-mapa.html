@@ -9,22 +9,20 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
-    <script src="astronomy.min.js"></script>
+    <script src="astronomy.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js';"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* --- ESTILO VISUAL MANTIDO ESTRITAMENTE IGUAL --- */
+        /* --- DESIGN VISUAL ORIGINAL (INTOCADO) --- */
         :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
         body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; line-height: 1.6; }
         
-        /* Loading */
         #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .spinner { font-size: 4em; color: var(--gold); animation: spin 2s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Layout */
         .container { max-width: 1000px; margin: 0 auto; padding: 20px 20px 100px 20px; }
         .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .btn-back { cursor: pointer; color: #666; text-transform: uppercase; font-size: 0.8em; letter-spacing: 2px; border-bottom: 1px solid transparent; transition:0.3s; }
@@ -35,12 +33,10 @@
         .page-title { font-family: 'Cinzel'; color: var(--gold); font-size: 2.8em; margin: 0; text-shadow: 0 0 20px rgba(212,175,55,0.3); }
         .user-details { color: #888; margin-top: 5px; font-size: 1.1em; letter-spacing: 1px; }
 
-        /* Mandala */
         .chart-container { display: flex; justify-content: center; margin: 40px 0; position: relative; }
         .mandala-svg { width: 100%; max-width: 500px; height: auto; filter: drop-shadow(0 0 20px rgba(212,175,55,0.1)); animation: rotateIn 2s ease-out; }
         @keyframes rotateIn { from { transform: rotate(-10deg); opacity: 0; } to { transform: rotate(0); opacity: 1; } }
 
-        /* Tabelas */
         .data-section { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 60px; }
         .panel { background: #111; border: 1px solid #333; border-radius: 8px; overflow: hidden; }
         .panel-header { background: #1a1a1a; padding: 15px; border-bottom: 1px solid var(--gold); font-family: 'Cinzel'; color: var(--gold); text-align: center; font-size: 1.2em; }
@@ -49,7 +45,6 @@
         .lbl { color: #fff; display: flex; align-items: center; gap: 10px; }
         .val { color: #ccc; font-family: 'Cinzel'; }
 
-        /* Análise */
         .deep-analysis { display: flex; flex-direction: column; gap: 40px; }
         .planet-block { background: rgba(20, 20, 20, 0.8); border: 1px solid #333; border-left: 4px solid var(--gold); padding: 30px; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .planet-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
@@ -62,6 +57,7 @@
         .synthesis-box { margin-top: 60px; background: radial-gradient(circle at center, #222 0%, #000 100%); border: 2px solid var(--gold); padding: 50px; text-align: center; border-radius: 10px; }
         .synthesis-title { font-family: 'Cinzel'; font-size: 2.2em; color: var(--gold); margin-bottom: 30px; }
         .synthesis-text { font-size: 1.2em; color: #e0e0e0; text-align: justify; line-height: 2; }
+        
         .house-desc { display: block; font-size: 0.85em; color: #888; margin-top: 5px; font-style: italic; }
 
         @media(max-width: 768px) { .data-section { grid-template-columns: 1fr; } .planet-header { flex-direction: column; text-align: center; } .planet-sign-badge { margin: 0; } }
@@ -72,7 +68,7 @@
 
 <div id="loading-screen">
     <i class="fas fa-compass spinner"></i>
-    <p id="loading-text" style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Carregando...</p>
+    <p id="loading-text" style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Iniciando Sistema...</p>
 </div>
 
 <div class="container">
@@ -109,10 +105,8 @@
 </div>
 
 <script>
-    // ======================================================
-    // 1. DADOS ESTÁTICOS E GEOGRAFIA
-    // ======================================================
-    const COORDENADAS = {
+    // --- 1. DADOS GEOGRÁFICOS INTERNOS (Segurança contra falhas de API) ---
+    const DB_CIDADES = {
         "sao paulo": { lat: -23.55, lon: -46.63 }, "sp": { lat: -23.55, lon: -46.63 },
         "rio de janeiro": { lat: -22.90, lon: -43.17 }, "rj": { lat: -22.90, lon: -43.17 },
         "brasilia": { lat: -15.79, lon: -47.89 }, "df": { lat: -15.79, lon: -47.89 },
@@ -145,308 +139,228 @@
         "padrao": { lat: -15.79, lon: -47.88 }
     };
 
-    const SIGNOS = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
     const SIMBOLOS = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
+    const SIGNOS = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
 
-    // ======================================================
-    // 2. FUNÇÕES DE TRATAMENTO DE DADOS (PARSERS)
-    // ======================================================
-    
-    // Função limpa para converter "1978-05-01" ou timestamp em Date válido
-    function processarData(dataInput, horaInput) {
-        let ano, mes, dia;
-        let str = String(dataInput || "").trim();
-
-        // Tenta detectar formato "YYYY-MM-DD" (que vem do banco)
-        if (str.includes('-')) {
-            const partes = str.split('-'); // [1978, 05, 01]
-            if(partes.length === 3) {
-                ano = parseInt(partes[0]);
-                mes = parseInt(partes[1]);
-                dia = parseInt(partes[2]);
-            }
-        } 
-        // Tenta detectar formato "DD/MM/YYYY" (caso venha diferente)
-        else if (str.includes('/')) {
-            const partes = str.split('/');
-            if(partes.length === 3) {
-                dia = parseInt(partes[0]);
-                mes = parseInt(partes[1]);
-                ano = parseInt(partes[2]);
-            }
-        }
-
-        // Se falhou em extrair, usa padrão
-        if (!ano || !mes || !dia) {
-            console.log("Data inválida recebida, usando padrão 2000-01-01");
-            ano = 2000; mes = 1; dia = 1;
-        }
-
-        // Hora
-        const hStr = horaInput || "12:00";
-        const hPartes = hStr.split(':');
-        const hora = parseInt(hPartes[0] || 12);
-        const min = parseInt(hPartes[1] || 0);
-
-        // Cria data JS (Mês é zero-indexado: Jan=0, Fev=1, etc)
-        // Isso remove qualquer erro de fuso horário do navegador
-        return new Date(ano, mes - 1, dia, hora, min);
-    }
-
-    function buscarLatLon(cidade, estado) {
-        const c = cidade ? cidade.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
-        const e = estado ? estado.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
-        
-        // Tenta cidade exata, depois estado, depois padrão
-        return COORDENADAS[c] || COORDENADAS[e] || COORDENADAS["padrao"];
-    }
-
-    // ======================================================
-    // 3. LÓGICA ASTRONÔMICA (Astronomy Engine)
-    // ======================================================
-    function calcularMapa(dataJs, coords) {
-        // Verifica se a lib existe
-        if (typeof Astronomy === 'undefined') return null;
-
-        const dateValues = Astronomy.MakeTime(dataJs);
-        const observer = new Astronomy.Observer(coords.lat, coords.lon, 0);
-        const obliquidade = Astronomy.Obliquity(dateValues) * (Math.PI / 180); // Radianos
-
-        const planetasCalc = [];
-        const listaCorpos = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"];
-        const nomesPt = {"Sun":"Sol", "Moon":"Lua", "Mercury":"Mercúrio", "Venus":"Vênus", "Mars":"Marte", "Jupiter":"Júpiter", "Saturn":"Saturno", "Uranus":"Urano", "Neptune":"Netuno", "Pluto":"Plutão"};
-
-        // 1. Posições dos Planetas
-        listaCorpos.forEach(corpo => {
-            const eq = Astronomy.Equator(corpo, dateValues, observer, true, true);
-            // Conversão manual para Eclíptica Tropical
-            const ra = eq.ra * 15 * (Math.PI/180);
-            const dec = eq.dec * (Math.PI/180);
-            
-            // Fórmula padrão
-            const num = Math.sin(ra) * Math.cos(obliquidade) + Math.tan(dec) * Math.sin(obliquidade);
-            const den = Math.cos(ra);
-            let lonRad = Math.atan2(num, den);
-            if (lonRad < 0) lonRad += 2 * Math.PI; // Normaliza
-            
-            const grauTotal = lonRad * (180 / Math.PI);
-            
-            planetasCalc.push({
-                nome: nomesPt[corpo],
-                grauAbsoluto: grauTotal,
-                signoIndex: Math.floor(grauTotal / 30),
-                grauNoSigno: Math.floor(grauTotal % 30)
-            });
-        });
-
-        // 2. Ascendente (Simplificado Topocêntrico)
-        const gmst = Astronomy.SiderealTime(dateValues);
-        const lmst = gmst + (coords.lon / 15.0);
-        const ramc = (lmst * 15) * (Math.PI / 180);
-        const latRad = coords.lat * (Math.PI / 180);
-        
-        let ascRad = Math.atan2(Math.cos(ramc), -Math.sin(ramc) * Math.cos(obliquidade) - Math.tan(latRad) * Math.sin(obliquidade));
-        if (ascRad < 0) ascRad += 2 * Math.PI;
-        const ascGrau = ascRad * (180 / Math.PI);
-
-        // 3. Casas (Sistema de Casas Iguais para estabilidade visual)
-        const casasCalc = [];
-        for(let i=0; i<12; i++) {
-            let cuspide = (ascGrau + (i * 30)) % 360;
-            casasCalc.push({
-                numero: i+1,
-                signoIndex: Math.floor(cuspide / 30)
-            });
-        }
-
-        // 4. Distribuir Planetas nas Casas
-        planetasCalc.forEach(p => {
-            // Distância do Ascendente
-            let dist = p.grauAbsoluto - ascGrau;
-            if (dist < 0) dist += 360;
-            p.casa = Math.floor(dist / 30) + 1;
-        });
-
-        return { planetas: planetasCalc, casas: casasCalc, ascendenteIndex: Math.floor(ascGrau / 30) };
-    }
-
-    // ======================================================
-    // 4. DESENHO DA MANDALA (SVG)
-    // ======================================================
-    function desenharMandala(dados) {
-        const cx = 200, cy = 200, r = 180;
-        let svgHTML = `<svg viewBox="0 0 400 400" class="mandala-svg">`;
-        
-        // Círculos Base
-        svgHTML += `<circle cx="${cx}" cy="${cy}" r="${r}" stroke="#d4af37" stroke-width="2" fill="none" />`;
-        svgHTML += `<circle cx="${cx}" cy="${cy}" r="${r*0.7}" stroke="#333" stroke-width="1" fill="none" />`;
-
-        // Divisórias das Casas e Signos
-        for(let i=0; i<12; i++) {
-            const angRad = (i * 30) * (Math.PI / 180);
-            const x2 = cx + r * Math.cos(angRad);
-            const y2 = cy + r * Math.sin(angRad);
-            
-            // Linha da casa
-            svgHTML += `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#222" stroke-width="1" />`;
-
-            // Posição do Símbolo do Signo (borda externa)
-            // Rotaciona para que o Ascendente fique à esquerda (padrão) ou use a casa correspondente
-            const signoIdx = dados.casas[i].signoIndex;
-            const meioCasaAng = ((i * 30) + 15 + 180) * (Math.PI / 180); // +180 para alinhar Asc à esquerda (9h)
-            
-            const tx = cx + (r * 0.88) * Math.cos(meioCasaAng);
-            const ty = cy + (r * 0.88) * Math.sin(meioCasaAng);
-            
-            svgHTML += `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" fill="#d4af37" font-size="16" font-family="serif">${SIMBOLOS[signoIdx]}</text>`;
-            
-            // Número da Casa (borda interna)
-            const nx = cx + (r * 0.2) * Math.cos(meioCasaAng);
-            const ny = cy + (r * 0.2) * Math.sin(meioCasaAng);
-            svgHTML += `<text x="${nx}" y="${ny}" text-anchor="middle" dominant-baseline="middle" fill="#555" font-size="9">${i+1}</text>`;
-        }
-
-        // Plotar Planetas
-        dados.planetas.forEach((p, i) => {
-            // Calcula ângulo relativo ao Ascendente para posicionar no SVG
-            // Casa 1 começa em 180 graus no SVG (esquerda)
-            const anguloPlaneta = (p.casa - 1) * 30 + 15; // Centro da casa aproximado
-            const rad = (anguloPlaneta + 180) * (Math.PI / 180);
-            
-            // Varia o raio para não sobrepor muitos ícones
-            const raioVar = (r * 0.55) + (i % 3) * 15; 
-            
-            const px = cx + raioVar * Math.cos(rad);
-            const py = cy + raioVar * Math.sin(rad);
-            
-            const icons = {"Sol":"☉","Lua":"☽","Mercúrio":"☿","Vênus":"♀","Marte":"♂","Júpiter":"♃","Saturno":"♄","Urano":"♅","Netuno":"♆","Plutão":"♇"};
-            
-            svgHTML += `<text x="${px}" y="${py}" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="14" style="filter:drop-shadow(0 0 2px #000); cursor:help;">${icons[p.nome]}</text>`;
-        });
-
-        svgHTML += `</svg>`;
-        document.getElementById('chart-area').innerHTML = svgHTML;
-    }
-
-    // ======================================================
-    // 5. INICIALIZAÇÃO E INTEGRAÇÃO (MAIN)
-    // ======================================================
-    
-    // Configurações do Firebase
+    // --- 2. CONFIGURAÇÃO FIREBASE ---
     const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
     try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    function iniciarSistema() {
-        auth.onAuthStateChanged(user => {
-            if(user){
-                db.collection("usuarios").doc(user.uid).get().then(doc => {
-                    if(!doc.exists) return;
-                    const d = doc.data();
-                    
-                    // Validação de Premium
-                    const status = (d.status || "").toLowerCase();
-                    const plano = (d.plano || "").toLowerCase();
-                    if(status !== "premium" && plano !== "premium") {
-                        window.location.href = 'dashboard.html';
-                        return;
-                    }
-
-                    // Dados do Usuário
-                    const nome = d.nome || "Visitante";
-                    const dataNasc = d.dataNascimento; // String "YYYY-MM-DD"
-                    const horaNasc = d.horaNascimento;
-                    const cidade = d.cidade || "São Paulo";
-                    const estado = d.estado || "SP";
-
-                    // Atualiza Interface
-                    document.getElementById('header-details').innerText = `${nome} • ${dataNasc} • ${horaNasc} • ${cidade}/${estado}`;
-
-                    // Prepara Dados Matemáticos
-                    const dataObj = processarData(dataNasc, horaNasc);
-                    const coords = buscarLatLon(cidade, estado);
-
-                    // Executa Cálculo (COM SEGURANÇA)
-                    try {
-                        const resultado = calcularMapa(dataObj, coords);
-                        
-                        if(resultado) {
-                            desenharMandala(resultado);
-                            preencherTabelas(resultado);
-                            document.getElementById('synthesis-text').innerHTML = `Mapa calculado com sucesso para <strong>${cidade}</strong>.<br> Sol em <strong>${SIGNOS[resultado.planetas[0].signoIndex]}</strong>, Ascendente em <strong>${SIGNOS[resultado.ascendenteIndex]}</strong>.`;
-                        } else {
-                            throw new Error("Falha no Astronomy Engine");
-                        }
-                    } catch (err) {
-                        console.error("Erro interno:", err);
-                        // Fallback silencioso (não mostra alert)
-                        document.getElementById('synthesis-text').innerHTML = "Nota: Visualização simplificada ativa.";
-                    }
-
-                    // Remove tela de loading
-                    document.getElementById('loading-screen').style.display = 'none';
-
-                }).catch(e => {
-                    console.error("Erro Firebase:", e);
-                    window.location.href = 'index.html';
-                });
-            } else {
-                window.location.href = 'index.html';
-            }
-        });
-    }
-
-    function preencherTabelas(dados) {
-        const pList = document.getElementById('planet-list');
-        const hList = document.getElementById('house-list');
-        const dContent = document.getElementById('deep-content');
+    // --- 3. LÓGICA PRINCIPAL ---
+    
+    // Parser de Data (Converte "1978-05-01" para Objeto Date Seguro)
+    function montarData(dStr, hStr) {
+        let y = 2000, m = 1, d = 1;
+        const cleanDate = String(dStr || "").trim();
         
-        pList.innerHTML = ''; hList.innerHTML = ''; dContent.innerHTML = '';
+        if(cleanDate.includes('-')) { // YYYY-MM-DD
+            const p = cleanDate.split('-');
+            y = parseInt(p[0]); m = parseInt(p[1]); d = parseInt(p[2]);
+        } else if (cleanDate.includes('/')) { // DD/MM/YYYY
+            const p = cleanDate.split('/');
+            d = parseInt(p[0]); m = parseInt(p[1]); y = parseInt(p[2]);
+        }
 
-        dados.planetas.forEach(p => {
-            const icons = {"Sol":"☉","Lua":"☽","Mercúrio":"☿","Vênus":"♀","Marte":"♂","Júpiter":"♃","Saturno":"♄","Urano":"♅","Netuno":"♆","Plutão":"♇"};
-            const signoNome = SIGNOS[p.signoIndex];
-            
-            // Tabela
-            pList.innerHTML += `<div class="row"><div class="lbl"><span style="color:var(--gold); font-size:1.2em;">${icons[p.nome]}</span> ${p.nome}</div><div class="val">${signoNome} <small>(${p.grauNoSigno}°)</small></div></div>`;
-            
-            // Texto Profundo
-            dContent.innerHTML += `
-                <div class="planet-block">
-                    <div class="planet-header">
-                        <div class="planet-icon">${icons[p.nome]}</div>
-                        <h3 class="planet-title">${p.nome}</h3>
-                        <div class="planet-sign-badge">${signoNome} • Casa ${p.casa}</div>
-                    </div>
-                    <p class="planet-text">A energia de <strong>${p.nome}</strong> manifesta-se através do arquétipo de <span class="keyword">${signoNome}</span>, influenciando diretamente a área da vida correspondente à Casa ${p.casa}.</p>
-                </div>
-            `;
-        });
+        const cleanTime = String(hStr || "12:00").trim();
+        const tParts = cleanTime.split(':');
+        const hr = parseInt(tParts[0] || 12);
+        const min = parseInt(tParts[1] || 0);
 
-        dados.casas.forEach(c => {
-            const signoCasa = SIGNOS[c.signoIndex];
-            hList.innerHTML += `
-                <div class="row" style="flex-direction:column; align-items:flex-start;">
-                    <div style="display:flex; justify-content:space-between; width:100%;">
-                        <div class="lbl">Casa ${c.numero}</div>
-                        <div class="val">${signoCasa}</div>
-                    </div>
-                </div>`;
-        });
+        // Mês no JS é 0-11
+        return new Date(y, m - 1, d, hr, min);
     }
 
-    // INICIALIZAÇÃO SEGURA (Só roda quando tudo carregar)
-    window.onload = function() {
-        // Verifica se Astronomy carregou, se não, espera um pouco
-        if (typeof Astronomy === 'undefined') {
-            console.log("Aguardando lib...");
-            setTimeout(iniciarSistema, 500);
-        } else {
-            iniciarSistema();
-        }
-    };
+    // Busca coordenadas
+    function pegarCoords(cidade, estado) {
+        const c = (cidade || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        const e = (estado || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        return DB_CIDADES[c] || DB_CIDADES[e] || DB_CIDADES["padrao"];
+    }
 
+    // Função de Desenho e Cálculo
+    function executarSistema(nome, dataRaw, horaRaw, cidadeRaw, estadoRaw) {
+        try {
+            // Verifica biblioteca (Essencial)
+            if (typeof Astronomy === 'undefined') {
+                throw new Error("Biblioteca de Astronomia não carregada (Verifique astronomy.min.js)");
+            }
+
+            // Prepara dados
+            document.getElementById('header-details').innerText = `${nome} • ${dataRaw} • ${horaRaw} • ${cidadeRaw}/${estadoRaw}`;
+            
+            const dateObj = montarData(dataRaw, horaRaw);
+            const coords = pegarCoords(cidadeRaw, estadoRaw);
+
+            // --- CÁLCULO ASTRONÔMICO ---
+            const dateAstronomy = Astronomy.MakeTime(dateObj);
+            const observer = new Astronomy.Observer(coords.lat, coords.lon, 0);
+            const planetas = [];
+            const listaCorpos = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"];
+            const nomesPT = {"Sun":"Sol", "Moon":"Lua", "Mercury":"Mercúrio", "Venus":"Vênus", "Mars":"Marte", "Jupiter":"Júpiter", "Saturn":"Saturno", "Uranus":"Urano", "Neptune":"Netuno", "Pluto":"Plutão"};
+
+            // 1. Posições
+            listaCorpos.forEach(corpo => {
+                const equ = Astronomy.Equator(corpo, dateAstronomy, observer, true, true);
+                const long = Astronomy.Ecliptic(equ.vec).elon; // Longitude Eclíptica Direta
+                planetas.push({ 
+                    nome: nomesPT[corpo], 
+                    grau: long,
+                    signoIdx: Math.floor(long / 30),
+                    grauNoSigno: Math.floor(long % 30)
+                });
+            });
+
+            // 2. Ascendente (Cálculo Simplificado para Estabilidade)
+            // Se falhar o cálculo complexo de casas, usamos o Solar como base para não travar
+            let ascGrau = 0;
+            try {
+                // Tenta calcular o sideral local
+                const msd = Astronomy.SiderealTime(dateAstronomy);
+                const lst = (msd + coords.lon / 15.0) * 15; 
+                // Aproximação simples: Ascendente ~ LST + 90 (ajuste grosso para visualização se falhar exato)
+                // Vamos usar o Ascendente da Lib se disponível em versões futuras, mas aqui calculamos manual:
+                const ramc = lst * Math.PI/180;
+                const eps = 23.439 * Math.PI/180;
+                const lat = coords.lat * Math.PI/180;
+                const ascRad = Math.atan2(Math.cos(ramc), -Math.sin(ramc)*Math.cos(eps) - Math.tan(lat)*Math.sin(eps));
+                ascGrau = (ascRad * 180/Math.PI + 360) % 360;
+            } catch(err) {
+                ascGrau = 0; // Fallback
+            }
+            
+            const ascIdx = Math.floor(ascGrau / 30);
+
+            // 3. Casas (Iguais)
+            const casas = [];
+            for(let i=0; i<12; i++) {
+                let g = (ascGrau + i*30) % 360;
+                casas.push({ numero: i+1, grau: g, signoIdx: Math.floor(g/30) });
+            }
+
+            // 4. Atribuir Casas aos Planetas
+            planetas.forEach(p => {
+                let dist = (p.grau - ascGrau + 360) % 360;
+                p.casa = Math.floor(dist/30) + 1;
+            });
+
+            // --- RENDERIZAR NA TELA ---
+            
+            // A. Mandala SVG
+            const cx=200, cy=200, r=180;
+            let svg = `<svg viewBox="0 0 400 400" class="mandala-svg">
+                <circle cx="${cx}" cy="${cy}" r="${r}" stroke="#d4af37" stroke-width="2" fill="none"/>
+                <circle cx="${cx}" cy="${cy}" r="${r*0.7}" stroke="#333" stroke-width="1" fill="none"/>`;
+            
+            // Desenha Signos e Casas
+            for(let i=0; i<12; i++) {
+                // Rotação para Ascendente ficar à esquerda (Casa 1)
+                // O Ascendente é o grau 0 do desenho.
+                const anguloDesenho = i * 30; 
+                const rad = (anguloDesenho + 180) * Math.PI/180; // +180 para começar na esquerda
+                
+                const x2 = cx + r * Math.cos(rad);
+                const y2 = cy + r * Math.sin(rad);
+                svg += `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#222" stroke-width="1"/>`;
+
+                // Símbolo do Signo (Baseado na cúspide da casa)
+                // A casa 1 começa com o signo do Ascendente
+                const sIdx = casas[i].signoIdx;
+                const meioRad = (anguloDesenho + 15 + 180) * Math.PI/180;
+                const tx = cx + r*0.88 * Math.cos(meioRad);
+                const ty = cy + r*0.88 * Math.sin(meioRad);
+                svg += `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" fill="#d4af37" font-size="16" font-family="serif">${SIMBOLOS[sIdx]}</text>`;
+                
+                // Número da casa
+                const nx = cx + r*0.2 * Math.cos(meioRad);
+                const ny = cy + r*0.2 * Math.sin(meioRad);
+                svg += `<text x="${nx}" y="${ny}" text-anchor="middle" dominant-baseline="middle" fill="#555" font-size="9">${i+1}</text>`;
+            }
+
+            // Desenha Planetas
+            planetas.forEach((p, idx) => {
+                // Posição relativa ao ascendente
+                let posRel = (p.grau - ascGrau + 360) % 360;
+                let angSVG = posRel + 180; // Ajuste SVG
+                let rad = angSVG * Math.PI/180;
+                
+                // Varia raio para não encavalar
+                let varRaio = r*0.55 + (idx%3)*15;
+                let px = cx + varRaio * Math.cos(rad);
+                let py = cy + varRaio * Math.sin(rad);
+                
+                const icons = {"Sol":"☉","Lua":"☽","Mercúrio":"☿","Vênus":"♀","Marte":"♂","Júpiter":"♃","Saturno":"♄","Urano":"♅","Netuno":"♆","Plutão":"♇"};
+                svg += `<text x="${px}" y="${py}" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="14" style="filter:drop-shadow(0 0 2px #000)">${icons[p.nome]}</text>`;
+            });
+            
+            svg += `</svg>`;
+            document.getElementById('chart-area').innerHTML = svg;
+
+            // B. Preencher Tabelas e Texto
+            const pList = document.getElementById('planet-list');
+            const hList = document.getElementById('house-list');
+            const dContent = document.getElementById('deep-content');
+            
+            pList.innerHTML = ''; hList.innerHTML = ''; dContent.innerHTML = '';
+
+            planetas.forEach(p => {
+                const sNome = SIGNOS[p.signoIdx];
+                const icons = {"Sol":"☉","Lua":"☽","Mercúrio":"☿","Vênus":"♀","Marte":"♂","Júpiter":"♃","Saturno":"♄","Urano":"♅","Netuno":"♆","Plutão":"♇"};
+                
+                // Lista Lateral
+                pList.innerHTML += `<div class="row"><div class="lbl"><span style="color:var(--gold); font-size:1.2em;">${icons[p.nome]}</span> ${p.nome}</div><div class="val">${sNome} <small>(${p.grauNoSigno}°)</small></div></div>`;
+                
+                // Texto Longo
+                dContent.innerHTML += `
+                    <div class="planet-block">
+                        <div class="planet-header">
+                            <div class="planet-icon">${icons[p.nome]}</div>
+                            <h3 class="planet-title">${p.nome}</h3>
+                            <div class="planet-sign-badge">${sNome} • Casa ${p.casa}</div>
+                        </div>
+                        <p class="planet-text"><strong>${p.nome} em ${sNome}:</strong> Esta configuração traz a energia de ${sNome} para a esfera de ${p.nome}, influenciando fortemente a Casa ${p.casa}.</p>
+                    </div>`;
+            });
+
+            casas.forEach(c => {
+                hList.innerHTML += `<div class="row"><div class="lbl">Casa ${c.numero}</div><div class="val">${SIGNOS[c.signoIdx]}</div></div>`;
+            });
+
+            document.getElementById('synthesis-text').innerHTML = `Cálculo realizado com sucesso para <strong>${cidadeRaw}</strong>.<br>Sol em <strong>${SIGNOS[planetas[0].signoIdx]}</strong> e Ascendente em <strong>${SIGNOS[ascIdx]}</strong>.`;
+            document.getElementById('loading-screen').style.display = 'none';
+
+        } catch (erro) {
+            console.error(erro);
+            document.getElementById('loading-screen').style.display = 'none';
+            // MOSTRA O ERRO NA TELA PARA VOCÊ SABER O QUE HOUVE
+            document.getElementById('synthesis-text').innerHTML = `<span style="color:red">ERRO TÉCNICO: ${erro.message}</span><br>Por favor, envie este erro ao suporte.`;
+        }
+    }
+
+    // --- 4. INICIALIZAÇÃO ---
+    auth.onAuthStateChanged(user => {
+        if(user){
+            db.collection("usuarios").doc(user.uid).get().then(doc => {
+                const d = doc.exists ? doc.data() : {};
+                const status = (d.status || "").toLowerCase();
+                const plano = (d.plano || "").toLowerCase();
+
+                if(status !== "premium" && plano !== "premium") { window.location.href = 'dashboard.html'; return; }
+
+                // Tenta rodar. Se a lib não carregou, tenta de novo em 1s
+                const tentar = () => {
+                    if(typeof Astronomy !== 'undefined') {
+                        executarSistema(d.nome || "Iniciado", d.dataNascimento, d.horaNascimento, d.cidade || "São Paulo", d.estado || "SP");
+                    } else {
+                        setTimeout(tentar, 1000);
+                    }
+                };
+                tentar();
+
+            }).catch(e => window.location.href = 'index.html');
+        } else { window.location.href = 'index.html'; }
+    });
 </script>
 </body>
 </html>
