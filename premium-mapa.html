@@ -11,8 +11,6 @@
 
     <script src="astronomy.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js';"></script>
 
-    <script src="astro-texts.js"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -59,6 +57,7 @@
         .synthesis-box { margin-top: 60px; background: radial-gradient(circle at center, #222 0%, #000 100%); border: 2px solid var(--gold); padding: 50px; text-align: center; border-radius: 10px; }
         .synthesis-title { font-family: 'Cinzel'; font-size: 2.2em; color: var(--gold); margin-bottom: 30px; }
         .synthesis-text { font-size: 1.2em; color: #e0e0e0; text-align: justify; line-height: 2; }
+        
         .house-desc { display: block; font-size: 0.85em; color: #888; margin-top: 5px; font-style: italic; }
 
         @media(max-width: 768px) { .data-section { grid-template-columns: 1fr; } .planet-header { flex-direction: column; text-align: center; } .planet-sign-badge { margin: 0; } }
@@ -106,7 +105,79 @@
 </div>
 
 <script>
-    // --- 1. DADOS GEOGRÁFICOS ---
+    // ======================================================
+    // 1. BANCO DE TEXTOS (INTEGRADO PARA EVITAR FALHAS)
+    // ======================================================
+    const ASTRO_DB = {
+        planetas: {
+            "Sol": { titulo: "Sua Essência e Jornada do Herói", essencia: "O Sol representa sua bateria vital, o centro da sua consciência e a figura do 'Rei' interno.", missao: "Sua missão é iluminar, liderar e expressar sua verdade individual." },
+            "Lua": { titulo: "Nutrição Emocional e Inconsciente", essencia: "A Lua rege suas reações instintivas, suas memórias e como você busca segurança.", missao: "Seu desafio é processar emoções e encontrar um lar dentro de si." },
+            "Mercúrio": { titulo: "Processos Mentais e Comunicação", essencia: "Mercúrio define como você processa informações e traduz a realidade para sua mente.", missao: "A meta é conectar ideias e articular sua visão com clareza." },
+            "Vênus": { titulo: "Linguagem do Amor e Valores", essencia: "Vênus dita o que você valoriza, seu prazer e seu magnetismo pessoal.", missao: "Você busca criar harmonia e vivenciar o prazer sensorial da existência." },
+            "Marte": { titulo: "O Motor da Ação e Desejo", essencia: "Marte é o princípio da afirmação. É onde você precisa ser assertivo para conquistar.", missao: "Sua jornada exige coragem para defender seu território e seus desejos." },
+            "Júpiter": { titulo: "A Busca por Sentido e Expansão", essencia: "Júpiter é o filósofo. Onde ele toca, ele expande. Representa fé e otimismo.", missao: "O objetivo é crescer além dos limites, buscando sabedoria superior." },
+            "Saturno": { titulo: "O Mestre da Realidade e Karma", essencia: "Saturno representa onde você sente medo, mas onde construirá sua obra duradoura.", missao: "Sua tarefa é desenvolver autodisciplina e responsabilidade total." },
+            "Urano": { titulo: "O Despertador e o Rebelde", essencia: "Urano rege a intuição relâmpago, a quebra de padrões e a liberdade absoluta.", missao: "Você deve inovar e trazer o futuro para o presente." },
+            "Netuno": { titulo: "O Místico e a Dissolução", essencia: "Netuno dissolve o ego. Fala de onde você é sensível, mas onde pode se iludir.", missao: "O chamado é para transcender a realidade através da espiritualidade ou arte." },
+            "Plutão": { titulo: "O Agente de Transformação", essencia: "Plutão é o poder nuclear da alma. Lida com morte, renascimento e o oculto.", missao: "Sua evolução depende de encarar sombras e renascer com poder." }
+        },
+        signos: {
+            "Áries": { adverbio: "de forma incisiva e corajosa", descricao: "veste uma armadura de fogo, priorizando a ação direta e a iniciativa." },
+            "Touro": { adverbio: "com constância e pragmatismo", descricao: "ganha substância, valorizando a segurança material e o prazer sensorial." },
+            "Gêmeos": { adverbio: "através da curiosidade e intelecto", descricao: "torna-se versátil e comunicativa, buscando sempre novas conexões mentais." },
+            "Câncer": { adverbio: "com proteção e sensibilidade", descricao: "recua para a proteção, guiada pela intuição e pela necessidade de nutrir." },
+            "Leão": { adverbio: "com nobreza e criatividade", descricao: "sobe ao palco, com uma necessidade vital de expressar seu brilho único." },
+            "Virgem": { adverbio: "com critério e desejo de servir", descricao: "foca no detalhe, buscando a perfeição, a ordem e a utilidade prática." },
+            "Libra": { adverbio: "buscando harmonia e beleza", descricao: "pondera os lados, mediada pela diplomacia e pelo espelho dos relacionamentos." },
+            "Escorpião": { adverbio: "com intensidade e mistério", descricao: "mergulha nas profundezas, investigando o oculto com poder regenerador." },
+            "Sagitário": { adverbio: "com otimismo e filosofia", descricao: "aponta para o distante, buscando a verdade maior e horizontes expandidos." },
+            "Capricórnio": { adverbio: "com ambição e estrutura", descricao: "escala a montanha, focada em metas de longo prazo e construção de legado." },
+            "Aquário": { adverbio: "de maneira original e rebelde", descricao: "quebra padrões, focada no futuro, no coletivo e na liberdade intelectual." },
+            "Peixes": { adverbio: "com empatia e fluidez", descricao: "dissolve fronteiras, movida por compaixão, sonhos e conexão espiritual." }
+        },
+        casas: {
+            1: { nome: "Casa da Identidade", foco: "Isso afeta diretamente sua autoimagem e como você inicia projetos." },
+            2: { nome: "Casa dos Valores", foco: "O cenário é a vida material, dinheiro e sua autoestima." },
+            3: { nome: "Casa da Mente", foco: "A influência ocorre na comunicação, aprendizado e trocas diárias." },
+            4: { nome: "Casa do Lar", foco: "Toca o fundo da alma: família, passado e sua vida privada." },
+            5: { nome: "Casa da Criatividade", foco: "É o palco da vida: romances, filhos e autoexpressão." },
+            6: { nome: "Casa da Rotina", foco: "Manifesta-se no trabalho, na saúde e na utilidade prática." },
+            7: { nome: "Casa das Parcerias", foco: "O foco sai de você e vai para o casamento e sociedades." },
+            8: { nome: "Casa da Transformação", foco: "Envolve crises, sexualidade profunda e o oculto." },
+            9: { nome: "Casa da Expansão", foco: "Expande para viagens, filosofia e busca espiritual." },
+            10: { nome: "Casa da Carreira", foco: "É o ponto mais alto: reputação, vocação e autoridade." },
+            11: { nome: "Casa do Futuro", foco: "Atua nos grupos, amizades e projetos de longo prazo." },
+            12: { nome: "Casa do Inconsciente", foco: "A área do isolamento, espiritualidade e resgate cármico." }
+        }
+    };
+
+    function gerarInterpretacao(planeta, signo, casa) {
+        const pInfo = ASTRO_DB.planetas[planeta] || ASTRO_DB.planetas["Sol"];
+        const sInfo = ASTRO_DB.signos[signo] || ASTRO_DB.signos["Áries"];
+        const cInfo = ASTRO_DB.casas[casa] || ASTRO_DB.casas[1];
+
+        return `
+            <h4 style="color:#d4af37; font-family:'Cinzel'; font-size:1.4em; margin-bottom:5px; border-bottom:1px solid #333; padding-bottom:5px;">
+                ${planeta} em ${signo} <span style="font-size:0.7em; color:#888;">(Casa ${casa})</span>
+            </h4>
+            <p style="color:#aaa; font-style:italic; font-size:0.9em; margin-bottom:15px;">
+                "${pInfo.titulo}"
+            </p>
+            <p style="margin-bottom: 12px; text-align: justify;">
+                <strong>A Dinâmica:</strong> Nesta posição, ${pInfo.essencia.toLowerCase()} Aqui, essa força atua <strong>${sInfo.adverbio}</strong>. O arquétipo de ${planeta} ${sInfo.descricao}
+            </p>
+            <p style="margin-bottom: 12px; text-align: justify;">
+                <strong>O Cenário (${cInfo.nome}):</strong> Essa combinação é canalizada para esta área. ${cInfo.foco} É aqui que você sentirá a necessidade de expressar a energia de ${signo}.
+            </p>
+            <p style="background: rgba(212,175,55,0.1); padding: 10px; border-left: 3px solid #d4af37; font-size: 0.95em;">
+                <strong>💡 Conselho:</strong> ${pInfo.missao}
+            </p>
+        `;
+    }
+
+    // ======================================================
+    // 2. DADOS GEOGRÁFICOS
+    // ======================================================
     const DB_CIDADES = {
         "sao paulo": { lat: -23.55, lon: -46.63 }, "sp": { lat: -23.55, lon: -46.63 },
         "rio de janeiro": { lat: -22.90, lon: -43.17 }, "rj": { lat: -22.90, lon: -43.17 },
@@ -140,16 +211,10 @@
         "padrao": { lat: -15.79, lon: -47.88 }
     };
 
-    const SIMBOLOS = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
     const SIGNOS = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
+    const SIMBOLOS = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
 
-    // --- 2. FIREBASE ---
-    const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
-    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    // --- 3. LOGICA DO SISTEMA ---
+    // --- 3. LÓGICA PRINCIPAL ---
     
     function montarData(dStr, hStr) {
         let y = 2000, m = 1, d = 1;
@@ -187,19 +252,25 @@
             listaCorpos.forEach(corpo => {
                 const equ = Astronomy.Equator(corpo, dateAstronomy, observer, true, true);
                 const long = Astronomy.Ecliptic(equ.vec).elon;
-                planetas.push({ nome: nomesPT[corpo], grau: long, signoIdx: Math.floor(long / 30), grauNoSigno: Math.floor(long % 30) });
+                planetas.push({ 
+                    nome: nomesPT[corpo], 
+                    grau: long,
+                    signoIdx: Math.floor(long / 30),
+                    grauNoSigno: Math.floor(long % 30)
+                });
             });
 
-            // Ascendente Solar (Aproximação estável)
-            // Nota: Usamos o Sol como âncora principal visual se o cálculo de casas for complexo demais
-            // Mas aqui tentamos o cálculo sideral real primeiro
-            const msd = Astronomy.SiderealTime(dateAstronomy);
-            const lst = (msd + coords.lon / 15.0) * 15; 
-            const ramc = lst * Math.PI/180;
-            const eps = 23.439 * Math.PI/180;
-            const lat = coords.lat * Math.PI/180;
-            let ascRad = Math.atan2(Math.cos(ramc), -Math.sin(ramc)*Math.cos(eps) - Math.tan(lat)*Math.sin(eps));
-            const ascGrau = (ascRad * 180/Math.PI + 360) % 360;
+            // Ascendente Simplificado
+            let ascGrau = 0;
+            try {
+                const msd = Astronomy.SiderealTime(dateAstronomy);
+                const lst = (msd + coords.lon / 15.0) * 15; 
+                const ramc = lst * Math.PI/180;
+                const eps = 23.439 * Math.PI/180;
+                const lat = coords.lat * Math.PI/180;
+                let ascRad = Math.atan2(Math.cos(ramc), -Math.sin(ramc)*Math.cos(eps) - Math.tan(lat)*Math.sin(eps));
+                ascGrau = (ascRad * 180/Math.PI + 360) % 360;
+            } catch(err) { ascGrau = 0; }
             const ascIdx = Math.floor(ascGrau / 30);
 
             const casas = [];
@@ -244,7 +315,7 @@
             svg += `</svg>`;
             document.getElementById('chart-area').innerHTML = svg;
 
-            // TEXTOS (INTEGRAÇÃO COM ASTRO-TEXTS.JS)
+            // PREENCHER DADOS
             const pList = document.getElementById('planet-list');
             const hList = document.getElementById('house-list');
             const dContent = document.getElementById('deep-content');
@@ -255,14 +326,8 @@
                 const icons = {"Sol":"☉","Lua":"☽","Mercúrio":"☿","Vênus":"♀","Marte":"♂","Júpiter":"♃","Saturno":"♄","Urano":"♅","Netuno":"♆","Plutão":"♇"};
                 pList.innerHTML += `<div class="row"><div class="lbl"><span style="color:var(--gold); font-size:1.2em;">${icons[p.nome]}</span> ${p.nome}</div><div class="val">${sNome} <small>(${p.grauNoSigno}°)</small></div></div>`;
                 
-                // USA A FUNÇÃO DO NOVO ARQUIVO SE EXISTIR
-                let htmlTexto = "";
-                if(typeof gerarInterpretacao === "function") {
-                    htmlTexto = gerarInterpretacao(p.nome, sNome, p.casa);
-                } else {
-                    htmlTexto = `<div class="planet-block"><h3 class="planet-title">${p.nome}</h3><p>Energia em ${sNome}.</p></div>`;
-                }
-                dContent.innerHTML += `<div class="planet-block">${htmlTexto}</div>`;
+                // GERA INTERPRETAÇÃO RICA
+                dContent.innerHTML += `<div class="planet-block">${gerarInterpretacao(p.nome, sNome, p.casa)}</div>`;
             });
 
             casas.forEach(c => {
@@ -274,14 +339,21 @@
 
         } catch (erro) {
             console.error(erro);
-            // Se falhar, tenta de novo em 500ms (pode ser carregamento)
-            setTimeout(() => {
-                 // Se falhar 2x, mostra erro
-                 document.getElementById('loading-screen').style.display = 'none';
-                 document.getElementById('synthesis-text').innerHTML = `<span style="color:red">Carregando dados...</span>`;
-            }, 500);
+            // Retry se for erro de load, senão mostra
+            if(erro.message.includes("Astronomy")) {
+                setTimeout(() => executarSistema(nome, dataRaw, horaRaw, cidadeRaw, estadoRaw), 500);
+            } else {
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('synthesis-text').innerHTML = `<span style="color:red">ERRO NO SISTEMA: ${erro.message}</span>`;
+            }
         }
     }
+
+    // --- 4. INICIALIZAÇÃO FIREBASE ---
+    const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
+    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
     auth.onAuthStateChanged(user => {
         if(user){
@@ -291,12 +363,13 @@
                 const plano = (d.plano || "").toLowerCase();
                 if(status !== "premium" && plano !== "premium") { window.location.href = 'dashboard.html'; return; }
 
+                // Inicia com polling
                 const loopCheck = setInterval(() => {
-                    if(typeof Astronomy !== 'undefined' && typeof ASTRO_DB !== 'undefined') {
+                    if(typeof Astronomy !== 'undefined') {
                         clearInterval(loopCheck);
                         executarSistema(d.nome || "Iniciado", d.dataNascimento, d.horaNascimento, d.cidade || "São Paulo", d.estado || "SP");
                     }
-                }, 500);
+                }, 200);
 
             }).catch(e => window.location.href = 'index.html');
         } else { window.location.href = 'index.html'; }
