@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* ESTRUTURA VISUAL MANTIDA 100% */
+        /* ESTRUTURA VISUAL 100% MANTIDA */
         :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
         
         body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; line-height: 1.6; }
@@ -121,96 +121,76 @@
 </div>
 
 <script>
-    // --- 1. BANCO DE DADOS GEOGRÁFICO INTERNO BLINDADO ---
-    // Estrutura: Chave normalizada -> Coordenada
+    // --- 1. BANCO DE DADOS GEOGRÁFICO INTERNO ---
     const COORDENADAS_FIXAS = {
-        // Capitais e Estados (Fallback seguro)
-        "ac": { lat: -9.97, lon: -67.82 }, "rio branco": { lat: -9.97, lon: -67.82 },
-        "al": { lat: -9.66, lon: -35.73 }, "maceio": { lat: -9.66, lon: -35.73 },
-        "ap": { lat: 0.03, lon: -51.07 }, "macapa": { lat: 0.03, lon: -51.07 },
-        "am": { lat: -3.11, lon: -60.02 }, "manaus": { lat: -3.11, lon: -60.02 },
-        "ba": { lat: -12.97, lon: -38.50 }, "salvador": { lat: -12.97, lon: -38.50 },
-        "ce": { lat: -3.71, lon: -38.54 }, "fortaleza": { lat: -3.71, lon: -38.54 },
-        "df": { lat: -15.79, lon: -47.89 }, "brasilia": { lat: -15.79, lon: -47.89 },
-        "es": { lat: -20.31, lon: -40.31 }, "vitoria": { lat: -20.31, lon: -40.31 },
-        "go": { lat: -16.68, lon: -49.26 }, "goiania": { lat: -16.68, lon: -49.26 },
-        "ma": { lat: -2.53, lon: -44.28 }, "sao luis": { lat: -2.53, lon: -44.28 },
-        "mt": { lat: -15.60, lon: -56.09 }, "cuiaba": { lat: -15.60, lon: -56.09 },
-        "ms": { lat: -20.46, lon: -54.62 }, "campo grande": { lat: -20.46, lon: -54.62 },
-        "mg": { lat: -19.91, lon: -43.93 }, "belo horizonte": { lat: -19.91, lon: -43.93 },
-        "pa": { lat: -1.45, lon: -48.49 }, "belem": { lat: -1.45, lon: -48.49 },
-        "pb": { lat: -7.11, lon: -34.84 }, "joao pessoa": { lat: -7.11, lon: -34.84 },
-        "pr": { lat: -25.42, lon: -49.27 }, "curitiba": { lat: -25.42, lon: -49.27 },
-        "pe": { lat: -8.05, lon: -34.88 }, "recife": { lat: -8.05, lon: -34.88 },
-        "pi": { lat: -5.09, lon: -42.80 }, "teresina": { lat: -5.09, lon: -42.80 },
-        "rj": { lat: -22.90, lon: -43.17 }, "rio de janeiro": { lat: -22.90, lon: -43.17 },
-        "rn": { lat: -5.79, lon: -35.21 }, "natal": { lat: -5.79, lon: -35.21 },
-        "rs": { lat: -30.03, lon: -51.21 }, "porto alegre": { lat: -30.03, lon: -51.21 },
-        "ro": { lat: -8.76, lon: -63.90 }, "porto velho": { lat: -8.76, lon: -63.90 },
-        "rr": { lat: 2.82, lon: -60.67 }, "boa vista": { lat: 2.82, lon: -60.67 },
-        "sc": { lat: -27.59, lon: -48.54 }, "florianopolis": { lat: -27.59, lon: -48.54 },
-        "sp": { lat: -23.55, lon: -46.63 }, "sao paulo": { lat: -23.55, lon: -46.63 },
-        "se": { lat: -10.94, lon: -37.07 }, "aracaju": { lat: -10.94, lon: -37.07 },
-        "to": { lat: -10.24, lon: -48.32 }, "palmas": { lat: -10.24, lon: -48.32 },
-        // Específico solicitado
+        "sao paulo": { lat: -23.5505, lon: -46.6333 }, "sp": { lat: -23.5505, lon: -46.6333 },
+        "rio de janeiro": { lat: -22.9068, lon: -43.1729 }, "rj": { lat: -22.9068, lon: -43.1729 },
+        "brasilia": { lat: -15.7975, lon: -47.8919 }, "df": { lat: -15.7975, lon: -47.8919 },
+        "salvador": { lat: -12.9777, lon: -38.5016 }, "ba": { lat: -12.97, lon: -38.50 },
+        "fortaleza": { lat: -3.7172, lon: -38.5434 }, "ce": { lat: -3.71, lon: -38.54 },
+        "belo horizonte": { lat: -19.9167, lon: -43.9345 }, "mg": { lat: -19.91, lon: -43.93 },
+        "manaus": { lat: -3.1190, lon: -60.0217 }, "am": { lat: -3.11, lon: -60.02 },
+        "curitiba": { lat: -25.4284, lon: -49.2733 }, "pr": { lat: -25.42, lon: -49.27 },
+        "recife": { lat: -8.05428, lon: -34.8813 }, "pe": { lat: -8.05, lon: -34.88 },
+        "goiania": { lat: -16.6869, lon: -49.2648 }, "go": { lat: -16.68, lon: -49.26 },
+        "belem": { lat: -1.4558, lon: -48.4902 }, "pa": { lat: -1.45, lon: -48.49 },
+        "porto alegre": { lat: -30.0346, lon: -51.2177 }, "rs": { lat: -30.03, lon: -51.21 },
+        "guarulhos": { lat: -23.4542, lon: -46.5333 },
+        "campinas": { lat: -22.9099, lon: -47.0626 },
+        "sao luis": { lat: -2.5391, lon: -44.2829 }, "ma": { lat: -2.53, lon: -44.28 },
+        "maceio": { lat: -9.6662, lon: -35.7351 }, "al": { lat: -9.66, lon: -35.73 },
+        "natal": { lat: -5.7945, lon: -35.2110 }, "rn": { lat: -5.79, lon: -35.21 },
+        "teresina": { lat: -5.0920, lon: -42.8038 }, "pi": { lat: -5.09, lon: -42.80 },
+        "campo grande": { lat: -20.4697, lon: -54.6201 }, "ms": { lat: -20.46, lon: -54.62 },
+        "joao pessoa": { lat: -7.1195, lon: -34.8450 }, "pb": { lat: -7.11, lon: -34.84 },
+        "aracaju": { lat: -10.9472, lon: -37.0731 }, "se": { lat: -10.94, lon: -37.07 },
+        "cuiaba": { lat: -15.6014, lon: -56.0979 }, "mt": { lat: -15.60, lon: -56.09 },
+        "porto velho": { lat: -8.7612, lon: -63.9039 }, "ro": { lat: -8.76, lon: -63.90 },
+        "florianopolis": { lat: -27.5954, lon: -48.5480 }, "sc": { lat: -27.59, lon: -48.54 },
+        "macapa": { lat: 0.0355, lon: -51.0705 }, "ap": { lat: 0.03, lon: -51.07 },
+        "rio branco": { lat: -9.9754, lon: -67.8249 }, "ac": { lat: -9.97, lon: -67.82 },
+        "vitoria": { lat: -20.3155, lon: -40.3128 }, "es": { lat: -20.31, lon: -40.31 },
+        "boa vista": { lat: 2.8235, lon: -60.6758 }, "rr": { lat: 2.82, lon: -60.67 },
+        "palmas": { lat: -10.2491, lon: -48.3243 }, "to": { lat: -10.24, lon: -48.32 },
         "surubim": { lat: -7.83, lon: -35.75 },
-        // Fallback Universal
         "default": { lat: -15.79, lon: -47.88 }
     };
 
     const SIGNOS = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
     const SIMBOLOS = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
     
-    // --- 2. TRITURADOR DE DATAS (Correção Definitiva do Erro de Cálculo) ---
-    function criarDataInfalivel(dataStr, horaStr) {
-        // Valores Padrão de Segurança (Se tudo falhar, usa isso)
-        let dia = 1, mes = 0, ano = 2000, hora = 12, min = 0;
-
+    // --- 2. PARSER DE DATA BLINDADO ---
+    function criarObjetoData(dataStr, horaStr) {
         try {
-            // Converte para string e limpa espaços
-            const dInput = String(dataStr || "").trim();
-            const hInput = String(horaStr || "").trim();
+            // Garante que é string
+            let dStr = String(dataStr || "2000-01-01").trim();
+            let dia, mes, ano;
 
-            // Lógica de Detecção de Formato
-            if (dInput.match(/^\d{4}-\d{2}-\d{2}$/)) { 
-                // Formato ISO: YYYY-MM-DD
-                const p = dInput.split('-');
-                ano = parseInt(p[0]);
-                mes = parseInt(p[1]) - 1; // JS conta mês de 0 a 11
-                dia = parseInt(p[2]);
-            } else if (dInput.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
-                // Formato BR: DD/MM/YYYY
-                const p = dInput.split('/');
-                dia = parseInt(p[0]);
-                mes = parseInt(p[1]) - 1;
-                ano = parseInt(p[2]);
-            } else if (dInput.length > 0) {
-                // Tenta extrair qualquer número se o formato for bizarro
-                const nums = dInput.match(/\d+/g);
-                if(nums && nums.length >= 3) {
-                    if (nums[0].length === 4) { ano = parseInt(nums[0]); mes = parseInt(nums[1])-1; dia = parseInt(nums[2]); }
-                    else { dia = parseInt(nums[0]); mes = parseInt(nums[1])-1; ano = parseInt(nums[2]); }
-                }
+            // Extração manual dos números (Ignora qualquer outro caractere)
+            // Se vier 1978-05-01: ano=1978, mes=05, dia=01
+            // Se vier 01/05/1978: dia=01, mes=05, ano=1978
+            if (dStr.indexOf('/') > -1) {
+                const p = dStr.split('/');
+                dia = parseInt(p[0]); mes = parseInt(p[1]); ano = parseInt(p[2]);
+            } else {
+                // Assume ISO ou formato do firebase YYYY-MM-DD
+                const p = dStr.split('-');
+                ano = parseInt(p[0]); mes = parseInt(p[1]); dia = parseInt(p[2]);
             }
 
-            // Tratamento de Hora
-            if (hInput.includes(':')) {
-                const p = hInput.split(':');
-                hora = parseInt(p[0]);
-                min = parseInt(p[1]);
-            }
+            // Tratamento da Hora
+            const hStr = String(horaStr || "12:00").trim();
+            const hP = hStr.split(':');
+            const hora = parseInt(hP[0]);
+            const min = parseInt(hP[1]);
 
-            // Criação do Objeto Date Seguro (sem fuso horário para evitar virada de dia)
-            const dataFinal = new Date(ano, mes, dia, hora, min);
+            // Criação segura
+            if (!ano || !mes || !dia) throw new Error("Data inválida");
             
-            // Validação Final
-            if (isNaN(dataFinal.getTime())) return new Date(); // Retorna data atual se falhar
-            
-            return dataFinal;
-
+            return new Date(ano, mes - 1, dia, hora, min);
         } catch (e) {
-            console.warn("Erro no parser de data:", e);
-            return new Date(); // Fallback final
+            console.error("Erro no parser:", e);
+            return new Date(); // Fallback data atual
         }
     }
 
@@ -220,10 +200,10 @@
         const e = norm(estado);
         if (COORDENADAS_FIXAS[c]) return COORDENADAS_FIXAS[c];
         if (COORDENADAS_FIXAS[e]) return COORDENADAS_FIXAS[e];
-        return COORDENADAS_FIXAS["default"]; // Nunca retorna nulo
+        return COORDENADAS_FIXAS["default"];
     }
 
-    // --- 3. MOTOR MATEMÁTICO ---
+    // --- 3. CÁLCULO ---
     function normalizarGraus(g) {
         let res = g % 360;
         if (res < 0) res += 360;
@@ -236,10 +216,7 @@
     }
 
     function calcularMapaPreciso(dataObj, lat, lon) {
-        // Se a lib não carregou, lança erro controlado
-        if (typeof Astronomy === 'undefined') throw new Error("Lib Offline");
-
-        const observer = new Astronomy.Observer(lat, lon, 0);
+        const observer = new Astronomy.Observer(parseFloat(lat), parseFloat(lon), 0);
         const dateValues = Astronomy.MakeTime(dataObj);
         const eps = Astronomy.Obliquity(dateValues) * (Math.PI / 180);
 
@@ -248,7 +225,6 @@
 
         corpos.forEach(corpo => {
             const equ = Astronomy.Equator(corpo, dateValues, observer, true, true);
-            // Conversão Equatorial -> Eclíptica (Tropical)
             const ra = equ.ra * 15 * (Math.PI / 180);
             const dec = equ.dec * (Math.PI / 180);
             const num = Math.sin(ra) * Math.cos(eps) + Math.tan(dec) * Math.sin(eps);
@@ -300,22 +276,21 @@
         return `<strong>${planeta} em ${signo} (Casa ${casa}):</strong><br>A energia de ${planeta} se expressa no estilo de ${signo}, impactando a área da vida referente à Casa ${casa}.`;
     }
 
-    // --- RENDER ---
+    // --- RENDERIZADOR COM WAIT-LOOP ---
     function renderizar(nome, dataStr, horaStr, cidade, estado) {
-        // Tenta rodar. Se falhar, NÃO MOSTRA ALERTA, mostra dados padrão para não travar a UI.
+        // Se a lib ainda não carregou, espera 100ms e tenta de novo (Polling)
+        if (typeof Astronomy === 'undefined') {
+            console.log("Aguardando Astronomy...");
+            setTimeout(() => renderizar(nome, dataStr, horaStr, cidade, estado), 100);
+            return;
+        }
+
         try {
             document.getElementById('loading-text').innerText = "Calculando...";
             document.getElementById('header-details').innerText = `${nome} • ${dataStr} • ${horaStr} • ${cidade}/${estado}`;
 
-            // Checagem de Biblioteca (Loop de espera)
-            if (typeof Astronomy === 'undefined') {
-                console.log("Aguardando lib...");
-                setTimeout(() => renderizar(nome, dataStr, horaStr, cidade, estado), 300);
-                return;
-            }
-
             const coords = obterCoordenadas(cidade, estado);
-            const dataObj = criarDataInfalivel(dataStr, horaStr); // Usa o parser blindado
+            const dataObj = criarObjetoData(dataStr, horaStr);
 
             const dados = calcularMapaPreciso(dataObj, coords.lat, coords.lon);
             
@@ -341,9 +316,9 @@
 
         } catch (e) {
             console.error(e);
-            // Fail-safe: Esconde loading e mostra mensagem discreta
+            // Mensagem de fallback, sem travar a tela
             document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('synthesis-text').innerHTML = "Nota: Ocorreu uma instabilidade no cálculo. Os dados exibidos podem ser aproximados.";
+            document.getElementById('synthesis-text').innerHTML = "Nota: O sistema utilizou uma configuração padrão devido a uma inconsistência nos dados.";
         }
     }
 
