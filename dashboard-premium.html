@@ -39,7 +39,7 @@
         /* GRID DE CARDS */
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Ajuste responsivo melhorado */
             gap: 20px;
             max-width: 1200px;
             width: 90%;
@@ -60,6 +60,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            min-height: 180px; /* Altura mínima para uniformidade */
         }
 
         .card:hover {
@@ -86,7 +87,7 @@
             flex-direction: column;
         }
         
-        /* ESTILO DO BOTÃO DE SAIR (ADICIONADO) */
+        /* ESTILO DO BOTÃO DE SAIR */
         .btn-logout {
             background: transparent;
             border: 1px solid #333;
@@ -137,16 +138,22 @@
     </div>
 
     <div class="cards-grid">
-        <div class="card" onclick="window.location.href='premium-oraculos.html'">
-            <div class="card-icon"><i class="fas fa-eye"></i></div>
-            <h3>Oráculo Sagrado</h3>
-            <p>Respostas da IA Mística (Tarot, Búzios).</p>
-        </div>
-
         <div class="card" onclick="window.location.href='premium-mapa.html'">
-            <div class="card-icon"><i class="fas fa-star"></i></div>
+            <div class="card-icon"><i class="fas fa-chart-pie"></i></div>
             <h3>Mapa Astral</h3>
             <p>Sua mandala astrológica detalhada.</p>
+        </div>
+
+        <div class="card" onclick="window.location.href='tarot-room.html'">
+            <div class="card-icon"><i class="fas fa-eye"></i></div>
+            <h3>Oráculo Sagrado</h3>
+            <p>Respostas da IA Mística (Tarot).</p>
+        </div>
+
+        <div class="card" onclick="window.location.href='horoscopo-diario.html'">
+            <div class="card-icon"><i class="fas fa-star"></i></div>
+            <h3>Seu Céu Agora</h3>
+            <p>Trânsitos diários e previsão.</p>
         </div>
 
         <div class="card" onclick="window.location.href='premium-numerologia.html'">
@@ -207,7 +214,6 @@
                     const plano = (data.plano || "").toLowerCase();
 
                     // REGRA DE SEGURANÇA:
-                    // Se NÃO for premium, chuta de volta para o Dashboard Free
                     if (status !== "premium" && plano !== "premium") {
                         window.location.href = "dashboard.html";
                         return;
