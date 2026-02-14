@@ -66,7 +66,7 @@
 
 <div id="loading-screen">
     <i class="fas fa-star spinner"></i>
-    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Calculando Trânsitos...</p>
+    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Lendo o Céu...</p>
 </div>
 
 <div class="container">
@@ -94,91 +94,180 @@
     // ======================================================
     // 1. BANCO DE DADOS DE TRÂNSITOS (INTELIGÊNCIA PREDITIVA)
     // ======================================================
-    // Estrutura: Planeta -> Casa -> Significado
+    
+    // TEXTOS DE IMPACTO (O QUE ACONTECE)
     const TRANSIT_DB = {
         "Sol": [
-            "É hora de brilhar pessoalmente. Sua vitalidade está alta e você sente necessidade de iniciar coisas novas. O mundo está olhando para você.", // Casa 1
-            "O foco está nas finanças. Um excelente momento para rever orçamentos, buscar novas fontes de renda e valorizar seus talentos.", // Casa 2
-            "Sua mente está acelerada. O dia pede comunicação, reuniões, estudos rápidos e trocas de ideias. O telefone não vai parar.", // Casa 3
-            "A energia se volta para dentro. É o momento de cuidar da casa, da família e da sua base emocional. Evite o mundo lá fora se puder.", // Casa 4
-            "Criatividade explodindo! Um dia para romance, hobbies, diversão e estar com filhos. Sua criança interior quer brincar.", // Casa 5
-            "Foco total no trabalho e na saúde. O dia é para organizar a rotina, limpar pendências e ser útil. A eficiência é sua arma hoje.", // Casa 6
-            "O outro é o foco. Parcerias, casamento ou clientes exigem sua atenção. Não é hora de agir sozinho, mas de negociar.", // Casa 7
-            "Dia de intensidade. Assuntos profundos, crises emocionais ou questões financeiras compartilhadas podem surgir. Transforme-se.", // Casa 8
-            "Sua mente quer expandir. Ótimo para planejar viagens, estudos superiores ou conectar-se com sua espiritualidade. Olhe longe.", // Casa 9
-            "Sua carreira está em destaque. Você está visível para chefes e autoridades. É o momento de mostrar competência e buscar reconhecimento.", // Casa 10
-            "Dia de socializar. Amigos, grupos e projetos futuros são favorecidos. Saia da bolha e conecte-se com ideais coletivos.", // Casa 11
-            "Recolhimento necessário. Sua bateria social pode estar baixa. O dia favorece a introspecção, sonhos e bastidores. Descanse." // Casa 12
+            "É hora de brilhar pessoalmente. Sua vitalidade está alta e o mundo olha para você.", 
+            "O foco está nas finanças. Excelente momento para rever orçamentos e valorizar seus talentos.", 
+            "Sua mente está acelerada. O dia pede comunicação, reuniões e trocas rápidas de ideias.", 
+            "A energia se volta para dentro. É o momento de cuidar da casa, da família e da base emocional.", 
+            "Criatividade explodindo! Um dia para romance, hobbies e diversão. Sua criança interior quer brincar.", 
+            "Foco total no trabalho e na saúde. O dia é para organizar a rotina e ser útil.", 
+            "O outro é o foco. Parcerias e clientes exigem atenção. Não é hora de agir sozinho.", 
+            "Dia de intensidade. Assuntos profundos ou crises emocionais podem surgir para serem curados.", 
+            "Sua mente quer expandir. Ótimo para planejar viagens, estudos ou conectar-se com sua fé.", 
+            "Sua carreira está em destaque. Você está visível para autoridades. Mostre competência.", 
+            "Dia de socializar. Amigos e projetos futuros são favorecidos. Saia da bolha.", 
+            "Recolhimento necessário. Sua bateria social está baixa. Favorece a introspecção e bastidores." 
         ],
         "Mercúrio": [
-            "Você está falando o que pensa sem filtro. Ótimo para se expressar, mas cuidado com a impulsividade verbal.", // Casa 1
-            "Sua mente está focada em dinheiro e negócios. Bom dia para negociações comerciais e planejamento financeiro.", // Casa 2
-            "Superatividade mental. Pequenas viagens e muitas conversas. Cuidado com a dispersão e fofocas.", // Casa 3
-            "Conversas importantes em família ou sobre imóveis. A mente se volta para o passado e memórias.", // Casa 4
-            "Mente criativa e lúdica. Ótimo para escrever, criar jogos ou ter conversas divertidas com quem ama.", // Casa 5
-            "Foco nos detalhes. O dia é perfeito para organizar planilhas, agendar exames e resolver problemas burocráticos.", // Casa 6
-            "Diálogo é a chave. Bom para resolver conflitos em relacionamentos e assinar contratos em parceria.", // Casa 7
-            "Pensamentos profundos e investigativos. Você está detetive hoje. Segredos podem ser revelados ou compreendidos.", // Casa 8
-            "Interesse por filosofia e grandes ideias. A mente quer aprender algo novo e complexo. Fuja do trivial.", // Casa 9
-            "Comunicação profissional em alta. Fale com clareza no trabalho. Suas palavras têm peso de autoridade hoje.", // Casa 10
-            "Troca de ideias com grupos. Brainstorming favorecido. Sua mente está futurista e inovadora.", // Casa 11
-            "Intuição alta, lógica baixa. Pode haver confusão mental ou segredos. Escreva seus sonhos e evite assinar coisas importantes." // Casa 12
+            "Você está falando o que pensa sem filtro. Ótimo para se expressar, cuidado com a impulsividade.", 
+            "Sua mente foca em dinheiro. Bom dia para negociações comerciais e planejamento.", 
+            "Superatividade mental e muitas conversas. Cuidado com a dispersão e fofocas.", 
+            "Conversas importantes em família. A mente se volta para o passado e memórias.", 
+            "Mente criativa e lúdica. Ótimo para escrever ou ter conversas divertidas.", 
+            "Foco nos detalhes. Perfeito para organizar planilhas e resolver burocracias.", 
+            "Diálogo é a chave. Bom para resolver conflitos em relacionamentos.", 
+            "Pensamentos investigativos. Você está detetive hoje. Segredos podem ser revelados.", 
+            "Interesse por filosofia. A mente quer aprender algo complexo. Fuja do trivial.", 
+            "Comunicação profissional em alta. Fale com clareza no trabalho.", 
+            "Troca de ideias com grupos. Brainstorming favorecido. Mente inovadora.", 
+            "Intuição alta, lógica baixa. Pode haver confusão mental. Evite assinar contratos." 
         ],
         "Vênus": [
-            "Você está magnético(a). As pessoas se sentem atraídas por você. Ótimo dia para cuidar da aparência.", // Casa 1
-            "Sorte financeira ou gastos com prazeres. Você sente necessidade de conforto material e boa comida.", // Casa 2
-            "Palavras doces. A comunicação está harmoniosa e diplomática. Ótimo para elogiar e seduzir pela conversa.", // Casa 3
-            "Harmonia no lar. Bom para decorar a casa, receber visitas íntimas e fazer as pazes com a família.", // Casa 4
-            "Romance no ar! O dia favorece encontros, diversão e expressão artística. Deixe-se apaixonar pela vida.", // Casa 5
-            "Prazer na rotina. Você encontra beleza nas pequenas coisas do dia a dia. A saúde e o trabalho fluem com leveza.", // Casa 6
-            "Amor e parcerias em alta. É o melhor momento para estar a dois ou fechar acordos benéficos.", // Casa 7
-            "Intimidade profunda. A sexualidade e a fusão emocional estão intensas. Pode haver ganhos através de outros.", // Casa 8
-            "Amor pelo estrangeiro ou pelo conhecimento. Você se atrai pelo que é diferente e exótico hoje.", // Casa 9
-            "Charme profissional. Você está sendo bem visto por superiores. A diplomacia abre portas na carreira.", // Casa 10
-            "Diversão com amigos. O amor pode surgir dentro de um círculo social. Atividades em grupo são prazerosas.", // Casa 11
-            "Amor secreto ou sacrifício. Você pode estar cuidando de alguém ou vivendo um sentimento platônico e espiritual." // Casa 12
+            "Você está magnético(a). As pessoas se sentem atraídas por você hoje.", 
+            "Sorte financeira ou gastos com prazeres. Vontade de conforto material.", 
+            "Palavras doces. A comunicação está diplomática. Ótimo para seduzir pela conversa.", 
+            "Harmonia no lar. Bom para decorar a casa e fazer as pazes com a família.", 
+            "Romance no ar! O dia favorece encontros e expressão artística.", 
+            "Prazer na rotina. Você encontra beleza nas pequenas coisas do dia a dia.", 
+            "Amor e parcerias em alta. Melhor momento para estar a dois.", 
+            "Intimidade profunda. A sexualidade e a fusão emocional estão intensas.", 
+            "Amor pelo estrangeiro ou pelo conhecimento. Você se atrai pelo diferente.", 
+            "Charme profissional. A diplomacia abre portas na carreira hoje.", 
+            "Diversão com amigos. O amor pode surgir dentro de um círculo social.", 
+            "Amor secreto ou espiritual. Você pode estar vivendo um sentimento platônico." 
         ],
         "Marte": [
-            "Energia explosiva! Você quer fazer tudo do seu jeito. Cuidado com acidentes por pressa e agressividade.", // Casa 1
-            "Gasto impulsivo de energia ou dinheiro. Você vai lutar pelo que é seu. Defenda seus valores, mas não quebre o cofrinho.", // Casa 2
-            "Debates acalorados. Você fala com assertividade (ou grosseria). Cuidado no trânsito e com palavras cortantes.", // Casa 3
-            "Conflitos domésticos ou obras em casa. A energia está acumulada no lar. Quebre uma parede, não pratos.", // Casa 4
-            "Competitividade nos jogos ou romance intenso. Você está caçador(a). Energia sexual alta e vontade de se arriscar.", // Casa 5
-            "Trabalho duro. Você tem energia para limpar tudo o que estava parado. Cuidado com febre ou inflamações.", // Casa 6
-            "Conflitos com parceiros ou inimigos declarados. A diplomacia falha, a guerra fria esquenta. Escolha suas batalhas.", // Casa 7
-            "Crise transformadora. A energia sexual ou conflitos por herança/dinheiro podem surgir. Corte o que está podre.", // Casa 8
-            "Defesa de crenças. Você pode brigar por ideais ou política. Vontade de se aventurar fisicamente.", // Casa 9
-            "Ambição desmedida. Você quer conquistar o topo a qualquer custo. Cuidado para não atropelar colegas.", // Casa 10
-            "Liderança em grupos ou brigas com amigos. Você quer comandar o time. Canalize isso para metas futuras.", // Casa 11
-            "Inimigos ocultos ou raiva reprimida. Você pode se sentir sem energia física. Cuidado com a autossabotagem." // Casa 12
+            "Energia explosiva! Você quer fazer tudo do seu jeito. Cuidado com a pressa.", 
+            "Gasto impulsivo de energia ou dinheiro. Defenda seus valores.", 
+            "Debates acalorados. Você fala com assertividade. Cuidado com palavras cortantes.", 
+            "Conflitos domésticos ou obras. A energia está acumulada no lar.", 
+            "Competitividade e romance intenso. Energia sexual alta e vontade de arriscar.", 
+            "Trabalho duro. Energia para limpar tudo o que estava parado.", 
+            "Conflitos com parceiros. A diplomacia falha, a guerra fria esquenta.", 
+            "Crise transformadora. Corte o que está podre na sua vida.", 
+            "Defesa de crenças. Você pode brigar por ideais. Vontade de se aventurar.", 
+            "Ambição desmedida. Você quer o topo. Cuidado para não atropelar colegas.", 
+            "Liderança em grupos. Você quer comandar o time. Canalize para metas.", 
+            "Inimigos ocultos ou raiva reprimida. Cuidado com a autossabotagem." 
         ],
         "Júpiter": [
-            "Otimismo renovado! Você sente que pode tudo. Sorte pessoal e proteção. Cuidado apenas para não engordar.", // Casa 1
-            "Expansão financeira. O dinheiro entra com mais facilidade, mas a vontade de gastar também cresce.", // Casa 2
-            "Mente aberta. Ótimo para aprender idiomas e fazer contatos. Boas notícias podem chegar por mensagem.", // Casa 3
-            "A família cresce ou a casa melhora. Sensação de paz interior e proteção doméstica. Bom para mudar de casa.", // Casa 4
-            "Excesso de confiança no amor e na sorte. Ótimo para festas. A vida parece um grande palco iluminado.", // Casa 5
-            "Melhora na saúde e no ambiente de trabalho. Você encontra sentido no servir. Proteção contra doenças.", // Casa 6
-            "Benefícios através de parcerias. Um casamento ou sociedade pode trazer crescimento e prosperidade.", // Casa 7
-            "Heranças ou apoio financeiro de terceiros. Transformações psicológicas positivas e libertadoras.", // Casa 8
-            "A grande viagem! Sorte em assuntos legais, acadêmicos e no exterior. Sua fé move montanhas hoje.", // Casa 9
-            "Sucesso público. Promoções, honrarias e reconhecimento profissional vêm com facilidade. Aproveite a onda.", // Casa 10
-            "Amigos poderosos ajudam. Seus sonhos ganham patrocinadores. A vida social está expandida e feliz.", // Casa 11
-            "Proteção espiritual. Um anjo da guarda parece atuar nos bastidores. Ótimo para retiros e caridade." // Casa 12
+            "Otimismo renovado! Sorte pessoal e proteção. Você sente que pode tudo.", 
+            "Expansão financeira. O dinheiro entra, mas a vontade de gastar cresce.", 
+            "Mente aberta. Ótimo para aprender idiomas e fazer contatos.", 
+            "A família cresce ou a casa melhora. Sensação de paz doméstica.", 
+            "Excesso de confiança no amor e na sorte. A vida parece um palco.", 
+            "Melhora na saúde e no trabalho. Você encontra sentido no servir.", 
+            "Benefícios através de parcerias. Um acordo pode trazer prosperidade.", 
+            "Apoio financeiro de terceiros. Transformações psicológicas positivas.", 
+            "Sorte em assuntos legais e no exterior. Sua fé move montanhas hoje.", 
+            "Sucesso público. Promoções e reconhecimento vêm com facilidade.", 
+            "Amigos poderosos ajudam. Seus sonhos ganham patrocinadores.", 
+            "Proteção espiritual. Um anjo da guarda parece atuar nos bastidores." 
         ],
         "Saturno": [
-            "O peso da realidade. Você se sente mais velho ou cansado. É hora de assumir responsabilidades sérias sobre si mesmo.", // Casa 1
-            "Restrição financeira. O dinheiro exige trabalho duro e economia. Não é hora de gastar, mas de estruturar.", // Casa 2
-            "Mente séria e preocupada. Comunicação difícil ou bloqueada. Estude algo difícil e fale pouco.", // Casa 3
-            "Peso familiar. Responsabilidades com pais ou problemas estruturais na casa. O passado cobra a conta.", // Casa 4
-            "Bloqueio criativo ou frieza no romance. A diversão parece obrigação. Leve a sério seus hobbies ou filhos.", // Casa 5
-            "Trabalho pesado. A rotina é exigente e cansativa. Cuide dos dentes, ossos e postura. Disciplina é tudo.", // Casa 6
-            "Esfriamento nas relações. Teste de realidade no casamento. Se a relação é sólida, fica. Se não, quebra.", // Casa 7
-            "Medo da perda ou dívidas. É hora de pagar o que deve e encarar a mortalidade com maturidade.", // Casa 8
-            "Crise de fé ou dificuldades em viagens/estudos. O dogmatismo pode atrapalhar. Busque sabedoria real, não teórica.", // Casa 9
-            "O ápice da cobrança. Chefes exigentes e muito trabalho. Sua reputação está sendo testada. Aguente firme.", // Casa 10
-            "Poucos amigos, mas verdadeiros. Seleção natural no círculo social. Projetos de longo prazo exigem paciência.", // Casa 11
-            "Solidão e isolamento. Medos inconscientes vêm à tona. O trabalho deve ser feito nos bastidores, sem aplausos." // Casa 12
+            "O peso da realidade. É hora de assumir responsabilidades sérias sobre si.", 
+            "Restrição financeira. Não é hora de gastar, mas de estruturar o futuro.", 
+            "Mente séria. Comunicação difícil. Estude algo difícil e fale pouco.", 
+            "Peso familiar. O passado cobra a conta. Resolva pendências antigas.", 
+            "Bloqueio criativo ou frieza. Leve a sério seus hobbies ou filhos.", 
+            "Trabalho pesado. A rotina é exigente. Disciplina é tudo hoje.", 
+            "Teste de realidade no casamento. Se é sólido, fica. Se não, quebra.", 
+            "Medo da perda. É hora de pagar o que deve e encarar a realidade.", 
+            "Dificuldades em viagens. Busque sabedoria real, não teórica.", 
+            "O ápice da cobrança. Chefes exigentes. Sua reputação está em teste.", 
+            "Seleção natural no círculo social. Fique apenas com os verdadeiros.", 
+            "Solidão e isolamento. O trabalho deve ser feito nos bastidores." 
+        ]
+    };
+
+    // CONSELHOS DO ORÁCULO (DICA ESPECÍFICA PARA CADA CASA/PLANETA)
+    const ORACLE_TIPS = {
+        "Sol": [
+            "Dica: A liderança é solitária, mas necessária. Assuma o leme.", // H1
+            "Dica: Se você não se der valor, ninguém dará. Cobre o justo.", // H2
+            "Dica: Fale com autoridade, mas escute com humildade.", // H3
+            "Dica: Sua luz deve aquecer os seus, não queimá-los.", // H4
+            "Dica: A vida é curta demais para não celebrar sua existência.", // H5
+            "Dica: A excelência é um hábito, não um ato isolado.", // H6
+            "Dica: Ilumine o caminho do outro e o seu ficará claro.", // H7
+            "Dica: Não tema a sombra; é lá que sua luz é necessária.", // H8
+            "Dica: Sua verdade é sua bússola. Não a negocie por conforto.", // H9
+            "Dica: O mundo espera sua obra. Não se esconda nos bastidores.", // H10
+            "Dica: Um sonho sonhado sozinho é apenas um sonho. Conecte-se.", // H11
+            "Dica: Às vezes, a maior vitória é o silêncio e a paz interior." // H12
+        ],
+        "Mercúrio": [
+            "Dica: Sua palavra cria sua realidade. Diga apenas o que deseja ver.",
+            "Dica: A inteligência financeira vale mais que o esforço bruto.",
+            "Dica: A dúvida é inimiga da ação. Decida e corrija a rota depois.",
+            "Dica: Memórias não pagam contas. Foque no presente.",
+            "Dica: Escreva sua história, não deixe outros segurarem a caneta.",
+            "Dica: Organize o caos mental antes de tentar arrumar a mesa.",
+            "Dica: Ouvir é mais poderoso do que convencer.",
+            "Dica: O segredo guardado é uma arma; o revelado, uma cura.",
+            "Dica: Aprender algo novo é a única fonte da juventude eterna.",
+            "Dica: Comunique sua competência. Quem não é visto, não é lembrado.",
+            "Dica: Uma ideia compartilhada se multiplica. Não tenha medo de dividir.",
+            "Dica: A intuição sabe o caminho que a lógica desconhece."
+        ],
+        "Vênus": [
+            "Dica: A beleza é uma forma de poder. Use-a com sabedoria.",
+            "Dica: O prazer sem culpa é o melhor investimento hoje.",
+            "Dica: A diplomacia abre portas que a força jamais abriria.",
+            "Dica: Transforme sua casa em seu templo sagrado.",
+            "Dica: O amor é um jogo onde só ganha quem se arrisca a perder.",
+            "Dica: Ame seu corpo; ele é o veículo da sua alma.",
+            "Dica: A paz vale mais que a razão. Escolha a harmonia.",
+            "Dica: A entrega total é assustadora, mas libertadora.",
+            "Dica: O amor não tem fronteiras geográficas ou mentais.",
+            "Dica: Seu carisma é sua moeda mais forte no trabalho hoje.",
+            "Dica: Amigos são a família que a alma escolhe. Valorize-os.",
+            "Dica: O amor incondicional começa pelo perdão a si mesmo."
+        ],
+        "Marte": [
+            "Dica: A sorte favorece os audazes. Dê o primeiro passo.",
+            "Dica: O dinheiro segue a energia da sua autoconfiança.",
+            "Dica: Corte a conversa fiada e vá direto ao ponto.",
+            "Dica: Proteja seu lar; é seu castelo e seu refúgio.",
+            "Dica: A paixão sem ação é apenas sofrimento. Mova-se.",
+            "Dica: O trabalho duro vence o talento quando o talento não trabalha.",
+            "Dica: Estabeleça limites claros. 'Não' é uma frase completa.",
+            "Dica: Elimine o que não serve mais. Corte o cordão.",
+            "Dica: Lute por aquilo em que acredita, ou cairá por qualquer coisa.",
+            "Dica: A ambição é combustível. Não peça desculpas por querer mais.",
+            "Dica: Lidere pelo exemplo, não pela força.",
+            "Dica: Sua maior batalha é contra seus sabotadores internos."
+        ],
+        "Júpiter": [
+            "Dica: Confie no fluxo. O universo conspira a seu favor.",
+            "Dica: A abundância é uma mentalidade antes de ser um fato.",
+            "Dica: Expanda seus horizontes. O mundo é pequeno demais para você.",
+            "Dica: A sorte favorece a mente preparada e o coração grato.",
+            "Dica: Celebre a vida. A alegria é um ímã de milagres.",
+            "Dica: A saúde é a maior riqueza. Cuide do seu templo.",
+            "Dica: Parcerias trazem ouro. Juntos somos gigantes.",
+            "Dica: Transforme crise em oportunidade. O fundo do poço tem mola.",
+            "Dica: A fé move montanhas reais. Acredite no impossível.",
+            "Dica: O sucesso é inevitável para quem não desiste.",
+            "Dica: Sonhe grande. O custo é o mesmo de sonhar pequeno.",
+            "Dica: A proteção divina está ativa. Nada pode te atingir."
+        ],
+        "Saturno": [
+            "Dica: A disciplina é a liberdade real. Faça o que deve ser feito.",
+            "Dica: Economize hoje, sorria amanhã. O tempo é o senhor da razão.",
+            "Dica: O silêncio é ouro. Fale apenas o necessário.",
+            "Dica: Honre suas raízes. Árvore sem raiz não aguenta tempestade.",
+            "Dica: Leve a sério sua diversão. O tempo livre é sagrado.",
+            "Dica: A rotina cura o caos. Organize-se.",
+            "Dica: Compromisso é tudo. Cumpra sua palavra.",
+            "Dica: O que resiste, persiste. Aceite a dor para curá-la.",
+            "Dica: A sabedoria vem com o tempo. Não tenha pressa.",
+            "Dica: Sua reputação é seu maior ativo. Proteja-a.",
+            "Dica: Corte os laços fracos. Fique com quem constrói.",
+            "Dica: Encare seus medos no escuro e eles sumirão na luz."
         ]
     };
 
@@ -190,14 +279,13 @@
     function calcularTransitos(usuario) {
         if (typeof Astronomy === 'undefined') return setTimeout(() => calcularTransitos(usuario), 500);
 
-        // A. Calcular ASCENDENTE NATAL (O ponto de partida)
+        // A. Calcular ASCENDENTE NATAL
         const dataNasc = new Date(usuario.dataNascimento + "T" + usuario.horaNascimento);
         const coords = DB_COORDS[usuario.estado?.toLowerCase()] || DB_COORDS["default"];
         
         const dateNatal = Astronomy.MakeTime(dataNasc);
         const observer = new Astronomy.Observer(coords.lat, coords.lon, 0);
         
-        // Cálculo Sideral do Ascendente Natal
         const msd = Astronomy.SiderealTime(dateNatal);
         const lst = (msd + coords.lon / 15.0) * 15;
         const ramc = lst * Math.PI/180;
@@ -206,24 +294,20 @@
         let ascRad = Math.atan2(Math.cos(ramc), -Math.sin(ramc)*Math.cos(eps) - Math.tan(latRad)*Math.sin(eps));
         const ascGrauNatal = (ascRad * 180/Math.PI + 360) % 360;
 
-        // B. Calcular PLANETAS AGORA (Trânsitos)
+        // B. Calcular PLANETAS AGORA
         const agora = new Date();
         const dateAgora = Astronomy.MakeTime(agora);
-        
-        // Exibir Data
         document.getElementById('display-date').innerText = agora.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
 
-        const listaPlanetas = ["Sol", "Mercúrio", "Vênus", "Marte", "Júpiter", "Saturno"]; // Lua é separada
+        const listaPlanetas = ["Sol", "Mercúrio", "Vênus", "Marte", "Júpiter", "Saturno"];
         const nomesIngles = {"Sol":"Sun", "Mercúrio":"Mercury", "Vênus":"Venus", "Marte":"Mars", "Júpiter":"Jupiter", "Saturno":"Saturn"};
         const htmlTransitos = document.getElementById('transits-list');
         htmlTransitos.innerHTML = "";
 
-        // 1. Processar LUA (Clima Astral)
+        // LUA
         const equLua = Astronomy.Equator("Moon", dateAgora, observer, true, true);
         const longLua = Astronomy.Ecliptic(equLua.vec).elon;
         const signoLuaIdx = Math.floor(longLua / 30);
-        
-        // Onde a Lua cai no mapa da pessoa (Casa)
         let distLua = (longLua - ascGrauNatal + 360) % 360;
         let casaLua = Math.floor(distLua / 30) + 1;
 
@@ -233,26 +317,23 @@
                 <h3>A Lua Hoje está em ${SIGNOS[signoLuaIdx]}</h3>
                 <p style="color:#ccc; margin-top:5px;">
                     Ela transita pela sua <strong>Casa ${casaLua}</strong>. 
-                    O clima emocional do seu dia está focado em: <span style="color:var(--gold)">${getAssuntoCasa(casaLua)}</span>.
+                    O clima emocional do dia foca em: <span style="color:var(--gold)">${getAssuntoCasa(casaLua)}</span>.
                 </p>
             </div>
         `;
 
-        // 2. Processar PLANETAS
+        // PLANETAS
         listaPlanetas.forEach(pNome => {
             const pKey = nomesIngles[pNome];
             const equ = Astronomy.Equator(pKey, dateAgora, observer, true, true);
             const long = Astronomy.Ecliptic(equ.vec).elon;
             
-            // Cálculo da Casa de Trânsito (Long Atual - Asc Natal)
             let distancia = (long - ascGrauNatal + 360) % 360;
             let casaTransito = Math.floor(distancia / 30) + 1; // 1 a 12
             
-            // Pega o Texto do Banco de Dados
-            // O array tem index 0-11, então casaTransito - 1
             const textoImpacto = TRANSIT_DB[pNome][casaTransito - 1];
+            const dicaOraculo = ORACLE_TIPS[pNome][casaTransito - 1]; // PEGA A DICA ESPECÍFICA
             
-            // Renderiza Card
             const icons = {"Sol":"☉", "Mercúrio":"☿", "Vênus":"♀", "Marte":"♂", "Júpiter":"♃", "Saturno":"♄"};
             
             htmlTransitos.innerHTML += `
@@ -263,7 +344,7 @@
                         <span class="house-badge">Ativando Casa ${casaTransito}</span>
                     </div>
                     <div class="impact-text">${textoImpacto}</div>
-                    <span class="advice-text">Dica do Oráculo: Use essa energia a seu favor.</span>
+                    <span class="advice-text">${dicaOraculo}</span>
                 </div>
             `;
         });
@@ -272,7 +353,7 @@
     }
 
     function getAssuntoCasa(num) {
-        const assuntos = ["Identidade e Corpo", "Finanças e Valores", "Comunicação e Trocas", "Lar e Família", "Criatividade e Romance", "Rotina e Saúde", "Parcerias e Casamento", "Transformação e Crises", "Viagens e Expansão", "Carreira e Status", "Amigos e Futuro", "Inconsciente e Espiritualidade"];
+        const assuntos = ["Identidade", "Finanças", "Comunicação", "Lar", "Prazer", "Rotina", "Parcerias", "Transformação", "Expansão", "Carreira", "Amigos", "Espiritualidade"];
         return assuntos[num-1];
     }
 
@@ -290,13 +371,10 @@
                 const plano = (d.plano || "").toLowerCase();
                 
                 if(status !== "premium" && plano !== "premium") {
-                    alert("Acesso exclusivo para membros Premium.");
                     window.location.href = 'dashboard.html';
                     return;
                 }
-
                 calcularTransitos(d);
-
             }).catch(e => window.location.href = 'index.html');
         } else { window.location.href = 'index.html'; }
     });
