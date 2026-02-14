@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Arcano | Oráculo Sagrado</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --gold: #d4af37; --bg-dark: #050505; --card-w: 120px; --card-h: 200px; }
+        
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; overflow-x: hidden; }
+        
+        /* HEADER SIMPLIFICADO */
+        .nav-bar { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
+        .back-btn { cursor: pointer; color: var(--gold); font-family: 'Cinzel'; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* A MESA DO TAROT */
+        .tarot-table {
+            min-height: 80vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            background: radial-gradient(circle at center, #111 0%, #000 80%);
+            padding-top: 50px; perspective: 1000px; /* Para o 3D */
+        }
+
+        .instruction { font-family: 'Cinzel'; color: #666; font-size: 1.2em; margin-bottom: 40px; text-align: center; max-width: 600px; }
+        
+        /* ÁREA DAS CARTAS (SLOTS) */
+        .spread-area {
+            display: flex; gap: 20px; margin-bottom: 50px; min-height: var(--card-h);
+        }
+        
+        .card-slot {
+            width: var(--card-w); height: var(--card-h);
+            border: 2px dashed #333; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: #333; font-family: 'Cinzel'; font-size: 0.8em;
+            position: relative;
+        }
+
+        /* O BARALHO (DECK) */
+        .deck-container {
+            position: relative; width: var(--card-w); height: var(--card-h); cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .deck-container:hover { transform: scale(1.05); }
+        
+        .card-back {
+            width: 100%; height: 100%; border-radius: 10px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #000 100%);
+            border: 2px solid var(--gold);
+            position: absolute; top: 0; left: 0;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .card-back::after { content: '★'; font-size: 3em; color: var(--gold); opacity: 0.5; }
+        
+        /* EFEITO DE EMPILHAMENTO */
+        .deck-card:nth-child(1) { transform: translate(0, 0); }
+        .deck-card:nth-child(2) { transform: translate(2px, -2px); }
+        .deck-card:nth-child(3) { transform: translate(4px, -4px); }
+
+        /* A CARTA ANIMADA */
+        .flying-card {
+            position: absolute; width: var(--card-w); height: var(--card-h);
+            transform-style: preserve-3d; transition: all 1s ease-in-out;
+            border-radius: 10px;
+        }
+        
+        .face {
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 10px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+            box-shadow: 0 0 15px var(--gold);
+        }
+        
+        .front { background: #000; border: 1px solid var(--gold); transform: rotateY(180deg); padding: 10px; box-sizing: border-box; }
+        .back { background: repeating-linear-gradient(45deg, #111, #111 10px, #222 10px, #222 20px); border: 2px solid #444; }
+
+        /* ARTE DA CARTA (Placeholder elegante) */
+        .arcana-name { font-family: 'Cinzel'; color: var(--gold); font-size: 0.9em; margin-bottom: 5px; margin-top: auto; }
+        .arcana-num { font-size: 1.5em; color: #fff; margin-bottom: auto; }
+        .arcana-img { font-size: 2.5em; margin: 10px 0; }
+
+        /* ÁREA DE LEITURA (RESULTADO) */
+        #reading-result {
+            max-width: 800px; padding: 40px; background: #111; border-top: 2px solid var(--gold);
+            display: none; animation: fadeIn 2s;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .meaning-block { margin-bottom: 30px; text-align: justify; }
+        .position-title { color: #666; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
+        .card-title { color: var(--gold); font-family: 'Cinzel'; font-size: 1.5em; margin: 0 0 10px 0; }
+
+        @media(max-width: 600px) {
+            .spread-area { transform: scale(0.7); gap: 10px; }
+            .tarot-table { padding-top: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <div class="back-btn" onclick="window.location.href='dashboard-premium.html'">← Sair do Oráculo</div>
+        <div style="font-family:'Cinzel'; color:#666;">TIRAGEM DE 3 CARTAS</div>
+    </div>
+
+    <div class="tarot-table">
+        <p class="instruction" id="instruction-text">Concentre-se na sua questão...<br>Quando sentir o chamado, clique no baralho.</p>
+
+        <div class="spread-area" id="slots">
+            <div class="card-slot" id="slot-1">PASSADO</div>
+            <div class="card-slot" id="slot-2">PRESENTE</div>
+            <div class="card-slot" id="slot-3">FUTURO</div>
+        </div>
+
+        <div class="deck-container" id="deck" onclick="tirarCarta()">
+            <div class="card-back deck-card"></div>
+            <div class="card-back deck-card"></div>
+            <div class="card-back deck-card"></div>
+        </div>
+    </div>
+
+    <div id="reading-result">
+        <h2 style="text-align:center; color:var(--gold); font-family:'Cinzel'; margin-bottom:40px;">A Revelação</h2>
+        <div id="text-content"></div>
+        <button onclick="location.reload()" style="display:block; margin:30px auto; background:transparent; border:1px solid var(--gold); color:var(--gold); padding:10px 30px; cursor:pointer; font-family:'Cinzel';">Nova Leitura</button>
+    </div>
+
+<script>
+    // --- 1. BANCO DE DADOS DEEP TAROT (Major Arcana) ---
+    // Estrutura: Nome, Ícone, Significado Profundo (Não apenas descritivo)
+    const TAROT_DB = [
+        { id: 0, nome: "O Louco", icone: "🃟", significado: "Você está diante de um abismo, mas não é uma queda, é um voo. Esta carta exige um salto de fé. O lógico e o racional não funcionam aqui. Aja com a inocência de quem não conhece o medo. O risco é real, mas ficar parado é a morte da alma." },
+        { id: 1, nome: "O Mago", icone: "🪄", significado: "Você tem todas as ferramentas na mesa, mas elas são inúteis se você não tiver vontade. O Mago não espera a sorte, ele a cria. O momento exige ação focada e manipulação consciente da realidade. Pare de planejar e comece a materializar." },
+        { id: 2, nome: "A Sacerdotisa", icone: "🌙", significado: "O silêncio é sua resposta. O que você procura não está no mundo externo, mas nos sussurros da sua intuição. Há algo oculto que ainda não foi revelado. Não force a porta; espere e observe. A passividade aqui é uma estratégia de poder." },
+        { id: 3, nome: "A Imperatriz", icone: "👑", significado: "Fecundidade e abundância. O que você plantou vai crescer, mas precisa de prazer e beleza para florescer. Esta carta pede que você se conecte com o mundo sensorial. Crie, ame e permita-se o luxo de ser quem você é. A aridez acabou." },
+        { id: 4, nome: "O Imperador", icone: "🏛️", significado: "O caos exige ordem. Não é hora de flexibilidade, mas de estrutura, regras e limites claros. Se você não governar sua própria vida, alguém o fará. Assuma a autoridade, seja frio se necessário, e construa alicerces que durem." },
+        { id: 5, nome: "O Hierofante", icone: "🙏", significado: "Busque a sabedoria que já foi testada pelo tempo. Não é hora de reinventar a roda, mas de seguir a tradição ou buscar um mentor. Há uma lição espiritual aqui: a conformidade, às vezes, é necessária para pertencer a algo maior." },
+        { id: 6, nome: "Os Enamorados", icone: "❤️", significado: "Uma encruzilhada moral. Não se trata apenas de romance, mas de uma escolha irrevogável. Você deve escolher não o que é fácil, mas o que faz seu coração vibrar. Unir opostos dentro de si mesmo é a chave para avançar." },
+        { id: 7, nome: "O Carro", icone: "🛒", significado: "Vitória através do controle da vontade. Você está sendo puxado por forças opostas, e só a sua determinação pode mantê-las na linha. Avance sem olhar para os lados. A agressividade focada é necessária agora. Não pare até conquistar." },
+        { id: 8, nome: "A Força", icone: "🦁", significado: "Domine a besta, não com violência, mas com compaixão. Sua verdadeira força não é física, é moral. Você está enfrentando um desafio que exige paciência infinita e coragem suave. Controle seus instintos mais baixos para elevar-se." },
+        { id: 9, nome: "O Eremita", icone: "🕯️", significado: "Retire-se. O mundo está barulhento demais e a verdade só aparece na solidão. Não busque aprovação externa. Você precisa encontrar sua própria luz na escuridão antes de poder guiar qualquer outra pessoa." },
+        { id: 10, nome: "Roda da Fortuna", icone: "🎡", significado: "O destino está girando e você não tem controle sobre isso. O que está em cima cairá, o que está embaixo subirá. A lição é a impermanência. Não se apegue ao sucesso nem se desespere no fracasso. Tudo passa. Adapte-se." },
+        { id: 11, nome: "Justiça", icone: "⚖️", significado: "Causa e efeito. Você colherá exatamente o que plantou, nem mais, nem menos. Se agiu com integridade, não tema. Se cortou caminhos, a conta chegou. A verdade cortante é necessária para restaurar o equilíbrio. Seja imparcial." },
+        { id: 12, nome: "O Enforcado", icone: "🙃", significado: "O sacrifício é necessário. Você está preso, mas é uma pausa para mudar a perspectiva. Para ganhar o que quer, você precisa desistir de algo que ama ou de uma velha forma de pensar. A entrega voluntária traz a iluminação." },
+        { id: 13, nome: "A Morte", icone: "💀", significado: "Não é o fim da vida, mas o fim de uma era. Algo deve morrer para que o novo nasça. Não resista ao fim. Deixe o cadáver do passado ir embora. A transformação é dolorosa, mas a limpeza é absoluta e necessária." },
+        { id: 14, nome: "A Temperança", icone: "🏺", significado: "Alquimia lenta. Não busque extremos. A cura vem da mistura paciente de opostos. Teste, ajuste, espere. É o momento de curar feridas e encontrar o caminho do meio. A moderação é sua maior arma agora." },
+        { id: 15, nome: "O Diabo", icone: "😈", significado: "Você está preso, mas as correntes são frouxas. Você é escravo de seus próprios desejos, vícios ou materialismo. Reconheça sua sombra. O que você nega o controla. A liberdade começa ao admitir sua própria toxicidade." },
+        { id: 16, nome: "A Torre", icone: "⚡", significado: "Destruição súbita. As estruturas em que você confiava eram falsas e o universo as derrubou. É um choque, mas é uma libertação. Não tente reconstruir o que caiu. Deixe queimar e veja o que sobra na fundação real." },
+        { id: 17, nome: "A Estrela", icone: "⭐", significado: "Após a tempestade da Torre, vem a calma. A esperança retorna. Você está nu, vulnerável, mas conectado ao cosmos. É hora de curar e acreditar no futuro. Siga sua inspiração, ela é a bússola correta agora." },
+        { id: 18, nome: "A Lua", icone: "🐺", significado: "Ilusão e medo. Nada é o que parece. Seus demônios subconscientes estão à solta. Não tome decisões definitivas agora, pois você está vendo sombras. Caminhe com cautela e confie apenas nos seus instintos mais primitivos." },
+        { id: 19, nome: "O Sol", icone: "☀️", significado: "Clareza total, alegria e sucesso. A dúvida se dissipa. É o momento de brilhar sem culpa. O universo está dizendo um grande 'SIM' para você. Celebre a vida, a vitalidade e a verdade exposta à luz do dia." },
+        { id: 20, nome: "O Julgamento", icone: "📯", significado: "O chamado final. Você está sendo convocado para um nível superior de existência. Deixe para trás os velhos erros, perdoe a si mesmo e ascenda. É um renascimento definitivo. Acorde para sua verdadeira vocação." },
+        { id: 21, nome: "O Mundo", icone: "🌍", significado: "Conclusão e totalidade. Um ciclo se fecha com perfeição. Você aprendeu a lição e está pronto para o próximo nível. Sinta a integração de todas as partes do seu ser. O sucesso é absoluto. Você chegou lá." }
+    ];
+
+    // --- 2. LÓGICA DO JOGO ---
+    let cartasTiradas = 0;
+    const maxCartas = 3;
+    const posicoes = ["PASSADO (A Raiz)", "PRESENTE (O Desafio)", "FUTURO (O Conselho)"];
+    let leitura = [];
+
+    function tirarCarta() {
+        if (cartasTiradas >= maxCartas) return;
+
+        // 1. Sorteio Matemático (Random)
+        const randIndex = Math.floor(Math.random() * TAROT_DB.length);
+        const cartaSorteada = TAROT_DB[randIndex];
+        leitura.push(cartaSorteada);
+
+        // 2. Elementos Visuais
+        const deck = document.getElementById('deck');
+        const slotDestino = document.getElementById(`slot-${cartasTiradas + 1}`);
+        const rectDeck = deck.getBoundingClientRect();
+        const rectSlot = slotDestino.getBoundingClientRect();
+
+        // 3. Criação da Carta "Voando"
+        const carta = document.createElement('div');
+        carta.className = 'flying-card';
+        carta.style.left = rectDeck.left + 'px';
+        carta.style.top = rectDeck.top + 'px';
+        
+        // Conteúdo da Carta (Frente e Verso)
+        carta.innerHTML = `
+            <div class="face front">
+                <div class="arcana-num">${cartaSorteada.id}</div>
+                <div class="arcana-img">${cartaSorteada.icone}</div>
+                <div class="arcana-name">${cartaSorteada.nome}</div>
+            </div>
+            <div class="face back"></div>
+        `;
+
+        document.body.appendChild(carta);
+
+        // 4. Animação (Move do Deck para o Slot)
+        // Pequeno delay para permitir o render
+        setTimeout(() => {
+            const moveX = rectSlot.left - rectDeck.left;
+            const moveY = rectSlot.top - rectDeck.top;
+            
+            carta.style.transform = `translate(${moveX}px, ${moveY}px) rotateY(180deg) scale(1)`;
+        }, 50);
+
+        cartasTiradas++;
+
+        // 5. Finalização
+        if (cartasTiradas === maxCartas) {
+            document.getElementById('instruction-text').innerText = "As cartas falaram. Veja abaixo a interpretação.";
+            document.getElementById('deck').style.opacity = '0.5';
+            document.getElementById('deck').style.pointerEvents = 'none';
+            setTimeout(revelarLeitura, 1500);
+        } else {
+            document.getElementById('instruction-text').innerText = `Mentalize a próxima carta (${posicoes[cartasTiradas]})...`;
+        }
+    }
+
+    function revelarLeitura() {
+        const container = document.getElementById('text-content');
+        const area = document.getElementById('reading-result');
+        area.style.display = 'block';
+
+        leitura.forEach((carta, index) => {
+            container.innerHTML += `
+                <div class="meaning-block">
+                    <div class="position-title">${posicoes[index]}</div>
+                    <h3 class="card-title">${carta.icone} ${carta.nome}</h3>
+                    <p style="color:#ccc; line-height:1.8; font-size:1.1em;">${carta.significado}</p>
+                    <hr style="border:0; border-top:1px solid #333; margin-top:20px;">
+                </div>
+            `;
+        });
+        
+        // Scroll suave até o resultado
+        area.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // FIREBASE CHECK (Segurança)
+    const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
+    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(user => {
+        if(user){
+            db.collection("usuarios").doc(user.uid).get().then(doc => {
+                const d = doc.exists ? doc.data() : {};
+                const status = (d.status || "").toLowerCase();
+                const plano = (d.plano || "").toLowerCase();
+                if(status !== "premium" && plano !== "premium") {
+                    alert("A Sala do Oráculo é exclusiva para iniciados Premium.");
+                    window.location.href = 'dashboard.html';
+                }
+            });
+        } else { window.location.href = 'index.html'; }
+    });
+
+</script>
+</body>
+</html>
