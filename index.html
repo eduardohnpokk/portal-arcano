@@ -5,124 +5,197 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <title>Portal Arcano | Mapa Astral Completo, Sinastria e Autoconhecimento</title>
-
     <meta name="description" content="Descubra sua missão de vida com o Mapa Astral mais completo do Brasil. Análise profunda de Sol, Lua, Ascendente e Casas. Acesse agora o Portal Arcano.">
-
     <meta name="keywords" content="mapa astral, astrologia, horóscopo, signos, ascendente, revolução solar, sinastria, autoconhecimento, psicologia, mapa natal">
-
     <meta name="author" content="Eduardo Pokk">
-    <meta name="robots" content="index, follow"> <meta name="language" content="Portuguese">
-    <meta name="revisit-after" content="7 days">
-    <meta name="theme-color" content="#050505"> <meta property="og:type" content="website">
+    <meta name="robots" content="index, follow"> 
+    <meta name="theme-color" content="#050505"> 
+    <meta property="og:type" content="website">
     <meta property="og:title" content="Descubra o que os astros dizem sobre você | Portal Arcano">
-    <meta property="og:description" content="Não é apenas horóscopo. É uma ferramenta de psicologia e autoconhecimento baseada em dados astronômicos precisos. Faça seu mapa agora.">
-    <meta property="og:image" content="assets/share-image.jpg"> <meta property="og:site_name" content="Portal Arcano">
+    <meta property="og:description" content="Não é apenas horóscopo. É uma ferramenta de psicologia e autoconhecimento.">
+    <meta property="og:image" content="assets/share-image.jpg"> 
+    <meta property="og:site_name" content="Portal Arcano">
 
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Portal Arcano | Mapa Astral Completo">
-    <meta name="twitter:description" content="Análise astrológica profunda unindo tradição e tecnologia.">
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "Portal Arcano",
-      "alternateName": "Portal Arcano Astrologia",
-      "url": "https://portalarcano.com.br", 
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": "https://portalarcano.com.br/search?q={search_term_string}",
-        "query-input": "required name=search_term_string"
-      },
-      "description": "Plataforma de Astrologia Profissional e Mapa Astral Online.",
-      "publisher": {
-        "@type": "Organization",
-        "name": "Eduardo Pokk"
-      }
-    }
-    </script>
-    
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        :root { --gold: #d4af37; --bg-dark: #050505; }
-        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; text-align: center; padding: 20px; }
+        :root { --gold: #d4af37; --bg-dark: #050505; --glass: rgba(20, 20, 20, 0.8); }
         
-        .hero { padding: 50px 20px; }
-        h1 { font-family: 'Cinzel'; color: var(--gold); font-size: 2.5em; margin-bottom: 10px; }
-        .subtitle { color: #888; font-size: 1.2em; max-width: 600px; margin: 0 auto 40px auto; }
+        body { 
+            margin: 0; 
+            font-family: 'Cormorant Garamond', serif; 
+            background-color: var(--bg-dark);
+            background-image: url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80'); /* Nebulosa HD */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #e0e0e0; 
+            overflow-x: hidden;
+        }
+
+        /* OVERLAY ESCURO PARA LEITURA */
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7); z-index: -1;
+        }
         
-        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 900px; margin: 0 auto; }
-        .feature-card { border: 1px solid #333; padding: 20px; border-radius: 8px; }
-        .feature-card h3 { color: var(--gold); font-family: 'Cinzel'; }
+        /* HERO SECTION (A CAPA DO FILME) */
+        .hero-section {
+            min-height: 90vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 20px;
+            animation: fadeIn 2s;
+        }
+
+        h1 { 
+            font-family: 'Cinzel'; color: var(--gold); font-size: 4em; margin: 0; 
+            text-shadow: 0 0 30px rgba(212,175,55,0.6); letter-spacing: 5px;
+        }
         
-        .auth-box { background: #111; border: 1px solid var(--gold); padding: 30px; max-width: 400px; margin: 50px auto; border-radius: 10px; }
+        .subtitle { 
+            font-size: 1.5em; max-width: 700px; margin: 20px auto 40px auto; 
+            color: #ccc; text-shadow: 0 2px 5px #000;
+        }
+
+        .btn-cta {
+            background: linear-gradient(45deg, #d4af37, #b8860b);
+            color: #000; font-family: 'Cinzel'; font-size: 1.2em; padding: 18px 50px;
+            border: none; cursor: pointer; font-weight: bold; border-radius: 50px;
+            box-shadow: 0 0 30px rgba(212,175,55,0.4); transition: 0.3s;
+            text-decoration: none; display: inline-block;
+        }
+        .btn-cta:hover { transform: scale(1.05); box-shadow: 0 0 50px rgba(212,175,55,0.8); }
+
+        /* FEATURES (POR QUE NÓS?) */
+        .features-section {
+            padding: 80px 20px; background: #0a0a0a; text-align: center;
+        }
+        .section-title { font-family: 'Cinzel'; color: var(--gold); font-size: 2.5em; margin-bottom: 50px; }
         
-        /* Inputs e Layout */
-        input { width: 90%; padding: 10px; margin: 10px 0; background: #000; border: 1px solid #333; color: #fff; border-radius: 4px; }
-        button { width: 100%; padding: 12px; background: var(--gold); border: none; font-weight: bold; cursor: pointer; margin-top: 10px; font-family: 'Cinzel'; border-radius: 4px; }
+        .features-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 40px; max-width: 1100px; margin: 0 auto; 
+        }
         
-        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 96%; margin: 0 auto; }
-        .row-2 input { width: 100%; box-sizing: border-box; } /* Ajuste para não quebrar o grid */
+        .feature-card { 
+            padding: 30px; border: 1px solid #333; border-radius: 10px; 
+            transition: 0.3s; background: #111;
+        }
+        .feature-card:hover { border-color: var(--gold); transform: translateY(-10px); }
+        .feature-icon { font-size: 3em; color: var(--gold); margin-bottom: 20px; }
+        .feature-card h3 { font-family: 'Cinzel'; font-size: 1.4em; color: #fff; }
+
+        /* ÁREA DE LOGIN/CADASTRO (AGORA É UM TEMPLO) */
+        .auth-section {
+            padding: 80px 20px;
+            background: url('https://www.transparenttextures.com/patterns/stardust.png'), #050505;
+            display: flex; justify-content: center;
+        }
+
+        .auth-box { 
+            background: var(--glass); backdrop-filter: blur(10px);
+            border: 1px solid var(--gold); padding: 40px; 
+            max-width: 450px; width: 100%; border-radius: 15px; 
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
         
-        .toggle { color: #888; margin-top: 15px; cursor: pointer; text-decoration: underline; font-size: 0.9em; }
+        /* FORMULÁRIO */
+        input { 
+            width: 100%; padding: 15px; margin: 10px 0; box-sizing: border-box;
+            background: rgba(0,0,0,0.5); border: 1px solid #444; color: #fff; 
+            border-radius: 5px; font-family: 'Cormorant Garamond'; font-size: 1.1em;
+        }
+        input:focus { border-color: var(--gold); outline: none; }
         
-        /* Labels para inputs específicos */
-        label { display: block; text-align: left; margin-left: 5%; font-size: 0.8em; color: var(--gold); margin-top: 5px; }
+        label { display: block; text-align: left; font-size: 0.9em; color: var(--gold); margin-top: 10px; font-family: 'Cinzel'; }
+        
+        .auth-btn { 
+            width: 100%; padding: 15px; background: var(--gold); border: none; 
+            font-weight: bold; cursor: pointer; margin-top: 20px; 
+            font-family: 'Cinzel'; border-radius: 5px; font-size: 1.1em;
+        }
+        
+        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .toggle { color: #888; margin-top: 20px; cursor: pointer; text-decoration: underline; font-size: 0.95em; text-align: center; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @media(max-width: 768px) { h1 { font-size: 2.8em; } .subtitle { font-size: 1.2em; } }
     </style>
 </head>
 <body>
 
-    <div class="hero">
+    <div class="hero-section">
         <h1>PORTAL ARCANO</h1>
-        <p class="subtitle">Descubra seu destino através da Astrologia, Numerologia e Oráculos Sagrados.</p>
+        <p class="subtitle">Não é apenas Astrologia. É o mapa da sua alma. Descubra sua missão, seus ciclos e seu poder oculto com tecnologia astronômica de precisão.</p>
+        <a href="#templo" class="btn-cta">INICIAR JORNADA</a>
+    </div>
 
-        <div class="features">
-            <div class="feature-card"><h3>Mapa Astral</h3><p>Entenda sua essência cósmica.</p></div>
-            <div class="feature-card"><h3>Oráculo IA</h3><p>Perguntas diretas aos mestres.</p></div>
-            <div class="feature-card"><h3>Rituais</h3><p>Conexão com os elementos.</p></div>
+    <div class="features-section">
+        <h2 class="section-title">SUAS FERRAMENTAS DE PODER</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <i class="fas fa-chart-pie feature-icon"></i>
+                <h3>Mapa Astral Real</h3>
+                <p>Esqueça horóscopo de jornal. Calculamos a posição exata de cada planeta no segundo do seu nascimento.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-eye feature-icon"></i>
+                <h3>Oráculo Sagrado</h3>
+                <p>Tiragens de Tarot e Runas para momentos de dúvida. Receba orientações diretas e sem rodeios.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-star feature-icon"></i>
+                <h3>Previsão Diária</h3>
+                <p>Saiba como o céu de hoje interage com o seu mapa. Astrologia preditiva personalizada.</p>
+            </div>
         </div>
     </div>
 
-    <div class="auth-box">
-        <h2 id="form-title" style="color:var(--gold); font-family:'Cinzel'">Entrar no Templo</h2>
-        
-        <div id="login-form">
-            <input type="email" id="email" placeholder="E-mail">
-            <input type="password" id="pass" placeholder="Senha">
-            <button onclick="login()">ENTRAR</button>
-            <p class="toggle" onclick="showRegister()">Não tem conta? Cadastre-se</p>
-        </div>
-
-        <div id="register-form" style="display:none">
-            <input type="text" id="reg-nome" placeholder="Nome Completo">
-            <input type="email" id="reg-email" placeholder="E-mail">
-            <input type="password" id="reg-pass" placeholder="Senha">
+    <div class="auth-section" id="templo">
+        <div class="auth-box">
+            <div style="text-align:center; margin-bottom:20px;">
+                <i class="fas fa-moon" style="font-size:3em; color:var(--gold);"></i>
+            </div>
+            <h2 id="form-title" style="color:var(--gold); font-family:'Cinzel'; text-align:center; margin:0 0 20px 0;">Entrar no Templo</h2>
             
-            <div class="row-2">
-                <div>
-                    <label>Nascimento</label>
-                    <input type="date" id="reg-nasc">
-                </div>
-                <div>
-                    <label>Horário</label>
-                    <input type="time" id="reg-hora">
-                </div>
+            <div id="login-form">
+                <input type="email" id="email" placeholder="Seu E-mail Sagrado">
+                <input type="password" id="pass" placeholder="Senha">
+                <button class="auth-btn" onclick="login()">ENTRAR</button>
+                <p class="toggle" onclick="showRegister()">Ainda não é um iniciado? Cadastre-se</p>
             </div>
 
-            <div class="row-2">
-                <input type="text" id="reg-cidade" placeholder="Cidade">
-                <input type="text" id="reg-uf" placeholder="UF" maxlength="2">
-            </div>
+            <div id="register-form" style="display:none">
+                <input type="text" id="reg-nome" placeholder="Nome Completo">
+                <input type="email" id="reg-email" placeholder="E-mail">
+                <input type="password" id="reg-pass" placeholder="Crie uma Senha">
+                
+                <div class="row-2">
+                    <div>
+                        <label>Data de Nascimento</label>
+                        <input type="date" id="reg-nasc">
+                    </div>
+                    <div>
+                        <label>Hora Exata</label>
+                        <input type="time" id="reg-hora">
+                    </div>
+                </div>
 
-            <input type="tel" id="reg-tel" placeholder="Telefone / WhatsApp">
-            
-            <button onclick="register()">CRIAR CONTA</button>
-            <p class="toggle" onclick="showLogin()">Já tem conta? Entrar</p>
+                <div class="row-2">
+                    <input type="text" id="reg-cidade" placeholder="Cidade">
+                    <input type="text" id="reg-uf" placeholder="UF" maxlength="2">
+                </div>
+
+                <input type="tel" id="reg-tel" placeholder="WhatsApp (Opcional)">
+                
+                <button class="auth-btn" onclick="register()">CRIAR MAPA AGORA</button>
+                <p class="toggle" onclick="showLogin()">Já possui conta? Entrar</p>
+            </div>
         </div>
     </div>
 
@@ -132,11 +205,12 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // ROTEAMENTO INTELIGENTE (Lê coleção 'usuarios')
+        // ROTEAMENTO INTELIGENTE (MANTIDO)
         auth.onAuthStateChanged(user => {
             if (user) {
-                const btn = document.querySelector('button');
-                if(btn) btn.innerText = "Verificando...";
+                // Efeito visual no botão enquanto carrega
+                const btns = document.querySelectorAll('button');
+                btns.forEach(b => b.innerText = "Verificando...");
                 
                 db.collection("usuarios").doc(user.uid).get().then(doc => {
                     if (doc.exists) {
@@ -149,7 +223,6 @@
                             window.location.href = "dashboard.html";
                         }
                     } else {
-                        // Se não achar o doc, cria um básico e manda pro free
                         window.location.href = "dashboard.html";
                     }
                 }).catch(e => {
@@ -169,7 +242,7 @@
         }
 
         function register() {
-            // 1. CAPTURA OS DADOS DO FORMULÁRIO COMPLETO
+            // 1. CAPTURA
             const nome = document.getElementById('reg-nome').value;
             const email = document.getElementById('reg-email').value;
             const pass = document.getElementById('reg-pass').value;
@@ -184,23 +257,21 @@
                 return alert("Por favor, preencha todos os campos obrigatórios para o Mapa Astral.");
             }
 
-            // 3. CRIAÇÃO NO FIREBASE
+            // 3. CRIAÇÃO
             auth.createUserWithEmailAndPassword(email, pass).then(cred => {
-                // Salva na coleção 'usuarios' (Português, conforme sua estrutura original)
                 return db.collection("usuarios").doc(cred.user.uid).set({
                     nome: nome,
                     email: email,
-                    dataNascimento: nasc, // Campo essencial para o cálculo
-                    horaNascimento: hora, // Campo essencial para o ascendente
+                    dataNascimento: nasc, 
+                    horaNascimento: hora, 
                     cidade: cidade,
                     estado: uf,
                     telefone: tel,
-                    status: 'free',     // Começa como Free
-                    plano: 'gratuito',  // Começa como Gratuito
+                    status: 'free',     
+                    plano: 'gratuito',  
                     data_cadastro: new Date().toISOString()
                 });
             }).then(() => {
-                // Redireciona para o Dashboard Free após cadastro
                 window.location.href = "dashboard.html";
             }).catch(e => alert("Erro ao cadastrar: " + e.message));
         }
@@ -209,6 +280,7 @@
             document.getElementById('login-form').style.display='none'; 
             document.getElementById('register-form').style.display='block'; 
             document.getElementById('form-title').innerText="Cadastro de Iniciado"; 
+            document.getElementById('templo').scrollIntoView({behavior: "smooth"});
         }
         function showLogin() { 
             document.getElementById('register-form').style.display='none'; 
