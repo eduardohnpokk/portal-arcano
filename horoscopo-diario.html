@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Arcano | Seu Céu Agora</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+    <script src="astronomy.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js';"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #111; }
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; line-height: 1.6; }
+        
+        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { font-size: 4em; color: var(--gold); animation: spin 2s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 20px 20px 100px 20px; }
+        .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid #222; padding-bottom: 20px; }
+        .back-btn { cursor: pointer; color: var(--gold); font-family: 'Cinzel'; text-transform: uppercase; letter-spacing: 1px; }
+
+        .date-display { text-align: center; margin-bottom: 40px; }
+        .today-label { font-family: 'Cinzel'; color: #666; letter-spacing: 3px; font-size: 0.9em; text-transform: uppercase; }
+        .current-date { font-family: 'Cinzel'; color: var(--gold); font-size: 2.5em; margin: 10px 0; text-shadow: 0 0 15px rgba(212,175,55,0.3); }
+
+        /* SEÇÃO DE DESTAQUE (LUA) */
+        .moon-section { 
+            background: linear-gradient(135deg, #1a1a1a 0%, #050505 100%); 
+            border: 1px solid var(--gold); border-radius: 8px; padding: 30px; 
+            display: flex; align-items: center; gap: 30px; margin-bottom: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .moon-icon { font-size: 4em; color: #fff; text-shadow: 0 0 20px #fff; }
+        .moon-info h3 { margin: 0; color: var(--gold); font-family: 'Cinzel'; font-size: 1.5em; }
+        
+        /* CARDS DE TRÂNSITOS */
+        .transits-grid { display: grid; gap: 30px; }
+        .transit-card { 
+            background: #111; border-left: 4px solid #333; padding: 25px; 
+            border-radius: 4px; transition: transform 0.3s;
+        }
+        .transit-card:hover { transform: translateX(10px); border-left-color: var(--gold); background: #161616; }
+        
+        .planet-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+        .p-icon { font-size: 1.8em; color: var(--gold); }
+        .p-name { font-family: 'Cinzel'; font-size: 1.3em; color: #fff; }
+        .house-badge { background: #222; color: #888; padding: 2px 10px; border-radius: 10px; font-size: 0.8em; margin-left: auto; border: 1px solid #333; }
+        
+        .impact-text { color: #ccc; text-align: justify; margin-bottom: 10px; }
+        .advice-text { color: #d4af37; font-style: italic; font-size: 0.95em; border-top: 1px solid #222; padding-top: 10px; margin-top: 15px; display: block; }
+
+        @media(max-width: 600px) { 
+            .moon-section { flex-direction: column; text-align: center; } 
+            .current-date { font-size: 1.8em; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="loading-screen">
+    <i class="fas fa-star spinner"></i>
+    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Calculando Trânsitos...</p>
+</div>
+
+<div class="container">
+    <div class="nav-bar">
+        <div class="back-btn" onclick="window.location.href='dashboard-premium.html'">← Voltar ao Hub</div>
+        <div style="color:#444; font-family:'Cinzel';">ASTROLOGIA PREDITIVA</div>
+    </div>
+
+    <div class="date-display">
+        <div class="today-label">Previsão para Hoje</div>
+        <div class="current-date" id="display-date">...</div>
+        <p style="color:#888; font-style:italic;">Calculado sobre o seu Mapa Natal exato.</p>
+    </div>
+
+    <div class="moon-section" id="moon-widget">
+        </div>
+
+    <h2 style="text-align:center; color:var(--gold); font-family:'Cinzel'; margin: 50px 0 30px 0;">TRÂNSITOS PESSOAIS ATIVOS</h2>
+    
+    <div class="transits-grid" id="transits-list">
+        </div>
+</div>
+
+<script>
+    // ======================================================
+    // 1. BANCO DE DADOS DE TRÂNSITOS (INTELIGÊNCIA PREDITIVA)
+    // ======================================================
+    // Estrutura: Planeta -> Casa -> Significado
+    const TRANSIT_DB = {
+        "Sol": [
+            "É hora de brilhar pessoalmente. Sua vitalidade está alta e você sente necessidade de iniciar coisas novas. O mundo está olhando para você.", // Casa 1
+            "O foco está nas finanças. Um excelente momento para rever orçamentos, buscar novas fontes de renda e valorizar seus talentos.", // Casa 2
+            "Sua mente está acelerada. O dia pede comunicação, reuniões, estudos rápidos e trocas de ideias. O telefone não vai parar.", // Casa 3
+            "A energia se volta para dentro. É o momento de cuidar da casa, da família e da sua base emocional. Evite o mundo lá fora se puder.", // Casa 4
+            "Criatividade explodindo! Um dia para romance, hobbies, diversão e estar com filhos. Sua criança interior quer brincar.", // Casa 5
+            "Foco total no trabalho e na saúde. O dia é para organizar a rotina, limpar pendências e ser útil. A eficiência é sua arma hoje.", // Casa 6
+            "O outro é o foco. Parcerias, casamento ou clientes exigem sua atenção. Não é hora de agir sozinho, mas de negociar.", // Casa 7
+            "Dia de intensidade. Assuntos profundos, crises emocionais ou questões financeiras compartilhadas podem surgir. Transforme-se.", // Casa 8
+            "Sua mente quer expandir. Ótimo para planejar viagens, estudos superiores ou conectar-se com sua espiritualidade. Olhe longe.", // Casa 9
+            "Sua carreira está em destaque. Você está visível para chefes e autoridades. É o momento de mostrar competência e buscar reconhecimento.", // Casa 10
+            "Dia de socializar. Amigos, grupos e projetos futuros são favorecidos. Saia da bolha e conecte-se com ideais coletivos.", // Casa 11
+            "Recolhimento necessário. Sua bateria social pode estar baixa. O dia favorece a introspecção, sonhos e bastidores. Descanse." // Casa 12
+        ],
+        "Mercúrio": [
+            "Você está falando o que pensa sem filtro. Ótimo para se expressar, mas cuidado com a impulsividade verbal.", // Casa 1
+            "Sua mente está focada em dinheiro e negócios. Bom dia para negociações comerciais e planejamento financeiro.", // Casa 2
+            "Superatividade mental. Pequenas viagens e muitas conversas. Cuidado com a dispersão e fofocas.", // Casa 3
+            "Conversas importantes em família ou sobre imóveis. A mente se volta para o passado e memórias.", // Casa 4
+            "Mente criativa e lúdica. Ótimo para escrever, criar jogos ou ter conversas divertidas com quem ama.", // Casa 5
+            "Foco nos detalhes. O dia é perfeito para organizar planilhas, agendar exames e resolver problemas burocráticos.", // Casa 6
+            "Diálogo é a chave. Bom para resolver conflitos em relacionamentos e assinar contratos em parceria.", // Casa 7
+            "Pensamentos profundos e investigativos. Você está detetive hoje. Segredos podem ser revelados ou compreendidos.", // Casa 8
+            "Interesse por filosofia e grandes ideias. A mente quer aprender algo novo e complexo. Fuja do trivial.", // Casa 9
+            "Comunicação profissional em alta. Fale com clareza no trabalho. Suas palavras têm peso de autoridade hoje.", // Casa 10
+            "Troca de ideias com grupos. Brainstorming favorecido. Sua mente está futurista e inovadora.", // Casa 11
+            "Intuição alta, lógica baixa. Pode haver confusão mental ou segredos. Escreva seus sonhos e evite assinar coisas importantes." // Casa 12
+        ],
+        "Vênus": [
+            "Você está magnético(a). As pessoas se sentem atraídas por você. Ótimo dia para cuidar da aparência.", // Casa 1
+            "Sorte financeira ou gastos com prazeres. Você sente necessidade de conforto material e boa comida.", // Casa 2
+            "Palavras doces. A comunicação está harmoniosa e diplomática. Ótimo para elogiar e seduzir pela conversa.", // Casa 3
+            "Harmonia no lar. Bom para decorar a casa, receber visitas íntimas e fazer as pazes com a família.", // Casa 4
+            "Romance no ar! O dia favorece encontros, diversão e expressão artística. Deixe-se apaixonar pela vida.", // Casa 5
+            "Prazer na rotina. Você encontra beleza nas pequenas coisas do dia a dia. A saúde e o trabalho fluem com leveza.", // Casa 6
+            "Amor e parcerias em alta. É o melhor momento para estar a dois ou fechar acordos benéficos.", // Casa 7
+            "Intimidade profunda. A sexualidade e a fusão emocional estão intensas. Pode haver ganhos através de outros.", // Casa 8
+            "Amor pelo estrangeiro ou pelo conhecimento. Você se atrai pelo que é diferente e exótico hoje.", // Casa 9
+            "Charme profissional. Você está sendo bem visto por superiores. A diplomacia abre portas na carreira.", // Casa 10
+            "Diversão com amigos. O amor pode surgir dentro de um círculo social. Atividades em grupo são prazerosas.", // Casa 11
+            "Amor secreto ou sacrifício. Você pode estar cuidando de alguém ou vivendo um sentimento platônico e espiritual." // Casa 12
+        ],
+        "Marte": [
+            "Energia explosiva! Você quer fazer tudo do seu jeito. Cuidado com acidentes por pressa e agressividade.", // Casa 1
+            "Gasto impulsivo de energia ou dinheiro. Você vai lutar pelo que é seu. Defenda seus valores, mas não quebre o cofrinho.", // Casa 2
+            "Debates acalorados. Você fala com assertividade (ou grosseria). Cuidado no trânsito e com palavras cortantes.", // Casa 3
+            "Conflitos domésticos ou obras em casa. A energia está acumulada no lar. Quebre uma parede, não pratos.", // Casa 4
+            "Competitividade nos jogos ou romance intenso. Você está caçador(a). Energia sexual alta e vontade de se arriscar.", // Casa 5
+            "Trabalho duro. Você tem energia para limpar tudo o que estava parado. Cuidado com febre ou inflamações.", // Casa 6
+            "Conflitos com parceiros ou inimigos declarados. A diplomacia falha, a guerra fria esquenta. Escolha suas batalhas.", // Casa 7
+            "Crise transformadora. A energia sexual ou conflitos por herança/dinheiro podem surgir. Corte o que está podre.", // Casa 8
+            "Defesa de crenças. Você pode brigar por ideais ou política. Vontade de se aventurar fisicamente.", // Casa 9
+            "Ambição desmedida. Você quer conquistar o topo a qualquer custo. Cuidado para não atropelar colegas.", // Casa 10
+            "Liderança em grupos ou brigas com amigos. Você quer comandar o time. Canalize isso para metas futuras.", // Casa 11
+            "Inimigos ocultos ou raiva reprimida. Você pode se sentir sem energia física. Cuidado com a autossabotagem." // Casa 12
+        ],
+        "Júpiter": [
+            "Otimismo renovado! Você sente que pode tudo. Sorte pessoal e proteção. Cuidado apenas para não engordar.", // Casa 1
+            "Expansão financeira. O dinheiro entra com mais facilidade, mas a vontade de gastar também cresce.", // Casa 2
+            "Mente aberta. Ótimo para aprender idiomas e fazer contatos. Boas notícias podem chegar por mensagem.", // Casa 3
+            "A família cresce ou a casa melhora. Sensação de paz interior e proteção doméstica. Bom para mudar de casa.", // Casa 4
+            "Excesso de confiança no amor e na sorte. Ótimo para festas. A vida parece um grande palco iluminado.", // Casa 5
+            "Melhora na saúde e no ambiente de trabalho. Você encontra sentido no servir. Proteção contra doenças.", // Casa 6
+            "Benefícios através de parcerias. Um casamento ou sociedade pode trazer crescimento e prosperidade.", // Casa 7
+            "Heranças ou apoio financeiro de terceiros. Transformações psicológicas positivas e libertadoras.", // Casa 8
+            "A grande viagem! Sorte em assuntos legais, acadêmicos e no exterior. Sua fé move montanhas hoje.", // Casa 9
+            "Sucesso público. Promoções, honrarias e reconhecimento profissional vêm com facilidade. Aproveite a onda.", // Casa 10
+            "Amigos poderosos ajudam. Seus sonhos ganham patrocinadores. A vida social está expandida e feliz.", // Casa 11
+            "Proteção espiritual. Um anjo da guarda parece atuar nos bastidores. Ótimo para retiros e caridade." // Casa 12
+        ],
+        "Saturno": [
+            "O peso da realidade. Você se sente mais velho ou cansado. É hora de assumir responsabilidades sérias sobre si mesmo.", // Casa 1
+            "Restrição financeira. O dinheiro exige trabalho duro e economia. Não é hora de gastar, mas de estruturar.", // Casa 2
+            "Mente séria e preocupada. Comunicação difícil ou bloqueada. Estude algo difícil e fale pouco.", // Casa 3
+            "Peso familiar. Responsabilidades com pais ou problemas estruturais na casa. O passado cobra a conta.", // Casa 4
+            "Bloqueio criativo ou frieza no romance. A diversão parece obrigação. Leve a sério seus hobbies ou filhos.", // Casa 5
+            "Trabalho pesado. A rotina é exigente e cansativa. Cuide dos dentes, ossos e postura. Disciplina é tudo.", // Casa 6
+            "Esfriamento nas relações. Teste de realidade no casamento. Se a relação é sólida, fica. Se não, quebra.", // Casa 7
+            "Medo da perda ou dívidas. É hora de pagar o que deve e encarar a mortalidade com maturidade.", // Casa 8
+            "Crise de fé ou dificuldades em viagens/estudos. O dogmatismo pode atrapalhar. Busque sabedoria real, não teórica.", // Casa 9
+            "O ápice da cobrança. Chefes exigentes e muito trabalho. Sua reputação está sendo testada. Aguente firme.", // Casa 10
+            "Poucos amigos, mas verdadeiros. Seleção natural no círculo social. Projetos de longo prazo exigem paciência.", // Casa 11
+            "Solidão e isolamento. Medos inconscientes vêm à tona. O trabalho deve ser feito nos bastidores, sem aplausos." // Casa 12
+        ]
+    };
+
+    // --- 2. CONFIGURAÇÃO BÁSICA ---
+    const DB_COORDS = { "sp": {lat:-23.55, lon:-46.63}, "rj": {lat:-22.90, lon:-43.17}, "default": {lat:-15.79, lon:-47.89} };
+    const SIGNOS = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
+    
+    // --- 3. LÓGICA ASTRONÔMICA DE TRÂNSITOS ---
+    function calcularTransitos(usuario) {
+        if (typeof Astronomy === 'undefined') return setTimeout(() => calcularTransitos(usuario), 500);
+
+        // A. Calcular ASCENDENTE NATAL (O ponto de partida)
+        const dataNasc = new Date(usuario.dataNascimento + "T" + usuario.horaNascimento);
+        const coords = DB_COORDS[usuario.estado?.toLowerCase()] || DB_COORDS["default"];
+        
+        const dateNatal = Astronomy.MakeTime(dataNasc);
+        const observer = new Astronomy.Observer(coords.lat, coords.lon, 0);
+        
+        // Cálculo Sideral do Ascendente Natal
+        const msd = Astronomy.SiderealTime(dateNatal);
+        const lst = (msd + coords.lon / 15.0) * 15;
+        const ramc = lst * Math.PI/180;
+        const eps = 23.439 * Math.PI/180;
+        const latRad = coords.lat * Math.PI/180;
+        let ascRad = Math.atan2(Math.cos(ramc), -Math.sin(ramc)*Math.cos(eps) - Math.tan(latRad)*Math.sin(eps));
+        const ascGrauNatal = (ascRad * 180/Math.PI + 360) % 360;
+
+        // B. Calcular PLANETAS AGORA (Trânsitos)
+        const agora = new Date();
+        const dateAgora = Astronomy.MakeTime(agora);
+        
+        // Exibir Data
+        document.getElementById('display-date').innerText = agora.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+        const listaPlanetas = ["Sol", "Mercúrio", "Vênus", "Marte", "Júpiter", "Saturno"]; // Lua é separada
+        const nomesIngles = {"Sol":"Sun", "Mercúrio":"Mercury", "Vênus":"Venus", "Marte":"Mars", "Júpiter":"Jupiter", "Saturno":"Saturn"};
+        const htmlTransitos = document.getElementById('transits-list');
+        htmlTransitos.innerHTML = "";
+
+        // 1. Processar LUA (Clima Astral)
+        const equLua = Astronomy.Equator("Moon", dateAgora, observer, true, true);
+        const longLua = Astronomy.Ecliptic(equLua.vec).elon;
+        const signoLuaIdx = Math.floor(longLua / 30);
+        
+        // Onde a Lua cai no mapa da pessoa (Casa)
+        let distLua = (longLua - ascGrauNatal + 360) % 360;
+        let casaLua = Math.floor(distLua / 30) + 1;
+
+        document.getElementById('moon-widget').innerHTML = `
+            <div class="moon-icon">🌑</div>
+            <div class="moon-info">
+                <h3>A Lua Hoje está em ${SIGNOS[signoLuaIdx]}</h3>
+                <p style="color:#ccc; margin-top:5px;">
+                    Ela transita pela sua <strong>Casa ${casaLua}</strong>. 
+                    O clima emocional do seu dia está focado em: <span style="color:var(--gold)">${getAssuntoCasa(casaLua)}</span>.
+                </p>
+            </div>
+        `;
+
+        // 2. Processar PLANETAS
+        listaPlanetas.forEach(pNome => {
+            const pKey = nomesIngles[pNome];
+            const equ = Astronomy.Equator(pKey, dateAgora, observer, true, true);
+            const long = Astronomy.Ecliptic(equ.vec).elon;
+            
+            // Cálculo da Casa de Trânsito (Long Atual - Asc Natal)
+            let distancia = (long - ascGrauNatal + 360) % 360;
+            let casaTransito = Math.floor(distancia / 30) + 1; // 1 a 12
+            
+            // Pega o Texto do Banco de Dados
+            // O array tem index 0-11, então casaTransito - 1
+            const textoImpacto = TRANSIT_DB[pNome][casaTransito - 1];
+            
+            // Renderiza Card
+            const icons = {"Sol":"☉", "Mercúrio":"☿", "Vênus":"♀", "Marte":"♂", "Júpiter":"♃", "Saturno":"♄"};
+            
+            htmlTransitos.innerHTML += `
+                <div class="transit-card">
+                    <div class="planet-header">
+                        <span class="p-icon">${icons[pNome]}</span>
+                        <span class="p-name">${pNome}</span>
+                        <span class="house-badge">Ativando Casa ${casaTransito}</span>
+                    </div>
+                    <div class="impact-text">${textoImpacto}</div>
+                    <span class="advice-text">Dica do Oráculo: Use essa energia a seu favor.</span>
+                </div>
+            `;
+        });
+
+        document.getElementById('loading-screen').style.display = 'none';
+    }
+
+    function getAssuntoCasa(num) {
+        const assuntos = ["Identidade e Corpo", "Finanças e Valores", "Comunicação e Trocas", "Lar e Família", "Criatividade e Romance", "Rotina e Saúde", "Parcerias e Casamento", "Transformação e Crises", "Viagens e Expansão", "Carreira e Status", "Amigos e Futuro", "Inconsciente e Espiritualidade"];
+        return assuntos[num-1];
+    }
+
+    // --- 4. FIREBASE AUTH ---
+    const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
+    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(user => {
+        if(user){
+            db.collection("usuarios").doc(user.uid).get().then(doc => {
+                const d = doc.exists ? doc.data() : {};
+                const status = (d.status || "").toLowerCase();
+                const plano = (d.plano || "").toLowerCase();
+                
+                if(status !== "premium" && plano !== "premium") {
+                    alert("Acesso exclusivo para membros Premium.");
+                    window.location.href = 'dashboard.html';
+                    return;
+                }
+
+                calcularTransitos(d);
+
+            }).catch(e => window.location.href = 'index.html');
+        } else { window.location.href = 'index.html'; }
+    });
+</script>
+</body>
+</html>
