@@ -9,7 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
-    <script src="astronomy.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js';"></script>
+    <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -35,27 +35,24 @@
         .page-title { font-family: 'Cinzel'; color: var(--gold); font-size: 3em; margin: 0; text-shadow: 0 0 20px rgba(212,175,55,0.4); }
         .year-highlight { font-family: 'Cinzel'; font-size: 1.5em; color: #fff; margin-top: 10px; display: block; }
 
-        /* CARDS PRINCIPAIS */
         .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-bottom: 50px; }
         .info-card { background: rgba(15, 15, 15, 0.9); border: 1px solid #333; padding: 30px; border-radius: 8px; text-align: center; border-top: 3px solid var(--gold); }
         .info-label { font-family: 'Cinzel'; font-size: 0.8em; color: #888; text-transform: uppercase; letter-spacing: 2px; }
         .info-value { font-family: 'Cinzel'; font-size: 1.8em; color: var(--gold); margin: 10px 0; }
 
-        /* BLOCOS DE TEXTO PROFUNDO */
         .analysis-section { background: rgba(20, 20, 20, 0.8); border-left: 4px solid var(--gold); padding: 40px; margin-bottom: 40px; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .analysis-section h3 { font-family: 'Cinzel'; color: var(--gold); margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
         .analysis-text { text-align: justify; color: #ccc; }
         .highlight-gold { color: var(--gold); font-weight: bold; }
 
         @media(max-width: 600px) { .page-title { font-size: 2em; } }
-        @media print { .btn-back, #loading-screen { display: none; } body { background: #fff; color: #000; } }
     </style>
 </head>
 <body>
 
 <div id="loading-screen">
     <i class="fas fa-sun spinner"></i>
-    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Calculando Retorno Solar...</p>
+    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Sincronizando Órbitas...</p>
 </div>
 
 <div class="container">
@@ -66,20 +63,20 @@
 
     <header class="page-header">
         <h1 class="page-title">REVOLUÇÃO SOLAR</h1>
-        <span class="year-highlight" id="user-name">Iniciado</span>
-        <p style="color:#888; font-style:italic;">A tônica do seu destino para os próximos 12 meses.</p>
+        <span class="year-highlight" id="user-name">Carregando Nome...</span>
+        <p style="color:#888; font-style:italic;">O seu ano pessoal começa aqui.</p>
     </header>
 
     <div class="summary-grid">
         <div class="info-card">
             <div class="info-label">Início do Ciclo</div>
             <div class="info-value" id="return-date">--/--/--</div>
-            <div style="font-size:0.8em; color:#666;">Momento exato do Retorno Solar</div>
+            <div style="font-size:0.8em; color:#666;">Momento do Retorno Solar</div>
         </div>
         <div class="info-card">
             <div class="info-label">Ascendente do Ano</div>
-            <div class="info-value" id="asc-year">Apurando...</div>
-            <div style="font-size:0.8em; color:#666;">A lente pela qual você verá o mundo</div>
+            <div class="info-value" id="asc-year">Calculando...</div>
+            <div style="font-size:0.8em; color:#666;">A tônica do seu desenvolvimento</div>
         </div>
     </div>
 
@@ -87,23 +84,23 @@
 </div>
 
 <script>
-    const DB_COORDS = { "default": {lat:-23.55, lon:-46.63} };
+    const DB_COORDS = { "default": {lat:-23.55, lon:-46.63} }; // Padrão SP para precisão
     const SIGNOS = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
 
     const TEXTOS_REVOLUCAO = {
         "Ascendente": {
-            "Áries": "Este é um ano de afirmação pessoal e novos começos. Você sentirá uma urgência em agir e liderar. A energia é de coragem, mas o desafio é a paciência.",
-            "Touro": "O foco do ano é a consolidação material e a busca por conforto. É um período para plantar colheitas de longo prazo e valorizar o que é tangível.",
-            "Gêmeos": "Um ciclo de intensa movimentação intelectual, viagens curtas e muitos contatos. Sua curiosidade estará no auge, favorecendo estudos e trocas.",
-            "Câncer": "A tônica recai sobre o lar, a família e a segurança emocional. Você buscará raízes e poderá estar mais voltado para suas bases íntimas.",
-            "Leão": "Um ano para brilhar e ser visto. Sua criatividade e autoexpressão pedem espaço. É o momento de assumir o seu palco pessoal com confiança.",
-            "Virgem": "Período de organização, foco no trabalho e atenção à saúde. A excelência nos detalhes será sua bússola para o sucesso neste ciclo.",
-            "Libra": "As parcerias e os relacionamentos ganham destaque total. É um ano para buscar equilíbrio, diplomacia e harmonia em todas as associações.",
-            "Escorpião": "Um ciclo de profundas transformações e renascimentos. Você lidará com assuntos intensos e terá o poder de transmutar crises em força.",
-            "Sagitário": "Expansão de horizontes, fé e busca por significado. O ano favorece viagens, estudos superiores e uma visão mais otimista da existência.",
-            "Capricórnio": "Foco total na carreira, nas responsabilidades e na reputação. É um ano de 'escalar a montanha' com disciplina e persistência.",
-            "Aquário": "Inovação, projetos sociais e liberdade. Você buscará caminhos não convencionais e se sentirá atraído por grupos que compartilham seus ideais.",
-            "Peixes": "Um ciclo de sensibilidade aguçada, espiritualidade e encerramentos. A intuição será sua maior aliada para navegar as águas do subconsciente."
+            "Áries": "Este é um ano de afirmação pessoal e novos começos. A energia é de coragem e ação.",
+            "Touro": "O foco do ano é a consolidação material e a busca por estabilidade real.",
+            "Gêmeos": "Um ciclo de intensa movimentação intelectual e novos contatos sociais.",
+            "Câncer": "A tônica recai sobre o lar e a segurança emocional profunda.",
+            "Leão": "Um ano para brilhar. Sua criatividade e autoexpressão pedem espaço.",
+            "Virgem": "Período de organização, foco no trabalho e atenção à saúde prática.",
+            "Libra": "As parcerias e os relacionamentos ganham destaque absoluto este ano.",
+            "Escorpião": "Um ciclo de profundas transformações e renascimentos pessoais.",
+            "Sagitário": "Expansão de horizontes, fé e novas aventuras intelectuais ou físicas.",
+            "Capricórnio": "Foco total na carreira e na escalada de metas a longo prazo.",
+            "Aquário": "Inovação e liberdade. Você buscará caminhos fora do convencional.",
+            "Peixes": "Um ciclo de sensibilidade aguçada e encerramentos necessários."
         }
     };
 
@@ -117,10 +114,8 @@
             db.collection("usuarios").doc(user.uid).get().then(doc => {
                 if(doc.exists) {
                     const d = doc.data();
-                    if((d.status || "").toLowerCase() === "premium" || (d.plano || "").toLowerCase() === "premium"){
-                        document.getElementById('user-name').innerText = d.nome || "Iniciado";
-                        processarRevolucao(d);
-                    } else { window.location.href = "dashboard.html"; }
+                    document.getElementById('user-name').innerText = d.nome || "Iniciado";
+                    processarRevolucao(d);
                 }
             });
         } else { window.location.href = "index.html"; }
@@ -131,30 +126,36 @@
             if (typeof Astronomy === 'undefined') return setTimeout(() => processarRevolucao(usuario), 500);
 
             const dataTxt = usuario.dataNascimento || usuario.nascimento;
-            if(!dataTxt) throw new Error("Data de nascimento não encontrada.");
-
             const dataNasc = new Date(dataTxt + "T" + (usuario.horaNascimento || "12:00"));
-            if(isNaN(dataNasc.getTime())) throw new Error("Formato de data inválido.");
-
+            
+            // 1. Obter Longitude do Sol Natal
             const timeNatal = Astronomy.MakeTime(dataNasc);
             const obs = new Astronomy.Observer(DB_COORDS.default.lat, DB_COORDS.default.lon, 0);
             const equNatal = Astronomy.Equator("Sun", timeNatal, obs, true, true);
             const longNatal = Astronomy.Ecliptic(equNatal.vec).elon;
 
+            // 2. Calcular Retorno Solar para 2026
             const anoBusca = 2026;
-            let timeRetorno = Astronomy.MakeTime(new Date(anoBusca, dataNasc.getMonth(), dataNasc.getDate() - 1));
+            let currentJSDate = new Date(anoBusca, dataNasc.getMonth(), dataNasc.getDate() - 1);
+            let timeRetorno = Astronomy.MakeTime(currentJSDate);
             
-            for(let i=0; i<8; i++) {
+            // Refinamento Iterativo (Correção da falha AddDays)
+            for(let i=0; i<10; i++) {
                 let equAtu = Astronomy.Equator("Sun", timeRetorno, obs, true, true);
                 let longAtu = Astronomy.Ecliptic(equAtu.vec).elon;
                 let diff = (longNatal - longAtu + 360) % 360;
                 if(diff > 180) diff -= 360;
-                timeRetorno = Astronomy.AddDays(timeRetorno, diff * 1.014);
+                
+                // Cálculo nativo de milissegundos (Segurança Total)
+                let msToAdd = diff * 1.014 * 24 * 60 * 60 * 1000;
+                currentJSDate = new Date(currentJSDate.getTime() + msToAdd);
+                timeRetorno = Astronomy.MakeTime(currentJSDate);
             }
 
-            const dataFinal = timeRetorno.date;
-            document.getElementById('return-date').innerText = dataFinal.toLocaleString('pt-BR', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
+            // Exibir Início do Ciclo
+            document.getElementById('return-date').innerText = currentJSDate.toLocaleString('pt-BR', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
 
+            // 3. Calcular Ascendente da Revolução
             const msd = Astronomy.SiderealTime(timeRetorno);
             const lst = (msd + DB_COORDS.default.lon / 15.0) * 15;
             const ramc = lst * Math.PI/180;
@@ -166,30 +167,31 @@
 
             document.getElementById('asc-year').innerText = signoAsc;
 
+            // 4. Renderizar Conteúdo Profundo
             document.getElementById('content-area').innerHTML = `
                 <div class="analysis-section">
-                    <h3>O Propósito do Ano: Sol na Revolução</h3>
+                    <h3>O Propósito Solar de 2026</h3>
                     <div class="analysis-text">
-                        <p>O Sol na Revolução Solar indica onde sua energia vital estará concentrada. Em 2026, seu Sol retorna ao grau exato de ${longNatal.toFixed(2)}°, reativando sua essência primordial.</p>
-                        <p>Este ano será marcado por um processo de <span class="highlight-gold">reafirmação de identidade</span>. Você sentirá um chamado para alinhar seus projetos externos com o que sua alma realmente deseja expressar.</p>
+                        <p>A Revolução Solar indica o tom vibracional do seu ano. Em 2026, seu Sol retorna ao grau exato de sua origem natal (${longNatal.toFixed(2)}°), iniciando um ciclo de renovação vital.</p>
+                        <p>Este ano será marcado pela <span class="highlight-gold">reestruturação da sua identidade</span>. Você sentirá um forte chamado para alinhar sua vida prática com os desejos mais profundos da sua alma, removendo o que não é mais autêntico.</p>
                     </div>
                 </div>
                 <div class="analysis-section">
                     <h3>A Lente do Ano: Ascendente em ${signoAsc}</h3>
                     <div class="analysis-text">
-                        <p>O Ascendente anual é o 'filtro' das suas experiências. Com o Ascendente em <span class="highlight-gold">${signoAsc}</span>, o universo exige uma postura específica.</p>
+                        <p>O Ascendente anual define como você irá encarar os desafios deste ciclo. Com o Ascendente em <span class="highlight-gold">${signoAsc}</span>, o universo exige uma postura específica de você.</p>
                         <p>${TEXTOS_REVOLUCAO.Ascendente[signoAsc]}</p>
                     </div>
                 </div>
                 <div class="analysis-section">
-                    <h3>Panorama Evolutivo</h3>
+                    <h3>Conselho Sistêmico</h3>
                     <div class="analysis-text">
-                        <p>Ao cruzarmos os dados, 2026 se revela um ano de <span class="highlight-gold">transição estrutural</span>. É o momento de encerrar pendências e iniciar uma nova oitava de aprendizado com foco total no seu propósito.</p>
+                        <p>Ao observar as órbitas deste ano, percebemos que a fluidez virá através da <span class="highlight-gold">aceitação do tempo natural das coisas</span>. Não tente apressar os resultados; 2026 é um ano de preparo de solo para colheitas monumentais no futuro próximo.</p>
                     </div>
                 </div>`;
         } catch (e) {
-            console.error("Erro no Cálculo:", e);
-            document.getElementById('content-area').innerHTML = `<p style='color:red'>Erro ao calcular mapa: ${e.message}</p>`;
+            console.error(e);
+            document.getElementById('content-area').innerHTML = `<p style='color:red; text-align:center;'>Ocorreu uma falha na interpretação das estrelas: ${e.message}</p>`;
         } finally {
             document.getElementById('loading-screen').style.display = 'none';
         }
