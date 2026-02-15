@@ -36,7 +36,18 @@
         .btn-calc { width: 100%; background: var(--gold); color: #000; border: none; padding: 15px; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; margin-top: 20px; border-radius: 4px; transition: 0.3s; }
         .btn-calc:hover { background: #fff; transform: scale(1.02); }
 
-        #result-area { display: none; animation: fadeIn 1.5s; }
+        #result-area { display: none; animation: fadeIn 1.5s; text-align: center; }
+        
+        /* MEDIDOR DE AFINIDADE */
+        .affinity-meter {
+            width: 220px; height: 220px; border-radius: 50%; border: 2px solid var(--gold);
+            margin: 40px auto; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; background: radial-gradient(circle, rgba(212,175,55,0.1) 0%, transparent 70%);
+            box-shadow: 0 0 40px rgba(212,175,55,0.2);
+        }
+        .score-value { font-family: 'Cinzel'; font-size: 4em; color: var(--gold); line-height: 1; }
+        .score-label { font-family: 'Cinzel'; font-size: 0.8em; color: #888; letter-spacing: 2px; margin-top: 5px; }
+
         .analysis-card { background: #111; border-left: 4px solid var(--gold); padding: 40px; margin-bottom: 30px; text-align: justify; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .analysis-card h4 { font-family: 'Cinzel'; color: var(--gold); margin-top: 0; font-size: 1.4em; border-bottom: 1px solid #222; padding-bottom: 15px; margin-bottom: 20px; }
         .analysis-card p { margin-bottom: 15px; color: #ccc; }
@@ -76,12 +87,16 @@
                 <input type="text" id="p-cidade" placeholder="Ex: São Paulo">
             </div>
         </div>
-        <button class="btn-calc" onclick="processarSinastria()">DESVELAR CONEXÃO</button>
+        <button class="btn-calc" id="btn-main" onclick="processarSinastria()">DESVELAR CONEXÃO</button>
     </div>
 
     <div id="result-area">
-        <h2 style="font-family:'Cinzel'; color:var(--gold); text-align:center; margin-top:60px; letter-spacing: 3px;">A ALQUIMIA DOS DESTINOS</h2>
-        <div id="sinastria-content"></div>
+        <div class="affinity-meter">
+            <div class="score-value" id="score-pct">0%</div>
+            <div class="score-label">Afinidade Astral</div>
+        </div>
+        <h2 style="font-family:'Cinzel'; color:var(--gold); text-align:center; margin-top:20px; letter-spacing: 3px;">A ALQUIMIA DOS DESTINOS</h2>
+        <div id="sinastria-content" style="text-align: left; margin-top: 40px;"></div>
     </div>
 </div>
 
@@ -91,6 +106,7 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
+    const DB_COORDS = { "sp": {lat:-23.55, lon:-46.63}, "rj": {lat:-22.90, lon:-43.17}, "default": {lat:-15.79, lon:-47.89} };
     let dadosUsuario = null;
 
     auth.onAuthStateChanged(user => {
@@ -104,49 +120,83 @@
         } else { window.location.href = 'index.html'; }
     });
 
+    // Função técnica para obter a longitude eclíptica de um planeta
+    function getLong(planet, date, hour) {
+        const time = Astronomy.MakeTime(new Date(date + "T" + hour));
+        const observer = new Astronomy.Observer(DB_COORDS.default.lat, DB_COORDS.default.lon, 0);
+        const equ = Astronomy.Equator(planet, time, observer, true, true);
+        return Astronomy.Ecliptic(equ.vec).elon;
+    }
+
     async function processarSinastria() {
         const pNome = document.getElementById('p-nome').value;
         const pData = document.getElementById('p-data').value;
-        const pHora = document.getElementById('p-hora').value;
+        const pHora = document.getElementById('p-hora').value || "12:00";
 
-        if(!pNome || !pData || !pHora) return alert("Por favor, preencha os campos para invocar a análise.");
+        if(!pNome || !pData) return alert("Por favor, preencha os dados essenciais para invocar a análise.");
+        
+        document.getElementById('btn-main').innerText = "CALCULANDO ÓRBITAS...";
 
+        // CÁLCULOS TÉCNICOS
+        const uSol = getLong("Sun", dadosUsuario.dataNascimento, dadosUsuario.horaNascimento);
+        const uLua = getLong("Moon", dadosUsuario.dataNascimento, dadosUsuario.horaNascimento);
+        const uVen = getLong("Venus", dadosUsuario.dataNascimento, dadosUsuario.horaNascimento);
+        const uMar = getLong("Mars", dadosUsuario.dataNascimento, dadosUsuario.horaNascimento);
+
+        const pSol = getLong("Sun", pData, pHora);
+        const pLua = getLong("Moon", pData, pHora);
+        const pVen = getLong("Venus", pData, pHora);
+        const pMar = getLong("Mars", pData, pHora);
+
+        // LÓGICA DE AFINIDADE (PESOS)
+        let notaTotal = 0;
+        
+        // Afinidade Sol/Lua (Base da Alma) - Peso 40
+        const diffSol = Math.abs(uSol - pSol) % 120;
+        if(diffSol < 10) notaTotal += 40; else if(diffSol < 30) notaTotal += 25; else notaTotal += 10;
+
+        // Afinidade Vênus/Marte (Química) - Peso 40
+        const diffVen = Math.abs(uVen - pMar) % 120;
+        if(diffVen < 10) notaTotal += 40; else if(diffVen < 30) notaTotal += 20; else notaTotal += 5;
+
+        // Bônus de Elemento - Peso 20
+        if(Math.floor(uSol/30) % 4 === Math.floor(pSol/30) % 4) notaTotal += 20;
+
+        const scoreFinal = Math.min(notaTotal, 100);
+
+        // EXIBIÇÃO
         const content = document.getElementById('sinastria-content');
         const area = document.getElementById('result-area');
+        document.getElementById('score-pct').innerText = scoreFinal + "%";
         area.style.display = 'block';
 
         content.innerHTML = `
             <div class="analysis-card">
                 <h4>O Encontro de Sóis: Identidade e o Reconhecimento do Ego</h4>
-                <p>O Sol é o núcleo de nossa consciência. Quando analisamos a interação entre o seu Sol e o de ${pNome}, observamos como as vontades individuais se chocam ou se fundem. Nesta sinastria, há um fluxo de vitalidade que sugere que ambos podem brilhar sem que um eclipse o outro. </p>
-                <p>A identidade de ${dadosUsuario.nome} encontra um eco na autoexpressão de ${pNome}, criando uma base de respeito mútuo. O desafio aqui é evitar a competição silenciosa por protagonismo, transformando a relação em uma parceria de dois líderes que constroem um império comum.</p>
+                <p>O Sol é o núcleo de nossa consciência. Quando analisamos a interação entre o seu Sol e o de ${pNome}, observamos como as vontades individuais se fundem. Nesta sinastria, há um fluxo de vitalidade que sugere que ambos podem brilhar sem que um eclipse o outro. </p>
+                <p>A identidade de ${dadosUsuario.nome} encontra um eco na autoexpressão de ${pNome}, criando uma base de respeito mútuo.</p>
             </div>
 
             <div class="analysis-card">
                 <h4>A Dança das Luas: O Refúgio e o Subconsciente Compartilhado</h4>
-                <p>A Lua governa o que não é dito; as necessidades de segurança e o ritmo biológico das emoções. A compatibilidade lunar entre vocês sugere uma "memória de alma". Há uma facilidade em prever as flutuações de humor do parceiro, o que reduz a necessidade de explicações constantes. </p>
-                <p>É uma conexão de "porto seguro". ${pNome} oferece o suporte emocional que ${dadosUsuario.nome} busca em momentos de vulnerabilidade. No entanto, o perigo reside na codependência. A profundidade emocional é tão vasta que vocês podem se perder no mundo interno um do outro, esquecendo-se da praticidade da vida externa.</p>
-            </div>
-
-            <div class="analysis-card">
-                <h4>Mercúrio: A Ponte Intelectual e os Labirintos do Diálogo</h4>
-                <p>Mercúrio define como as ideias cruzam o abismo entre duas mentes. Na sua relação, o diálogo flui através de uma curiosidade incessante. Vocês são, antes de tudo, companheiros de jornada intelectual. A facilidade em trocar ideias complexas mantém a chama do interesse acesa a longo prazo. </p>
-                <p>A atenção deve ser voltada para os momentos de tensão: a agilidade mental de ambos pode gerar debates acalorados onde a razão tenta sufocar o sentimento. Lembrem-se que nem toda verdade precisa ser dita com a frieza de um fato; a ponte de Mercúrio também deve transportar empatia.</p>
+                <p>A Lua governa o que não é dito. A compatibilidade lunar entre vocês sugere uma "memória de alma". Há uma facilidade em prever as flutuações de humor do parceiro. </p>
+                <p>É uma conexão de "porto seguro". ${pNome} oferece o suporte emocional que ${dadosUsuario.nome} busca em momentos de vulnerabilidade.</p>
             </div>
 
             <div class="analysis-card">
                 <h4>Vênus e Marte: A Alquimia do Desejo e a Força da Atração</h4>
-                <p>Esta é a dinâmica entre o "Gostar" (Vênus) e o "Conquistar" (Marte). A sinastria revela um magnetismo físico poderoso, onde o desejo não é apenas instintivo, mas estético e profundo. Existe uma harmonia entre o que um considera belo e o que o outro expressa como paixão. </p>
-                <p>A energia de Marte traz o ímpeto e a iniciativa, enquanto Vênus garante que essa força não seja destrutiva, transformando-a em afeto e prazer compartilhado. É uma química que se renova através do desafio e da admiração mútua, evitando que o cotidiano esfrie a conexão original.</p>
+                <p>A sinastria revela um magnetismo físico poderoso. Existe uma harmonia entre o que um considera belo e o que o outro expressa como paixão. </p>
+                <p>A energia de Marte traz o ímpeto, enquanto Vênus garante que essa força se transforme em afeto e prazer compartilhado.</p>
             </div>
 
             <div class="analysis-card">
                 <h4>Saturno: O Selo do Tempo e a Responsabilidade do Elo</h4>
-                <p>Saturno é o planeta que determina se uma relação passará pelo teste das décadas. Ele traz o peso da realidade. Nesta sinastria, Saturno atua como o cimento da construção: ele exige que vocês olhem para o futuro com seriedade. </p>
-                <p>Embora Saturno possa trazer momentos de sensação de "dever" ou peso emocional, é ele quem garante que, nos momentos de crise, o compromisso fale mais alto que a vontade passageira. É a garantia de que este encontro não é apenas uma faísca, mas um contrato de alma desenhado para durar.</p>
+                <p>Saturno é o planeta que determina se uma relação passará pelo teste das décadas. Ele exige que vocês olhem para o futuro com seriedade. </p>
+                <p>É a garantia de que este encontro não é apenas uma faísca, mas um contrato de alma desenhado para durar.</p>
             </div>
         `;
 
+        document.getElementById('btn-main').innerText = "DESVELAR CONEXÃO";
         area.scrollIntoView({ behavior: 'smooth' });
     }
 </script>
