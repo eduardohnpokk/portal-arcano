@@ -51,13 +51,13 @@
 
 <div id="loading-screen">
     <i class="fas fa-compass spinner"></i>
-    <p style="color:#666; font-family:'Cinzel'; margin-top:15px;">Mapeando sua Vibração...</p>
+    <p style="color:#666; font-family:'Cinzel'; margin-top:15px;">Decodificando Vibrações Numéricas...</p>
 </div>
 
 <div class="container">
     <div class="nav-bar">
         <div onclick="window.location.href='dashboard-premium.html'" class="btn-back">← Voltar</div>
-        <button onclick="window.print()" class="btn-print"><i class="fas fa-print"></i> Imprimir</button>
+        <button onclick="window.print()" class="btn-print"><i class="fas fa-print"></i> Imprimir Dossiê</button>
     </div>
 
     <div class="page-header">
@@ -67,8 +67,9 @@
 
     <div class="num-grid" id="main-grid"></div>
     <div id="report-content"></div>
+    
     <div class="synthesis-box" id="synthesis-area" style="display:none">
-        <h2 class="synthesis-title">SÍNTESE DA PERSONALIDADE</h2>
+        <h2 class="synthesis-title">GRANDE SÍNTESE SISTÊMICA</h2>
         <div id="synthesis-text"></div>
     </div>
 </div>
@@ -94,7 +95,7 @@
         document.getElementById('user-info').innerText = `${nome} • ${data}`;
         const res = calcularNumerologia(nome, data);
         
-        // Renderizar Cards do Topo
+        // 1. Renderizar Cards do Topo
         const grid = document.getElementById('main-grid');
         const cards = [
             {label: "Motivação (Alma)", val: res.motivacao},
@@ -109,36 +110,41 @@
             </div>
         `).join('');
 
-        // Renderizar Relatório
+        // 2. Renderizar Relatório (CHAVES CORRIGIDAS AQUI)
         const report = document.getElementById('report-content');
         const blocos = [
-            {t: "Motivação da Alma", n: res.motivacao, k: "motivacao", icon: "heart"},
-            {t: "Impressão do Ego", n: res.impressao, k: "impressao", icon: "user"},
+            {t: "Motivação da Alma", n: res.motivacao, k: "motiva", icon: "heart"},
+            {t: "Impressão do Ego", n: res.impressao, k: "impres", icon: "user"},
             {t: "Missão e Expressão", n: res.expressao, k: "desc", icon: "fingerprint"},
             {t: "Caminho de Destino", n: res.destino, k: "destino", icon: "road"}
         ];
 
         report.innerHTML = blocos.map(b => {
             const info = TEXTOS_NUMEROS[String(b.n)];
+            // Validação de segurança para números não mapeados (como 33)
+            if(!info) return `<div class="report-block"><h3>Número ${b.n} em análise.</h3></div>`;
+            
             return `
                 <div class="report-block">
                     <div class="block-header">
-                        <i class="fas fa-${b.icon} color:var(--gold)"></i>
+                        <i class="fas fa-${b.icon}" style="color:var(--gold); font-size:1.5em; margin-right:15px;"></i>
                         <h3 class="block-title">${b.t}: ${b.n}</h3>
                     </div>
                     <div class="block-text">
-                        <h4 style="color:var(--gold); font-family:'Cinzel'; margin-top:0;">Arquetipo: ${info.arquetipo} - ${info.titulo}</h4>
+                        <h4 style="color:var(--gold); font-family:'Cinzel'; margin-top:0; border-bottom:1px solid #333; padding-bottom:5px;">
+                            Arquétipo: ${info.arquetipo} - ${info.titulo}
+                        </h4>
                         ${info[b.k]}
                     </div>
                 </div>
             `;
         }).join('');
 
-        // Síntese
+        // 3. Grande Síntese
         document.getElementById('synthesis-area').style.display = 'block';
         document.getElementById('synthesis-text').innerHTML = `
-            <p>Seu <b>Destino ${res.destino}</b> define o cenário de aprendizado desta vida. Para trilhá-lo, você utiliza a <b>Missão ${res.expressao}</b>, que são seus talentos naturais.</p>
-            <p>A harmonia real acontece quando você alinha esses atos externos com sua <b>Vibração da Alma (${res.motivacao})</b>. Se houver conflito entre o que você faz e o que sua alma pede, sentirá um vazio inexplicável. Honrar o número ${res.motivacao} em seus momentos íntimos é a chave para o preenchimento absoluto.</p>
+            <p>Seu <b>Caminho de Destino ${res.destino}</b> define o solo onde você pisa nesta existência. Para trilhar este solo, você utiliza sua <b>Missão ${res.expressao}</b>, que são seus talentos inatos manifestados para o mundo.</p>
+            <p>A harmonia real só ocorre quando esses atos externos alimentam sua <b>Vibração da Alma (${res.motivacao})</b>. Se houver divórcio entre o que você faz e o que sua alma pede, o sucesso material será acompanhado de um vazio inexplicável. O segredo da sua plenitude é usar seus dons naturais (${res.expressao}) para cumprir seu propósito de vida (${res.destino}) sem nunca trair os desejos profundos do seu coração (${res.motivacao}).</p>
         `;
 
         document.getElementById('loading-screen').style.display = 'none';
