@@ -34,11 +34,18 @@
         .moon-section { 
             background: linear-gradient(135deg, #1a1a1a 0%, #050505 100%); 
             border: 1px solid var(--gold); border-radius: 8px; padding: 30px; 
-            display: flex; align-items: center; gap: 30px; margin-bottom: 50px;
+            display: flex; align-items: center; gap: 30px; margin-bottom: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         .moon-icon { font-size: 4em; color: #fff; text-shadow: 0 0 20px #fff; }
         .moon-info h3 { margin: 0; color: var(--gold); font-family: 'Cinzel'; font-size: 1.5em; }
+
+        /* NOVA SEÇÃO: PANORAMA DIDÁTICO */
+        .overview-section {
+            background: #0a0a0a; border: 1px solid #222; padding: 30px; border-radius: 8px; margin-bottom: 50px;
+        }
+        .overview-title { font-family: 'Cinzel'; color: var(--gold); font-size: 1.2em; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .overview-text { color: #aaa; text-align: justify; font-size: 1.05em; margin: 0; }
         
         /* CARDS DE TRÂNSITOS */
         .transits-grid { display: grid; gap: 30px; }
@@ -81,21 +88,19 @@
         <p style="color:#888; font-style:italic;">Calculado sobre o seu Mapa Natal exato.</p>
     </div>
 
-    <div class="moon-section" id="moon-widget">
-        </div>
+    <div class="moon-section" id="moon-widget"></div>
+
+    <div class="overview-section">
+        <h3 class="overview-title">O Significado do seu Céu Hoje</h3>
+        <p id="overview-text" class="overview-text">Sincronizando as frequências planetárias com seu mapa natal...</p>
+    </div>
 
     <h2 style="text-align:center; color:var(--gold); font-family:'Cinzel'; margin: 50px 0 30px 0;">TRÂNSITOS PESSOAIS ATIVOS</h2>
     
-    <div class="transits-grid" id="transits-list">
-        </div>
+    <div class="transits-grid" id="transits-list"></div>
 </div>
 
 <script>
-    // ======================================================
-    // 1. BANCO DE DADOS DE TRÂNSITOS (INTELIGÊNCIA PREDITIVA)
-    // ======================================================
-    
-    // TEXTOS DE IMPACTO (O QUE ACONTECE)
     const TRANSIT_DB = {
         "Sol": [
             "É hora de brilhar pessoalmente. Sua vitalidade está alta e o mundo olha para você.", 
@@ -183,106 +188,35 @@
         ]
     };
 
-    // CONSELHOS DO ORÁCULO (DICA ESPECÍFICA PARA CADA CASA/PLANETA)
     const ORACLE_TIPS = {
         "Sol": [
-            "Dica: A liderança é solitária, mas necessária. Assuma o leme.", // H1
-            "Dica: Se você não se der valor, ninguém dará. Cobre o justo.", // H2
-            "Dica: Fale com autoridade, mas escute com humildade.", // H3
-            "Dica: Sua luz deve aquecer os seus, não queimá-los.", // H4
-            "Dica: A vida é curta demais para não celebrar sua existência.", // H5
-            "Dica: A excelência é um hábito, não um ato isolado.", // H6
-            "Dica: Ilumine o caminho do outro e o seu ficará claro.", // H7
-            "Dica: Não tema a sombra; é lá que sua luz é necessária.", // H8
-            "Dica: Sua verdade é sua bússola. Não a negocie por conforto.", // H9
-            "Dica: O mundo espera sua obra. Não se esconda nos bastidores.", // H10
-            "Dica: Um sonho sonhado sozinho é apenas um sonho. Conecte-se.", // H11
-            "Dica: Às vezes, a maior vitória é o silêncio e a paz interior." // H12
+            "Dica: A liderança é solitária, mas necessária. Assuma o leme.", "Dica: Se você não se der valor, ninguém dará. Cobre o justo.", "Dica: Fale com autoridade, mas escute com humildade.", "Dica: Sua luz deve aquecer os seus, não queimá-los.", "Dica: A vida é curta demais para não celebrar sua existência.", "Dica: A excelência é um hábito, não um ato isolado.", "Dica: Ilumine o caminho do outro e o seu ficará claro.", "Dica: Não tema a sombra; é lá que sua luz é necessária.", "Dica: Sua verdade é sua bússola. Não a negocie por conforto.", "Dica: O mundo espera sua obra. Não se esconda nos bastidores.", "Dica: Um sonho sonhado sozinho é apenas um sonho. Conecte-se.", "Dica: Às vezes, a maior vitória é o silêncio e a paz interior."
         ],
         "Mercúrio": [
-            "Dica: Sua palavra cria sua realidade. Diga apenas o que deseja ver.",
-            "Dica: A inteligência financeira vale mais que o esforço bruto.",
-            "Dica: A dúvida é inimiga da ação. Decida e corrija a rota depois.",
-            "Dica: Memórias não pagam contas. Foque no presente.",
-            "Dica: Escreva sua história, não deixe outros segurarem a caneta.",
-            "Dica: Organize o caos mental antes de tentar arrumar a mesa.",
-            "Dica: Ouvir é mais poderoso do que convencer.",
-            "Dica: O segredo guardado é uma arma; o revelado, uma cura.",
-            "Dica: Aprender algo novo é a única fonte da juventude eterna.",
-            "Dica: Comunique sua competência. Quem não é visto, não é lembrado.",
-            "Dica: Uma ideia compartilhada se multiplica. Não tenha medo de dividir.",
-            "Dica: A intuição sabe o caminho que a lógica desconhece."
+            "Dica: Sua palavra cria sua realidade. Diga apenas o que deseja ver.", "Dica: A inteligência financeira vale mais que o esforço bruto.", "Dica: A dúvida é inimiga da ação. Decida e corrija a rota depois.", "Dica: Memórias não pagam contas. Foque no presente.", "Dica: Escreva sua história, não deixe outros segurarem a caneta.", "Dica: Organize o caos mental antes de tentar arrumar a mesa.", "Dica: Ouvir é mais poderoso do que convencer.", "Dica: O segredo guardado é uma arma; o revelado, uma cura.", "Dica: Aprender algo novo é a única fonte da juventude eterna.", "Dica: Comunique sua competência. Quem não é visto, não é lembrado.", "Dica: Uma ideia compartilhada se multiplica. Não tenha medo de dividir.", "Dica: A intuição sabe o caminho que a lógica desconhece."
         ],
         "Vênus": [
-            "Dica: A beleza é uma forma de poder. Use-a com sabedoria.",
-            "Dica: O prazer sem culpa é o melhor investimento hoje.",
-            "Dica: A diplomacia abre portas que a força jamais abriria.",
-            "Dica: Transforme sua casa em seu templo sagrado.",
-            "Dica: O amor é um jogo onde só ganha quem se arrisca a perder.",
-            "Dica: Ame seu corpo; ele é o veículo da sua alma.",
-            "Dica: A paz vale mais que a razão. Escolha a harmonia.",
-            "Dica: A entrega total é assustadora, mas libertadora.",
-            "Dica: O amor não tem fronteiras geográficas ou mentais.",
-            "Dica: Seu carisma é sua moeda mais forte no trabalho hoje.",
-            "Dica: Amigos são a família que a alma escolhe. Valorize-os.",
-            "Dica: O amor incondicional começa pelo perdão a si mesmo."
+            "Dica: A beleza é uma forma de poder. Use-a com sabedoria.", "Dica: O prazer sem culpa é o melhor investimento hoje.", "Dica: A diplomacia abre portas que a força jamais abriria.", "Dica: Transforme sua casa em seu templo sagrado.", "Dica: O amor é um jogo onde só ganha quem se arrisca a perder.", "Dica: Ame seu corpo; ele é o veículo da sua alma.", "Dica: A paz vale mais que a razão. Escolha a harmonia.", "Dica: A entrega total é assustadora, mas libertadora.", "Dica: O amor não tem fronteiras geográficas ou mentais.", "Dica: Seu carisma é sua moeda mais forte no trabalho hoje.", "Dica: Amigos são a família que a alma escolhe. Valorize-os.", "Dica: O amor incondicional começa pelo perdão a si mesmo."
         ],
         "Marte": [
-            "Dica: A sorte favorece os audazes. Dê o primeiro passo.",
-            "Dica: O dinheiro segue a energia da sua autoconfiança.",
-            "Dica: Corte a conversa fiada e vá direto ao ponto.",
-            "Dica: Proteja seu lar; é seu castelo e seu refúgio.",
-            "Dica: A paixão sem ação é apenas sofrimento. Mova-se.",
-            "Dica: O trabalho duro vence o talento quando o talento não trabalha.",
-            "Dica: Estabeleça limites claros. 'Não' é uma frase completa.",
-            "Dica: Elimine o que não serve mais. Corte o cordão.",
-            "Dica: Lute por aquilo em que acredita, ou cairá por qualquer coisa.",
-            "Dica: A ambição é combustível. Não peça desculpas por querer mais.",
-            "Dica: Lidere pelo exemplo, não pela força.",
-            "Dica: Sua maior batalha é contra seus sabotadores internos."
+            "Dica: A sorte favorece os audazes. Dê o primeiro passo.", "Dica: O dinheiro segue a energia da sua autoconfiança.", "Dica: Corte a conversa fiada e vá direto ao ponto.", "Dica: Proteja seu lar; é seu castelo e seu refúgio.", "Dica: A paixão sem ação é apenas sofrimento. Mova-se.", "Dica: O trabalho duro vence o talento quando o talento não trabalha.", "Dica: Estabeleça limites claros. 'Não' é uma frase completa.", "Dica: Elimine o que não serve mais. Corte o cordão.", "Dica: Lute por aquilo em que acredita, ou cairá por qualquer coisa.", "Dica: A ambição é combustível. Não peça desculpas por querer mais.", "Dica: Lidere pelo exemplo, não pela força.", "Dica: Sua maior batalha é contra seus sabotadores internos."
         ],
         "Júpiter": [
-            "Dica: Confie no fluxo. O universo conspira a seu favor.",
-            "Dica: A abundância é uma mentalidade antes de ser um fato.",
-            "Dica: Expanda seus horizontes. O mundo é pequeno demais para você.",
-            "Dica: A sorte favorece a mente preparada e o coração grato.",
-            "Dica: Celebre a vida. A alegria é um ímã de milagres.",
-            "Dica: A saúde é a maior riqueza. Cuide do seu templo.",
-            "Dica: Parcerias trazem ouro. Juntos somos gigantes.",
-            "Dica: Transforme crise em oportunidade. O fundo do poço tem mola.",
-            "Dica: A fé move montanhas reais. Acredite no impossível.",
-            "Dica: O sucesso é inevitável para quem não desiste.",
-            "Dica: Sonhe grande. O custo é o mesmo de sonhar pequeno.",
-            "Dica: A proteção divina está ativa. Nada pode te atingir."
+            "Dica: Confie no fluxo. O universo conspira a seu favor.", "Dica: A abundância é uma mentalidade antes de ser um fato.", "Dica: Expanda seus horizontes. O mundo é pequeno demais para você.", "Dica: A sorte favorece a mente preparada e o coração grato.", "Dica: Celebre a vida. A alegria é um ímã de milagres.", "Dica: A saúde é a maior riqueza. Cuide do seu templo.", "Dica: Parcerias trazem ouro. Juntos somos gigantes.", "Dica: Transforme crise em oportunidade. O fundo do poço tem mola.", "Dica: A fé move montanhas reais. Acredite no impossível.", "Dica: O sucesso é inevitável para quem não desiste.", "Dica: Sonhe grande. O custo é o mesmo de sonhar pequeno.", "Dica: A proteção divina está ativa. Nada pode te atingir."
         ],
         "Saturno": [
-            "Dica: A disciplina é a liberdade real. Faça o que deve ser feito.",
-            "Dica: Economize hoje, sorria amanhã. O tempo é o senhor da razão.",
-            "Dica: O silêncio é ouro. Fale apenas o necessário.",
-            "Dica: Honre suas raízes. Árvore sem raiz não aguenta tempestade.",
-            "Dica: Leve a sério sua diversão. O tempo livre é sagrado.",
-            "Dica: A rotina cura o caos. Organize-se.",
-            "Dica: Compromisso é tudo. Cumpra sua palavra.",
-            "Dica: O que resiste, persiste. Aceite a dor para curá-la.",
-            "Dica: A sabedoria vem com o tempo. Não tenha pressa.",
-            "Dica: Sua reputação é seu maior ativo. Proteja-a.",
-            "Dica: Corte os laços fracos. Fique com quem constrói.",
-            "Dica: Encare seus medos no escuro e eles sumirão na luz."
+            "Dica: A disciplina é a liberdade real. Faça o que deve ser feito.", "Dica: Economize hoje, sorria amanhã. O tempo é o senhor da razão.", "Dica: O silêncio é ouro. Fale apenas o necessário.", "Dica: Honre suas raízes. Árvore sem raiz não aguenta tempestade.", "Dica: Leve a sério sua diversão. O tempo livre é sagrado.", "Dica: A rotina cura o caos. Organize-se.", "Dica: Compromisso é tudo. Cumpra sua palavra.", "Dica: O que resiste, persiste. Aceite a dor para curá-la.", "Dica: A sabedoria vem com o tempo. Não tenha pressa.", "Dica: Sua reputação é seu maior ativo. Proteja-a.", "Dica: Corte os laços fracos. Fique com quem constrói.", "Dica: Encare seus medos no escuro e eles sumirão na luz."
         ]
     };
 
-    // --- 2. CONFIGURAÇÃO BÁSICA ---
     const DB_COORDS = { "sp": {lat:-23.55, lon:-46.63}, "rj": {lat:-22.90, lon:-43.17}, "default": {lat:-15.79, lon:-47.89} };
     const SIGNOS = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
     
-    // --- 3. LÓGICA ASTRONÔMICA DE TRÂNSITOS ---
     function calcularTransitos(usuario) {
         if (typeof Astronomy === 'undefined') return setTimeout(() => calcularTransitos(usuario), 500);
 
-        // A. Calcular ASCENDENTE NATAL
         const dataNasc = new Date(usuario.dataNascimento + "T" + usuario.horaNascimento);
         const coords = DB_COORDS[usuario.estado?.toLowerCase()] || DB_COORDS["default"];
-        
         const dateNatal = Astronomy.MakeTime(dataNasc);
         const observer = new Astronomy.Observer(coords.lat, coords.lon, 0);
         
@@ -294,7 +228,6 @@
         let ascRad = Math.atan2(Math.cos(ramc), -Math.sin(ramc)*Math.cos(eps) - Math.tan(latRad)*Math.sin(eps));
         const ascGrauNatal = (ascRad * 180/Math.PI + 360) % 360;
 
-        // B. Calcular PLANETAS AGORA
         const agora = new Date();
         const dateAgora = Astronomy.MakeTime(agora);
         document.getElementById('display-date').innerText = agora.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -304,7 +237,6 @@
         const htmlTransitos = document.getElementById('transits-list');
         htmlTransitos.innerHTML = "";
 
-        // LUA
         const equLua = Astronomy.Equator("Moon", dateAgora, observer, true, true);
         const longLua = Astronomy.Ecliptic(equLua.vec).elon;
         const signoLuaIdx = Math.floor(longLua / 30);
@@ -322,18 +254,27 @@
             </div>
         `;
 
-        // PLANETAS
+        // LÓGICA DO TEXTO DIDÁTICO (PANORAMA DO DIA)
+        const overviewDiv = document.getElementById('overview-text');
+        const signoLua = SIGNOS[signoLuaIdx];
+        const temaCasa = getAssuntoCasa(casaLua);
+
+        overviewDiv.innerHTML = `
+            Astrologia preditiva não é sobre "adivinhar o futuro", mas sim sobre entender o clima energético em que você está navegando. 
+            O que chamamos de <strong>trânsitos</strong> é o movimento real dos planetas no céu de hoje em relação ao mapa fixo do seu nascimento. <br><br>
+            Hoje, a <strong>Lua em ${signoLua}</strong> atua como o seu relógio emocional principal, ativando sua <strong>Casa ${casaLua} (${temaCasa})</strong>. 
+            Isso significa que sua sensibilidade e reações estarão voltadas para este setor da vida. Abaixo, você verá como cada planeta está "conversando" 
+            individualmente com sua estrutura natal, gerando os desafios e as oportunidades que você sentirá nas próximas horas.
+        `;
+
         listaPlanetas.forEach(pNome => {
             const pKey = nomesIngles[pNome];
             const equ = Astronomy.Equator(pKey, dateAgora, observer, true, true);
             const long = Astronomy.Ecliptic(equ.vec).elon;
-            
             let distancia = (long - ascGrauNatal + 360) % 360;
-            let casaTransito = Math.floor(distancia / 30) + 1; // 1 a 12
-            
+            let casaTransito = Math.floor(distancia / 30) + 1;
             const textoImpacto = TRANSIT_DB[pNome][casaTransito - 1];
-            const dicaOraculo = ORACLE_TIPS[pNome][casaTransito - 1]; // PEGA A DICA ESPECÍFICA
-            
+            const dicaOraculo = ORACLE_TIPS[pNome][casaTransito - 1];
             const icons = {"Sol":"☉", "Mercúrio":"☿", "Vênus":"♀", "Marte":"♂", "Júpiter":"♃", "Saturno":"♄"};
             
             htmlTransitos.innerHTML += `
@@ -357,7 +298,6 @@
         return assuntos[num-1];
     }
 
-    // --- 4. FIREBASE AUTH ---
     const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
     try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const auth = firebase.auth();
@@ -369,7 +309,6 @@
                 const d = doc.exists ? doc.data() : {};
                 const status = (d.status || "").toLowerCase();
                 const plano = (d.plano || "").toLowerCase();
-                
                 if(status !== "premium" && plano !== "premium") {
                     window.location.href = 'dashboard.html';
                     return;
