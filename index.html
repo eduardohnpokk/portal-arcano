@@ -24,13 +24,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        :root { --gold: #d4af37; --bg-dark: #050505; --glass: rgba(20, 20, 20, 0.8); }
+        :root { --gold: #d4af37; --bg-dark: #050505; --glass: rgba(255, 255, 255, 0.05); }
         
+        * { scroll-behavior: smooth; }
+
         body { 
             margin: 0; 
             font-family: 'Cormorant Garamond', serif; 
             background-color: var(--bg-dark);
-            background-image: url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80'); /* Nebulosa HD */
+            background-image: url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -38,80 +40,88 @@
             overflow-x: hidden;
         }
 
-        /* OVERLAY ESCURO PARA LEITURA */
+        /* OVERLAY DA NEBULOSA - AJUSTADO PARA 0.45 */
         body::before {
             content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7); z-index: -1;
+            background: rgba(0, 0, 0, 0.45); z-index: -1;
         }
+
+        /* NAVEGAÇÃO */
+        nav {
+            padding: 20px 50px; display: flex; justify-content: space-between; align-items: center;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            position: fixed; top: 0; width: 100%; z-index: 100; box-sizing: border-box;
+        }
+        .nav-logo { font-family: 'Cinzel'; color: var(--gold); font-size: 1.2em; letter-spacing: 2px; }
+        .nav-btn { color: #fff; text-decoration: none; font-family: 'Cinzel'; font-size: 0.8em; border: 1px solid var(--gold); padding: 8px 20px; border-radius: 4px; transition: 0.3s; }
+        .nav-btn:hover { background: var(--gold); color: #000; }
         
-        /* HERO SECTION (A CAPA DO FILME) */
+        /* HERO SECTION */
         .hero-section {
-            min-height: 90vh;
+            min-height: 100vh;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             text-align: center; padding: 20px;
             animation: fadeIn 2s;
         }
 
         h1 { 
-            font-family: 'Cinzel'; color: var(--gold); font-size: 4em; margin: 0; 
-            text-shadow: 0 0 30px rgba(212,175,55,0.6); letter-spacing: 5px;
+            font-family: 'Cinzel'; color: var(--gold); font-size: clamp(3em, 8vw, 5em); margin: 0; 
+            text-shadow: 0 0 30px rgba(212,175,55,0.6); letter-spacing: 8px;
         }
         
         .subtitle { 
-            font-size: 1.5em; max-width: 700px; margin: 20px auto 40px auto; 
-            color: #ccc; text-shadow: 0 2px 5px #000;
+            font-size: 1.5em; max-width: 800px; margin: 20px auto 40px auto; 
+            color: #eee; text-shadow: 0 2px 5px #000;
         }
 
         .btn-cta {
             background: linear-gradient(45deg, #d4af37, #b8860b);
-            color: #000; font-family: 'Cinzel'; font-size: 1.2em; padding: 18px 50px;
+            color: #000; font-family: 'Cinzel'; font-size: 1.1em; padding: 20px 60px;
             border: none; cursor: pointer; font-weight: bold; border-radius: 50px;
             box-shadow: 0 0 30px rgba(212,175,55,0.4); transition: 0.3s;
-            text-decoration: none; display: inline-block;
+            text-decoration: none; display: inline-block; letter-spacing: 2px;
         }
-        .btn-cta:hover { transform: scale(1.05); box-shadow: 0 0 50px rgba(212,175,55,0.8); }
+        .btn-cta:hover { transform: scale(1.05); box-shadow: 0 0 50px rgba(212,175,55,0.8); background: #fff; }
 
-        /* FEATURES (POR QUE NÓS?) */
-        .features-section {
-            padding: 80px 20px; background: #0a0a0a; text-align: center;
-        }
+        /* GRID DE FERRAMENTAS (8 ITENS) */
+        .tools-section { padding: 100px 20px; text-align: center; }
         .section-title { font-family: 'Cinzel'; color: var(--gold); font-size: 2.5em; margin-bottom: 50px; }
         
-        .features-grid { 
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-            gap: 40px; max-width: 1100px; margin: 0 auto; 
+        .tools-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
+            gap: 25px; max-width: 1200px; margin: 0 auto; 
         }
         
-        .feature-card { 
-            padding: 30px; border: 1px solid #333; border-radius: 10px; 
-            transition: 0.3s; background: #111;
+        .tool-card { 
+            padding: 35px 20px; border: 1px solid rgba(255,255,255,0.1); 
+            background: var(--glass); backdrop-filter: blur(8px);
+            border-radius: 8px; transition: 0.4s;
         }
-        .feature-card:hover { border-color: var(--gold); transform: translateY(-10px); }
-        .feature-icon { font-size: 3em; color: var(--gold); margin-bottom: 20px; }
-        .feature-card h3 { font-family: 'Cinzel'; font-size: 1.4em; color: #fff; }
+        .tool-card:hover { 
+            border-color: var(--gold); transform: translateY(-10px); 
+            background: rgba(212,175,55,0.05);
+        }
+        .tool-icon { font-size: 2.5em; color: var(--gold); margin-bottom: 20px; opacity: 0.8; }
+        .tool-card h3 { font-family: 'Cinzel'; font-size: 1.1em; color: #fff; margin: 0 0 10px 0; }
+        .tool-card p { font-size: 0.9em; color: #999; line-height: 1.5; margin: 0; }
 
-        /* ÁREA DE LOGIN/CADASTRO (AGORA É UM TEMPLO) */
+        /* AUTH BOX (TEMPLO) */
         .auth-section {
-            padding: 80px 20px;
-            background: url('https://www.transparenttextures.com/patterns/stardust.png'), #050505;
-            display: flex; justify-content: center;
+            padding: 100px 20px; display: flex; justify-content: center;
         }
 
         .auth-box { 
-            background: var(--glass); backdrop-filter: blur(10px);
-            border: 1px solid var(--gold); padding: 40px; 
-            max-width: 450px; width: 100%; border-radius: 15px; 
+            background: rgba(10, 10, 10, 0.9); border: 1px solid var(--gold); 
+            padding: 40px; max-width: 450px; width: 100%; border-radius: 15px; 
             box-shadow: 0 0 50px rgba(0,0,0,0.8);
         }
         
-        /* FORMULÁRIO */
         input { 
             width: 100%; padding: 15px; margin: 10px 0; box-sizing: border-box;
-            background: rgba(0,0,0,0.5); border: 1px solid #444; color: #fff; 
+            background: #000; border: 1px solid #333; color: #fff; 
             border-radius: 5px; font-family: 'Cormorant Garamond'; font-size: 1.1em;
         }
         input:focus { border-color: var(--gold); outline: none; }
-        
         label { display: block; text-align: left; font-size: 0.9em; color: var(--gold); margin-top: 10px; font-family: 'Cinzel'; }
         
         .auth-btn { 
@@ -124,37 +134,67 @@
         .toggle { color: #888; margin-top: 20px; cursor: pointer; text-decoration: underline; font-size: 0.95em; text-align: center; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @media(max-width: 768px) { h1 { font-size: 2.8em; } .subtitle { font-size: 1.2em; } }
+        @media(max-width: 768px) { h1 { font-size: 2.5em; } nav { padding: 20px; } }
     </style>
 </head>
 <body>
 
+    <nav>
+        <div class="nav-logo">PORTAL ARCANO</div>
+        <a href="#templo" class="nav-btn" onclick="showLogin()">Acessar</a>
+    </nav>
+
     <div class="hero-section">
         <h1>PORTAL ARCANO</h1>
-        <p class="subtitle">Não é apenas Astrologia. É o mapa da sua alma. Descubra sua missão, seus ciclos e seu poder oculto com tecnologia astronômica de precisão.</p>
-        <a href="#templo" class="btn-cta">INICIAR JORNADA</a>
+        <p class="subtitle">A união entre a astronomia de precisão e a sabedoria ancestral. Decodifique sua alma e descubra o que o universo reservou para você.</p>
+        <a href="#templo" class="btn-cta" onclick="showRegister()">REVELAR MEU DESTINO</a>
     </div>
 
-    <div class="features-section">
-        <h2 class="section-title">SUAS FERRAMENTAS DE PODER</h2>
-        <div class="features-grid">
-            <div class="feature-card">
-                <i class="fas fa-chart-pie feature-icon"></i>
-                <h3>Mapa Astral Real</h3>
-                <p>Esqueça horóscopo de jornal. Calculamos a posição exata de cada planeta no segundo do seu nascimento.</p>
+    <section class="tools-section">
+        <h2 class="section-title">UMA JORNADA COMPLETA</h2>
+        <div class="tools-grid">
+            <div class="tool-card">
+                <i class="fas fa-chart-pie tool-icon"></i>
+                <h3>Mapa Natal</h3>
+                <p>O retrato do céu no instante em que você nasceu.</p>
             </div>
-            <div class="feature-card">
-                <i class="fas fa-eye feature-icon"></i>
+            <div class="tool-card">
+                <i class="fas fa-eye tool-icon"></i>
                 <h3>Oráculo Sagrado</h3>
-                <p>Tiragens de Tarot e Runas para momentos de dúvida. Receba orientações diretas e sem rodeios.</p>
+                <p>O Tarot como guia imediato para suas dúvidas.</p>
             </div>
-            <div class="feature-card">
-                <i class="fas fa-star feature-icon"></i>
-                <h3>Previsão Diária</h3>
-                <p>Saiba como o céu de hoje interage com o seu mapa. Astrologia preditiva personalizada.</p>
+            <div class="tool-card">
+                <i class="fas fa-star tool-icon"></i>
+                <h3>Trânsitos Diários</h3>
+                <p>Como o céu de hoje interage com sua essência.</p>
+            </div>
+            <div class="tool-card">
+                <i class="fas fa-arrow-up-9-1 tool-icon"></i>
+                <h3>Numerologia</h3>
+                <p>A vibração matemática do seu nome e destino.</p>
+            </div>
+            <div class="tool-card">
+                <i class="fas fa-dragon tool-icon"></i>
+                <h3>Horóscopo Chinês</h3>
+                <p>Sua natureza elemental milenar do oriente.</p>
+            </div>
+            <div class="tool-card">
+                <i class="fas fa-leaf tool-icon"></i>
+                <h3>Banhos & Ervas</h3>
+                <p>Rituais de limpeza e equilíbrio energético.</p>
+            </div>
+            <div class="tool-card">
+                <i class="fas fa-wind tool-icon"></i>
+                <h3>Feng Shui</h3>
+                <p>Harmonização de ambientes para prosperidade.</p>
+            </div>
+            <div class="tool-card">
+                <i class="fas fa-question-circle tool-icon"></i>
+                <h3>A Sabedoria</h3>
+                <p>Central completa de ensinamentos evolutivos.</p>
             </div>
         </div>
-    </div>
+    </section>
 
     <div class="auth-section" id="templo">
         <div class="auth-box">
@@ -164,7 +204,7 @@
             <h2 id="form-title" style="color:var(--gold); font-family:'Cinzel'; text-align:center; margin:0 0 20px 0;">Entrar no Templo</h2>
             
             <div id="login-form">
-                <input type="email" id="email" placeholder="Seu E-mail Sagrado">
+                <input type="email" id="email" placeholder="E-mail">
                 <input type="password" id="pass" placeholder="Senha">
                 <button class="auth-btn" onclick="login()">ENTRAR</button>
                 <p class="toggle" onclick="showRegister()">Ainda não é um iniciado? Cadastre-se</p>
@@ -177,7 +217,7 @@
                 
                 <div class="row-2">
                     <div>
-                        <label>Data de Nascimento</label>
+                        <label>Nascimento</label>
                         <input type="date" id="reg-nasc">
                     </div>
                     <div>
@@ -205,10 +245,8 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // ROTEAMENTO INTELIGENTE (MANTIDO)
         auth.onAuthStateChanged(user => {
             if (user) {
-                // Efeito visual no botão enquanto carrega
                 const btns = document.querySelectorAll('button');
                 btns.forEach(b => b.innerText = "Verificando...");
                 
@@ -216,12 +254,7 @@
                     if (doc.exists) {
                         const d = doc.data();
                         const isPremium = (d.status === 'premium' || d.plano === 'premium' || d.premium === true);
-                        
-                        if (isPremium) {
-                            window.location.href = "dashboard-premium.html";
-                        } else {
-                            window.location.href = "dashboard.html";
-                        }
+                        window.location.href = isPremium ? "dashboard-premium.html" : "dashboard.html";
                     } else {
                         window.location.href = "dashboard.html";
                     }
@@ -236,13 +269,10 @@
             const email = document.getElementById('email').value;
             const pass = document.getElementById('pass').value;
             if(!email || !pass) return alert("Preencha todos os campos.");
-            
-            auth.signInWithEmailAndPassword(email, pass)
-                .catch(e => alert("Erro: " + e.message));
+            auth.signInWithEmailAndPassword(email, pass).catch(e => alert("Erro: " + e.message));
         }
 
         function register() {
-            // 1. CAPTURA
             const nome = document.getElementById('reg-nome').value;
             const email = document.getElementById('reg-email').value;
             const pass = document.getElementById('reg-pass').value;
@@ -252,28 +282,14 @@
             const uf = document.getElementById('reg-uf').value;
             const tel = document.getElementById('reg-tel').value;
 
-            // 2. VALIDAÇÃO
-            if(!nome || !email || !pass || !nasc || !hora || !cidade || !uf) {
-                return alert("Por favor, preencha todos os campos obrigatórios para o Mapa Astral.");
-            }
+            if(!nome || !email || !pass || !nasc || !hora || !cidade || !uf) return alert("Preencha todos os campos.");
 
-            // 3. CRIAÇÃO
             auth.createUserWithEmailAndPassword(email, pass).then(cred => {
                 return db.collection("usuarios").doc(cred.user.uid).set({
-                    nome: nome,
-                    email: email,
-                    dataNascimento: nasc, 
-                    horaNascimento: hora, 
-                    cidade: cidade,
-                    estado: uf,
-                    telefone: tel,
-                    status: 'free',     
-                    plano: 'gratuito',  
-                    data_cadastro: new Date().toISOString()
+                    nome, email, dataNascimento: nasc, horaNascimento: hora, cidade, estado: uf, telefone: tel,
+                    status: 'free', plano: 'gratuito', data_cadastro: new Date().toISOString()
                 });
-            }).then(() => {
-                window.location.href = "dashboard.html";
-            }).catch(e => alert("Erro ao cadastrar: " + e.message));
+            }).then(() => window.location.href = "dashboard.html").catch(e => alert("Erro: " + e.message));
         }
 
         function showRegister() { 
