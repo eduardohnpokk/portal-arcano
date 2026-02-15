@@ -77,8 +77,7 @@
         <p style="color:#888; font-style:italic;">Identifique o momento exato para cada ação importante.</p>
     </header>
 
-    <div id="calendar-container" class="calendar-grid">
-        </div>
+    <div id="calendar-container" class="calendar-grid"></div>
 </div>
 
 <script>
@@ -105,32 +104,35 @@
 
     function getMoonPhaseIcon(angle) {
         const index = Math.floor(((angle + 22.5) % 360) / 45);
-        return MOON_ICONS[index];
+        return MOON_ICONS[index % 8];
     }
 
     function calcularEletiva(data) {
         const time = Astronomy.MakeTime(data);
-        const obs = new Astronomy.Observer(-23.55, -46.63, 0); // SP default
+        const obs = new Astronomy.Observer(-23.55, -46.63, 0); 
         
         const phase = Astronomy.MoonPhase(time);
         const equLua = Astronomy.Equator("Moon", time, obs, true, true);
         const longLua = Astronomy.Ecliptic(equLua.vec).elon;
         const signoLuaIdx = Math.floor(longLua / 30);
         
-        // Simulação de Retrógrado (Lógica Simplificada para performance)
-        const isMercuryRetro = (data.getMonth() === 1); // Exemplo para Fev 2026
+        // Simulação de Retrógrado (Baseado no calendário de 2026)
+        const isMercuryRetro = (data.getMonth() === 1); 
 
-        let scores = { biz: 50, love: 50, health: 50, chat: 50 };
+        let scores = { biz: 50, love: 50, health: 50 };
 
-        // Lógica de Fases
-        if(phase < 90) scores.biz += 20; // Crescente: bom para negócios
-        if(phase > 180 && phase < 270) scores.health += 20; // Minguante: bom para cirurgias/limpeza
+        // Lógica de Fases da Lua
+        if(phase < 90) scores.biz += 20; 
+        if(phase > 180 && phase < 270) scores.health += 25; 
 
-        // Lógica de Signos da Lua
-        if([1, 3, 9].includes(signoLuaIdx)) scores.biz += 15; // Touro, Câncer, Capricórnio
-        if([6, 4].includes(signoAscIdx)) scores.love += 20; // Libra, Leão
+        // Lógica de Signos da Lua (Ajustada cirurgicamente)
+        if([1, 3, 9].includes(signoLuaIdx)) scores.biz += 15; // Touro, Câncer, Capricórnio favorecem estabilidade
+        if([4, 6].includes(signoLuaIdx)) scores.love += 20;  // Leão e Libra favorecem romances
+        if([7, 11].includes(signoLuaIdx)) scores.health += 10; // Escorpião e Peixes para cura emocional
 
-        if(isMercuryRetro) scores.biz -= 30;
+        if(isMercuryRetro) {
+            scores.biz = Math.max(scores.biz - 40, 10);
+        }
 
         return {
             phaseIcon: getMoonPhaseIcon(phase),
@@ -142,6 +144,9 @@
 
     function gerarCalendario() {
         const container = document.getElementById('calendar-container');
+        if(!container) return;
+        
+        container.innerHTML = "";
         const hoje = new Date();
         
         for(let i=0; i<30; i++) {
@@ -177,7 +182,7 @@
                     <div class="warning-box">
                         <i class="fas fa-exclamation-triangle"></i> 
                         <span class="mercury-retro">Mercúrio Retrógrado</span><br>
-                        Evite contratos e eletrônicos.
+                        Atenção a contratos e eletrônicos.
                     </div>
                 ` : ''}
             `;
