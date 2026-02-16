@@ -27,11 +27,12 @@
         .card { background: rgba(10, 10, 10, 0.85); border: 1px solid #333; border-radius: 6px; padding: 35px 20px; text-align: center; cursor: pointer; transition: 0.4s; }
         .card:hover { border-color: var(--gold); }
         .card-icon { font-size: 2.2em; color: var(--gold); margin-bottom: 15px; }
-        .card h3 { font-family: 'Cinzel'; font-size: 1.1em; color: #fff; margin: 0 0 10px 0; }
+        .card h3 { font-family: 'Cinzel'; font-size: 1.1em; color: #fff; text-transform: uppercase; margin: 0 0 10px 0; }
         .btn-logout { background: transparent; border: 1px solid #333; color: #666; padding: 10px 30px; font-family: 'Cinzel'; cursor: pointer; margin-bottom: 50px; }
     </style>
 </head>
 <body>
+
     <div id="loading"><i class="fas fa-compass fa-spin" style="font-size: 3em; color: var(--gold);"></i></div>
 
     <div class="header-container">
@@ -67,7 +68,8 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        const ID_LIVRO_MASTER = "price_1T1PskL12Q2zNNHlhCJqARTz";
+        // ID ATUALIZADO CONFORME image_8a1921.png
+        const ID_LIVRO_MASTER = "price_1T1TOkLc8MnSdAQGz5JdrjkB";
 
         async function comprarLivro() {
             const user = auth.currentUser;
