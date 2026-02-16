@@ -17,6 +17,8 @@
         .cta-box { border: 1px solid var(--gold); padding: 50px; background: rgba(10, 10, 10, 0.95); border-radius: 12px; margin-top: 60px; text-align: center; }
         .btn-buy { background: linear-gradient(45deg, #d4af37, #b8860b); color: #000; font-family: 'Cinzel'; font-size: 1.3em; padding: 20px 60px; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; width: 100%; max-width: 400px; }
         .btn-logout { background: transparent; border: 1px solid #333; color: #666; padding: 10px 30px; margin-top: 40px; cursor: pointer; font-family: 'Cinzel'; }
+        .btn-cancel { background: transparent; border: 1px solid #440000; color: #770000; padding: 5px 15px; margin-top: 60px; font-size: 0.7em; cursor: pointer; font-family: 'Cinzel'; transition: 0.3s; }
+        .btn-cancel:hover { background: #440000; color: #fff; }
     </style>
 </head>
 <body>
@@ -27,14 +29,13 @@
         <button class="btn-buy" id="btn-comprar">ASSINAR PORTAL PREMIUM</button>
     </div>
     <button class="btn-logout" onclick="firebase.auth().signOut()">Sair do Templo</button>
+    <button class="btn-cancel" onclick="cancelAccount()">Encerrar Minha Jornada (Excluir Conta)</button>
 
     <script>
         const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
-
-        // ID ATUALIZADO CONFORME image_8a18e2.png
         const ID_ASSINATURA = "price_1T1TO1Lc8MnSdAQGTLSfGS34"; 
 
         document.getElementById('btn-comprar').addEventListener('click', async () => {
@@ -57,12 +58,26 @@
             }
         });
 
+        // FUNÇÃO CIRÚRGICA: Cancelamento de Conta
+        async function cancelAccount() {
+            const confirmacao = confirm("AVISO DO TEMPLO: Esta ação é definitiva. Seus dados e acessos serão apagados para sempre. Deseja prosseguir?");
+            if(!confirmacao) return;
+            const user = auth.currentUser;
+            if(!user) return;
+            try {
+                await db.collection("usuarios").doc(user.uid).delete();
+                await user.delete();
+                alert("CONTA EXCLUÍDA. Sua jornada no Portal Arcano foi encerrada.");
+                window.location.href = "index.html";
+            } catch (e) {
+                alert("ERRO DE SEGURANÇA: Para excluir sua conta, você precisa ter feito login recentemente. Saia e entre novamente antes de tentar excluir.");
+            }
+        }
+
         auth.onAuthStateChanged(user => {
             if (user) {
                 db.collection("usuarios").doc(user.uid).onSnapshot(doc => {
-                    if (doc.exists && doc.data().status === "premium") {
-                        window.location.href = "dashboard-premium.html";
-                    }
+                    if (doc.exists && doc.data().status === "premium") window.location.href = "dashboard-premium.html";
                 });
             } else window.location.href = "index.html";
         });
