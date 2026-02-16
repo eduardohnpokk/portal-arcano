@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Arcano | Numerologia Cabalística</title>
+    <title>Portal Arcano | Dossiê Numerológico de Elite</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -16,61 +16,63 @@
     
     <style>
         :root { --gold: #d4af37; --bg-dark: #050505; }
-        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; line-height: 1.6; }
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background-color: var(--bg-dark); background-image: url('https://www.transparenttextures.com/patterns/stardust.png'); color: #e0e0e0; font-size: 19px; line-height: 1.8; }
         
         #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .spinner { font-size: 4em; color: var(--gold); animation: spin 2s linear infinite; margin-bottom: 20px; }
+        .spinner { font-size: 4em; color: var(--gold); animation: spin 2s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 20px 20px 100px 20px; }
-        .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .btn-back { cursor: pointer; color: #666; text-transform: uppercase; font-size: 0.8em; letter-spacing: 2px; transition:0.3s; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px 100px 20px; }
+        .nav-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 20px; margin-bottom: 40px; }
+        .btn-back { cursor: pointer; color: #666; text-transform: uppercase; font-size: 0.8em; letter-spacing: 2px; text-decoration: none; transition: 0.3s; }
         .btn-back:hover { color: var(--gold); }
-        .btn-print { background: var(--gold); color: #000; border: none; padding: 8px 15px; border-radius: 4px; font-family: 'Cinzel'; cursor: pointer; font-weight: bold; }
 
-        .page-header { text-align: center; margin-bottom: 50px; }
-        .page-title { font-family: 'Cinzel'; color: var(--gold); font-size: 2.8em; margin: 0; text-shadow: 0 0 20px rgba(212,175,55,0.3); }
+        .page-header { text-align: center; margin-bottom: 60px; }
+        .page-title { font-family: 'Cinzel'; color: var(--gold); font-size: 3em; margin: 0; text-shadow: 0 0 30px rgba(212,175,55,0.4); letter-spacing: 4px; }
+        .user-info-text { color: #888; font-family: 'Cinzel'; margin-top: 15px; letter-spacing: 2px; }
 
         .num-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 60px; }
-        .num-card { background: #0a0a0a; border: 1px solid #333; padding: 25px; border-radius: 8px; text-align: center; border-top: 3px solid var(--gold); }
-        .num-label { font-family: 'Cinzel'; font-size: 0.75em; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
-        .num-big { font-family: 'Cinzel'; font-size: 4em; color: var(--gold); line-height: 1; margin: 10px 0; }
+        .num-card { background: #0a0a0a; border: 1px solid #333; padding: 30px; border-radius: 8px; text-align: center; border-top: 4px solid var(--gold); box-shadow: 0 10px 25px rgba(0,0,0,0.4); transition: 0.3s; }
+        .num-card:hover { transform: translateY(-5px); border-color: #fff; }
+        .num-label { font-family: 'Cinzel'; font-size: 0.7em; color: #888; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
+        .num-big { font-family: 'Cinzel'; font-size: 4.5em; color: var(--gold); line-height: 1; margin: 15px 0; text-shadow: 0 0 15px rgba(212,175,55,0.3); }
 
-        .report-block { background: rgba(15, 15, 15, 0.9); border: 1px solid #222; padding: 40px; border-left: 4px solid var(--gold); border-radius: 4px; margin-bottom: 40px; }
-        .block-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .block-title { font-family: 'Cinzel'; font-size: 1.5em; color: var(--gold); margin: 0; }
-        .block-text { color: #ccc; text-align: justify; }
+        .report-block { background: rgba(15, 15, 15, 0.95); border: 1px solid #222; padding: 50px; border-left: 6px solid var(--gold); border-radius: 4px; margin-bottom: 45px; box-shadow: 0 15px 40px rgba(0,0,0,0.5); }
+        .block-header { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 20px; }
+        .block-title { font-family: 'Cinzel'; font-size: 1.8em; color: var(--gold); margin: 0; text-transform: uppercase; }
+        .block-text { color: #ccc; text-align: justify; font-size: 1.1em; line-height: 2; }
+        .highlight { color: #fff; font-weight: bold; border-bottom: 1px solid var(--gold); }
 
-        .synthesis-box { margin-top: 40px; border: 1px solid var(--gold); padding: 40px; border-radius: 8px; background: radial-gradient(circle, #111, #000); }
-        .synthesis-title { font-family: 'Cinzel'; color: var(--gold); text-align: center; margin-bottom: 20px; }
+        .synthesis-section { margin-top: 80px; border: 2px solid var(--gold); padding: 60px; border-radius: 12px; background: radial-gradient(circle, #1a1a1a, #000); box-shadow: 0 0 60px rgba(212,175,55,0.1); }
+        .synthesis-title { font-family: 'Cinzel'; color: var(--gold); text-align: center; margin-bottom: 40px; font-size: 2.5em; letter-spacing: 5px; }
 
-        @media print { .btn-back, .btn-print { display: none; } body { background: #fff; color: #000; } }
+        @media(max-width: 600px) { .num-grid { grid-template-columns: 1fr; } .block-header { flex-direction: column; text-align: center; } .page-title { font-size: 2em; } }
     </style>
 </head>
 <body>
 
 <div id="loading-screen">
-    <i class="fas fa-compass spinner"></i>
-    <p style="color:#666; font-family:'Cinzel'; margin-top:15px;">Decodificando Vibrações Numéricas...</p>
+    <i class="fas fa-fingerprint spinner"></i>
+    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:3px;">Codificando Matriz Numérica...</p>
 </div>
 
 <div class="container">
     <div class="nav-bar">
-        <div onclick="window.location.href='dashboard-premium.html'" class="btn-back">← Voltar</div>
-        <button onclick="window.print()" class="btn-print"><i class="fas fa-print"></i> Imprimir Dossiê</button>
+        <a href="dashboard-premium.html" class="btn-back">← Retornar ao Hub</a>
+        <button onclick="window.print()" style="background:var(--gold); border:none; padding:8px 20px; font-family:'Cinzel'; font-weight:bold; cursor:pointer; border-radius:4px;"><i class="fas fa-print"></i> PDF</button>
     </div>
 
     <div class="page-header">
-        <h1 class="page-title">DOSSIÊ NUMEROLÓGICO</h1>
-        <div id="user-info" style="color:#888; font-family:'Cinzel'; margin-top:10px;"></div>
+        <h1 class="page-title">SISTEMA NUMEROLÓGICO</h1>
+        <div id="user-info-display" class="user-info-text">...</div>
     </div>
 
     <div class="num-grid" id="main-grid"></div>
     <div id="report-content"></div>
     
-    <div class="synthesis-box" id="synthesis-area" style="display:none">
-        <h2 class="synthesis-title">GRANDE SÍNTESE SISTÊMICA</h2>
-        <div id="synthesis-text"></div>
+    <div class="synthesis-section">
+        <h2 class="synthesis-title">A LEI DA HARMONIA</h2>
+        <div id="final-essay" class="block-text"></div>
     </div>
 </div>
 
@@ -80,75 +82,70 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    auth.onAuthStateChanged(user => {
-        if(user){
-            db.collection("usuarios").doc(user.uid).get().then(doc => {
+    function carregarDados(user) {
+        db.collection("usuarios").doc(user.uid).get().then(doc => {
+            if(doc.exists) {
                 const d = doc.data();
-                if((d.status || "").toLowerCase() === "premium" || (d.plano || "").toLowerCase() === "premium"){
-                    renderizar(d.nome, d.dataNascimento);
-                } else { window.location.href = "dashboard.html"; }
-            });
-        } else { window.location.href = "index.html"; }
-    });
+                document.getElementById('user-info-display').innerText = `${d.nome.toUpperCase()} • NASCIDO EM ${d.dataNascimento}`;
+                const res = calcularNumerologia(d.nome, d.dataNascimento);
+                renderizarInterface(res, d.nome);
+            }
+        });
+    }
 
-    function renderizar(nome, data) {
-        document.getElementById('user-info').innerText = `${nome} • ${data}`;
-        const res = calcularNumerologia(nome, data);
-        
-        // 1. Renderizar Cards do Topo
+    function renderizarInterface(res, nome) {
         const grid = document.getElementById('main-grid');
         const cards = [
-            {label: "Motivação (Alma)", val: res.motivacao},
-            {label: "Impressão (Ego)", val: res.impressao},
-            {label: "Missão (Expressão)", val: res.expressao},
-            {label: "Caminho de Destino", val: res.destino}
+            {l: "Motivação (Alma)", v: res.motivacao},
+            {l: "Impressão (Ego)", v: res.impressao},
+            {l: "Missão (Expressão)", v: res.expressao},
+            {l: "Caminho de Destino", v: res.destino}
         ];
+        
         grid.innerHTML = cards.map(c => `
             <div class="num-card">
-                <div class="num-label">${c.label}</div>
-                <div class="num-big">${c.val}</div>
+                <div class="num-label">${c.l}</div>
+                <div class="num-big">${c.v}</div>
             </div>
         `).join('');
 
-        // 2. Renderizar Relatório (CHAVES CORRIGIDAS AQUI)
         const report = document.getElementById('report-content');
-        const blocos = [
-            {t: "Motivação da Alma", n: res.motivacao, k: "motiva", icon: "heart"},
-            {t: "Impressão do Ego", n: res.impressao, k: "impres", icon: "user"},
-            {t: "Missão e Expressão", n: res.expressao, k: "desc", icon: "fingerprint"},
-            {t: "Caminho de Destino", n: res.destino, k: "destino", icon: "road"}
+        const sections = [
+            {t: "Vibração da Alma", n: res.motivacao, key: "motiva", icon: "heart"},
+            {t: "Imagem Externa", n: res.impressao, key: "impres", icon: "eye"},
+            {t: "Ferramenta de Vida", n: res.expressao, key: "desc", icon: "hammer"},
+            {t: "Caminho de Destino", n: res.destino, key: "destino", icon: "road"}
         ];
 
-        report.innerHTML = blocos.map(b => {
-            const info = TEXTOS_NUMEROS[String(b.n)];
-            // Validação de segurança para números não mapeados (como 33)
-            if(!info) return `<div class="report-block"><h3>Número ${b.n} em análise.</h3></div>`;
-            
+        report.innerHTML = sections.map(s => {
+            const info = TEXTOS_NUMEROS[String(s.n)];
+            if(!info) return "";
             return `
                 <div class="report-block">
                     <div class="block-header">
-                        <i class="fas fa-${b.icon}" style="color:var(--gold); font-size:1.5em; margin-right:15px;"></i>
-                        <h3 class="block-title">${b.t}: ${b.n}</h3>
+                        <i class="fas fa-${s.icon}" style="color:var(--gold); font-size:2em;"></i>
+                        <h3 class="block-title">${s.t}: ${s.n}</h3>
                     </div>
                     <div class="block-text">
-                        <h4 style="color:var(--gold); font-family:'Cinzel'; margin-top:0; border-bottom:1px solid #333; padding-bottom:5px;">
-                            Arquétipo: ${info.arquetipo} - ${info.titulo}
-                        </h4>
-                        ${info[b.k]}
+                        <h4 style="font-family:'Cinzel'; color:var(--gold); margin-top:0;">ARQUÉTIPO: ${info.arquetipo.toUpperCase()}</h4>
+                        ${info[s.key]}
                     </div>
                 </div>
             `;
         }).join('');
 
-        // 3. Grande Síntese
-        document.getElementById('synthesis-area').style.display = 'block';
-        document.getElementById('synthesis-text').innerHTML = `
-            <p>Seu <b>Caminho de Destino ${res.destino}</b> define o solo onde você pisa nesta existência. Para trilhar este solo, você utiliza sua <b>Missão ${res.expressao}</b>, que são seus talentos inatos manifestados para o mundo.</p>
-            <p>A harmonia real só ocorre quando esses atos externos alimentam sua <b>Vibração da Alma (${res.motivacao})</b>. Se houver divórcio entre o que você faz e o que sua alma pede, o sucesso material será acompanhado de um vazio inexplicável. O segredo da sua plenitude é usar seus dons naturais (${res.expressao}) para cumprir seu propósito de vida (${res.destino}) sem nunca trair os desejos profundos do seu coração (${res.motivacao}).</p>
+        // GRANDE SÍNTESE PROFUNDA
+        document.getElementById('final-essay').innerHTML = `
+            <p>O dossiê de <span class="highlight">${nome}</span> revela uma engenharia vibracional específica. Seu <span class="highlight">Caminho de Destino ${res.destino}</span> define o cenário obrigatório de aprendizado nesta vida, enquanto sua <span class="highlight">Missão ${res.expressao}</span> entrega as armas e talentos para vencer as batalhas deste solo.</p>
+            <p>O grande conflito humano, no entanto, nasce do divórcio entre o Ego (${res.impressao}) e a Alma (${res.motivacao}). Sua alma pede a vibração do número ${res.motivacao}, um desejo silencioso que muitas vezes é abafado pelas exigências sociais. A harmonia suprema só será alcançada quando você alinhar seus atos externos com este chamado interno.</p>
+            <p>Para 2026, a numerologia cabalística indica que a integração destes quatro pilares será o divisor de águas entre a sobrevivência e a plenitude espiritual.</p>
         `;
 
-        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('loading-screen').style.opacity = '0';
+        setTimeout(() => document.getElementById('loading-screen').style.display = 'none', 800);
     }
+
+    auth.onAuthStateChanged(user => { if(user) carregarDados(user); else window.location.href="index.html"; });
 </script>
 </body>
 </html>
