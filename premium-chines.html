@@ -31,39 +31,37 @@
             text-align: center; margin-bottom: 40px; position: relative;
             box-shadow: 0 0 50px rgba(138, 28, 28, 0.2);
         }
-        .china-hero::before { content: 'SISTEMA BAZI DE ELITE'; position: absolute; top: 15px; left: 50%; transform: translateX(-50%); font-family: 'Cinzel'; font-size: 0.7em; color: var(--red); letter-spacing: 5px; width: 100%; }
 
-        .report-block { background: rgba(15, 15, 15, 0.95); border: 1px solid #333; border-left: 4px solid var(--red); padding: 40px; margin-bottom: 30px; border-radius: 4px; transition: 0.3s; }
-        .report-block:hover { border-color: var(--gold); }
-        .block-title { font-family: 'Cinzel'; color: var(--gold); margin-bottom: 20px; font-size: 1.5em; border-bottom: 1px solid #222; padding-bottom: 10px; }
+        .report-block { background: rgba(15, 15, 15, 0.95); border: 1px solid #333; border-left: 4px solid var(--red); padding: 45px; margin-bottom: 35px; border-radius: 4px; }
+        .block-title { font-family: 'Cinzel'; color: var(--gold); margin-bottom: 25px; font-size: 1.6em; border-bottom: 1px solid #222; padding-bottom: 10px; }
         
-        .animal-name { font-family: 'Cinzel'; font-size: 4.5em; color: #fff; margin: 10px 0; text-transform: uppercase; line-height: 1; text-shadow: 0 0 20px rgba(255,255,255,0.1); }
+        .animal-name { font-family: 'Cinzel'; font-size: 4.5em; color: #fff; margin: 10px 0; text-transform: uppercase; line-height: 1; }
         .element-badge { background: var(--red); color: #fff; padding: 6px 30px; display: inline-block; border-radius: 25px; font-family: 'Cinzel'; letter-spacing: 3px; font-size: 1em; margin-top: 15px; }
 
-        @media(max-width: 600px) { .animal-name { font-size: 3em; } }
+        .deep-text { text-align: justify; color: #ccc; margin-bottom: 20px; }
+        .highlight { color: var(--gold); font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div id="loading-screen">
     <i class="fas fa-dragon spinner"></i>
-    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Decifrando Pilares Ancestrais...</p>
+    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Decifrando Pilares do Destino...</p>
 </div>
 
 <div class="container">
     <div class="nav-bar">
-        <a href="dashboard-premium.html" class="btn-back">← Voltar ao Hub</a>
-        <div id="user-info" style="font-family:'Cinzel'; color:#444; font-size:0.8em; letter-spacing:3px;">...</div>
+        <a href="dashboard-premium.html" class="btn-back">← Voltar</a>
+        <div id="user-info" style="font-family:'Cinzel'; color:#444; font-size:0.8em; letter-spacing:3px;">SISTEMA BAZI ATIVO</div>
     </div>
 
     <div class="china-hero">
-        <div id="res-icon" style="font-size: 7em; color: var(--gold); margin-bottom: 20px; filter: drop-shadow(0 0 15px rgba(212,175,55,0.4));"></div>
+        <div id="res-icon" style="font-size: 7em; color: var(--gold); margin-bottom: 20px;"></div>
         <h1 id="res-animal" class="animal-name">...</h1>
         <div id="res-element" class="element-badge">...</div>
     </div>
 
-    <div id="report-area">
-        </div>
+    <div id="report-area"></div>
 </div>
 
 <script>
@@ -72,90 +70,140 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    const ANIMAIS_DB = ["Macaco","Galo","Cão","Porco","Rato","Boi","Tigre","Coelho","Dragão","Serpente","Cavalo","Cabra"];
-    const ELEMENTOS_DB = ["Metal","Metal","Água","Água","Madeira","Madeira","Fogo","Fogo","Terra","Terra"];
-    const ICONS_DB = {"Rato":"mouse","Boi":"bullhorn","Tigre":"cat","Coelho":"paw","Dragão":"dragon","Serpente":"staff-snake","Cavalo":"horse","Cabra":"bacon","Macaco":"atom","Galo":"crow","Cão":"dog","Porco":"piggy-bank"};
-
-    const DESCRICOES_DENSAS = {
-        "Rato": "O Estrategista Oculto. Você possui uma inteligência de sobrevivência inigualável, agindo nos bastidores para garantir a prosperidade do seu clã.",
-        "Boi": "O Pilar Inabalável. Sua força não reside na velocidade, mas na resistência e na honestidade brutal que sustenta estruturas familiares e profissionais.",
-        "Tigre": "O Comandante Solitário. Você é movido pela paixão e pelo senso de justiça, agindo como um catalisador de mudanças e revoluções onde quer que vá.",
-        "Coelho": "O Diplomata Resiliente. Por trás de sua aura pacífica, existe uma mente estratégica capaz de contornar obstáculos sem nunca perder a elegância.",
-        "Dragão": "O Soberano Magnético. Único ser mítico, sua presença traz vitalidade e sorte, mas exige que você aprenda a lidar com o peso da própria autoridade.",
-        "Serpente": "O Sábio Místico. Você enxerga o que está oculto e possui um tempo de reação cirúrgico. Sua força é o silêncio e a análise profunda.",
-        "Cavalo": "O Espírito Indomável. Sua energia é de expansão e liberdade. Em 2026, seu ano de regência, sua força vital atinge o ápice de manifestação.",
-        "Cabra": "O Guardião da Harmonia. Você transforma o caos em beleza através da empatia, possuindo uma resistência passiva que vence qualquer conflito.",
-        "Macaco": "O Gênio Inventivo. Nenhuma situação é complexa demais para sua mente. Você joga o jogo da vida com uma agilidade mental fora do comum.",
-        "Galo": "O Administrador da Ordem. Sua clareza de visão e franqueza são ferramentas de cura, organizando o que está disperso com perfeição técnica.",
-        "Cão": "O Protetor Vigilante. Sua lealdade é um pilar sistêmico. Você sente a injustiça no ar e dedica sua vida a proteger os valores fundamentais do seu ser.",
-        "Porco": "O Filantropo Nobre. Você encerra os ciclos com generosidade e prazer, entendendo que a verdadeira fortuna reside na abundância compartilhada."
+    const ANIMAIS_DATA = {
+        "Rato": { 
+            desc: "O Rato é o estrategista nato, o primeiro dos ramos terrestres. Sua vibração é marcada por uma inteligência de sobrevivência inigualável e um charme social magnético. Sistemicamente, você carrega a semente do início, sendo aquele que detecta oportunidades antes de qualquer outro membro do sistema. Sua mente é incansável, processando variáveis ocultas para garantir a prosperidade do seu clã familiar ou corporativo. O desafio do Rato é a ansiedade por acumulação, devendo aprender que a verdadeira abundância flui através do desapego generoso.",
+            work: "No âmbito profissional, você é o mestre da eficiência. Trabalhos que exigem tática, negociação e visão de futuro são seu habitat. Você não busca o confronto direto; prefere a diplomacia estratégica e o 'bote' no momento exato. Sua habilidade financeira é um dom ancestral, sendo capaz de transformar recursos escassos em impérios através da gestão cirúrgica.",
+            mission: "Sua missão é ensinar ao mundo que a inteligência supera a força bruta. Você veio para quebrar ciclos de pobreza sistêmica e instaurar novos métodos de crescimento acelerado."
+        },
+        "Boi": {
+            desc: "O Boi representa o Pilar da Perseverança. Sua força não está na rapidez, mas na resistência inquebrável e na integridade absoluta. Você é a base sobre a qual sociedades e famílias são construídas. Existe uma honestidade brutal em sua essência que detesta jogos mentais ou manipulações. Sistemicamente, você é o guardião das tradições e o provedor inabalável. Seu silêncio não é ausência de pensamento, mas sim o acúmulo de força para a execução perfeita. O maior desafio é a teimosia excessiva; você deve aprender que a flexibilidade é uma forma superior de força.",
+            work: "Inigualável em carreiras que exigem rigor, método e longo prazo. Medicina, arquitetura, administração pública ou qualquer campo onde o erro não é permitido. Você não teme o trabalho pesado e sua recompensa vem através do mérito consolidado pelo tempo. Sua ética é o seu maior patrimônio profissional.",
+            mission: "Você veio para materializar o invisível através da disciplina. Sua missão é mostrar que o sucesso real é construído tijolo por tijolo, honrando o suor e o tempo natural da colheita."
+        },
+        "Tigre": {
+            desc: "O Tigre é o Comandante Nobre, uma explosão de energia yang e paixão avassaladora. Você nasceu para o desafio e para a defesa feroz da justiça. Sua presença altera a temperatura de qualquer ambiente; é impossível ignorar o seu magnetismo. Sistemicamente, o Tigre atua como o catalisador de mudanças e o destruidor de estruturas obsoletas. Você é movido por ideais elevados, mas sua impulsividade pode ser sua maior inimiga. A maestria da vida virá quando você aprender a domar o rugido interno, transformando a raiva em autoridade compassiva.",
+            work: "Você lidera por inspiração, não por medo. Carreiras dinâmicas, política, artes intensas ou cargos de comando imediato são ideais. O Tigre não suporta a monotonia burocrática; você precisa sentir o perigo e a novidade correndo nas veias para produzir em alto nível. O sucesso financeiro vem de saltos ousados e riscos calculados.",
+            mission: "Sua missão é inspirar a coragem naqueles que estão paralisados pelo medo. Você veio para liderar revoluções de consciência e proteger o direito à liberdade individual."
+        },
+        "Coelho": {
+            desc: "O Coelho é o Diplomata da Sorte, regido por uma aura de elegância e astúcia discreta. Você possui uma sensibilidade aguçada que capta as intenções alheias antes que elas sejam verbalizadas. Sistemicamente, você é o harmonizador, aquele que evita o colapso do clã através da palavra certa e do recuo estratégico. Embora pareça frágil, sua força reside na resiliência: você se dobra mas não quebra, sempre encontrando uma saída segura para os conflitos. O desafio é não se tornar excessivamente cauteloso ou fugir das decisões difíceis da vida.",
+            work: "Excelente em profissões que exigem gosto refinado, diplomacia e análise profunda. Direito, psicologia, design e comércio de luxo são campos onde você prospera. Você tem um instinto de preservação financeira que garante uma vida confortável e estável, baseada na prudência.",
+            mission: "Sua missão é introduzir a beleza e a harmonia em ambientes de conflito. Você veio para mostrar que a gentileza e a paz são as armas mais eficazes para a conquista duradoura."
+        },
+        "Dragão": {
+            desc: "O Dragão é a única criatura mítica, o Soberano Magnético do Zodíaco. Você carrega uma vitalidade solar inesgotável e um senso de destino que ultrapassa o comum. Sistemicamente, você é visto como um centro de poder e sorte, o que gera uma responsabilidade monumental: o Dragão não pode falhar sem afetar todo o seu sistema. Sua natureza é generosa, mas autocrática. Você enxerga o mundo em grandes escalas, ignorando detalhes mesquinhos que distraem os outros. O desafio é aprender a lidar com o isolamento no topo e aceitar a fragilidade humana.",
+            work: "Nascido para o topo. Empreendedorismo de alto risco, liderança mundial ou carreiras visionárias. Você não trabalha para ninguém; você constrói o palco onde outros trabalham. Sua sorte com dinheiro é lendária, mas deve cuidar para que a arrogância não crie pontos cegos na sua gestão.",
+            mission: "Sua missão é elevar o padrão de realidade do seu sistema. Você veio para trazer o fogo do espírito para a matéria, transformando sonhos 'impossíveis' em legados monumentais."
+        },
+        "Serpente": {
+            desc: "A Serpente representa a Sabedoria Mística e o silêncio calculista. Você enxerga o que está por trás do véu e possui uma intuição que beira o psiquismo. Sistemicamente, você é o estrategista de bastidores, aquele que manipula as energias para que o resultado final seja favorável ao seu círculo. Sua força é a paciência: você espera o momento exato para dar o bote cirúrgico. Você valoriza o refinamento intelectual e a beleza oculta. O desafio é o ciúme possessivo e a tendência a guardar segredos demais, criando abismos em seus relacionamentos.",
+            work: "Pesquisa científica, investigação, filosofia ou gestão financeira complexa. Você brilha em ambientes onde a informação é poder. Sua capacidade de foco é absoluta, permitindo que decifre problemas que outros abandonariam por cansaço. Você trabalha melhor no silêncio e na exclusividade.",
+            mission: "Sua missão é trazer luz às profundezas do conhecimento. Você veio para ser o guardião de verdades ocultas e ensinar a importância da análise profunda sobre a impulsividade."
+        },
+        "Cavalo": {
+            desc: "O Cavalo é o Espírito Indomável, a pura energia da expansão e da liberdade. Em 2026, seu ano de regência absoluta, sua força vital atinge o ápice. Você é comunicativo, impaciente com a lentidão e apaixonado pelo movimento. Sistemicamente, você é o mensageiro e o aventureiro que traz novas notícias e energias de fora para o clã. Seu otimismo é contagiante, mas sua sede de independência pode ser vista como egoísmo pelos que dependem de você. O desafio é aprender a terminar o que começou, unindo a rapidez com a consistência.",
+            work: "Vendas, comunicação, esporte, turismo ou qualquer área que exija presença pública e agilidade. Você precisa de liberdade total de horário e movimento. Sua fortuna é flutuante, mas sua capacidade de recuperação financeira é fenomenal, baseada no seu brilho pessoal e carisma.",
+            mission: "Sua missão é romper as correntes da estagnação. Você veio para mostrar que a vida é uma corrida de alegria e que a verdadeira segurança reside na capacidade de mudar e fluir."
+        },
+        "Cabra": {
+            desc: "A Cabra representa o Sonhador Criativo, o ápice da energia Yin da compaixão. Você transforma o caos emocional em beleza através da empatia e da sensibilidade artística. Sistemicamente, você é a alma do clã, aquele que nutre os corações e mantém a união através do afeto silencioso. Possui uma resistência passiva incrível: você vence os outros pela insistência doce e pela recusa em entrar em combates desnecessários. O desafio é a dependência emocional; você deve aprender a encontrar segurança dentro de si mesmo, não apenas no apoio alheio.",
+            work: "Artes visuais, cura holística, educação ou design de interiores. Você brilha onde a criatividade e o cuidado humano são necessários. Não foi feito para a competição corporativa feroz; você precisa de ambientes colaborativos e harmoniosos para florescer.",
+            mission: "Sua missão é suavizar a dureza do mundo material. Você veio para ensinar o valor da arte, do amor incondicional e da paz como fundamentos da existência humana."
+        },
+        "Macaco": {
+            desc: "O Macaco é o Gênio Inventivo, dotado de uma agilidade mental que beira a magia. Nenhuma situação é complexa demais para sua mente resolutiva. Sistemicamente, você é o solucionador de problemas e o inovador que encontra brechas para o progresso onde ninguém mais vê. Você joga o jogo da vida com leveza e humor, mas sua astúcia pode ser confundida com oportunismo. O desafio é a falta de foco em um único objetivo; você deve aprender que a maestria exige profundidade em um campo, não apenas o conhecimento superficial de mil áreas.",
+            work: "Tecnologia de ponta, mercado de ações, engenharia social ou advocacia. Você prospera no caos e na mudança rápida. Sua habilidade em improvisar garante que você nunca fique sem recursos, sendo um mestre em 'fazer muito com pouco'.",
+            mission: "Sua missão é acelerar a evolução técnica e mental da humanidade. Você veio para mostrar que a curiosidade eterna e a criatividade são as chaves para vencer qualquer limitação."
+        },
+        "Galo": {
+            desc: "O Galo representa o Guardião da Ordem e da Clareza. Você possui uma visão microscópica para detalhes e uma franqueza que serve como ferramenta de cura social. Sistemicamente, você é o administrador, aquele que organiza os recursos e mantém a disciplina do sistema. Você valoriza a aparência e o status, mas apenas como reflexo do seu trabalho árduo. Seu desafio é o perfeccionismo paralisante e o julgamento severo sobre os outros; aprenda que a perfeição é um ideal divino, mas o progresso humano é feito de falhas.",
+            work: "Administração de alto nível, medicina cirúrgica, crítica de arte ou contabilidade. Sua precisão técnica é absoluta. Você brilha em cargos que exigem supervisão constante e organização impecável. Sua fortuna é construída sobre a base do mérito e do planejamento rigoroso.",
+            mission: "Sua missão é trazer estrutura e verdade para o que está disperso ou confuso. Você veio para purificar o sistema através da disciplina e da visão clara dos fatos."
+        },
+        "Cão": {
+            desc: "O Cão é o Protetor Vigilante, regido por um radar moral inabalável. Sua lealdade é o pilar que sustenta seus relacionamentos e projetos. Sistemicamente, você é o sentinela, aquele que detecta injustiças e perigos ancestrais antes que eles se manifestem. Você possui uma natureza ansiosa por querer proteger tudo e todos, mas seu espírito é um dos mais nobres do zodíaco. O desafio é o pessimismo; você deve aprender que o universo conspira a favor da justiça e que a sua vigilância não precisa ser uma prisão de medo.",
+            work: "Segurança, justiça, assistência social ou ONGs. Você precisa de um propósito moral para trabalhar. Líderes Cães são os mais amados pelas equipes porque priorizam o bem do grupo acima do lucro cego. Sua fortuna é estável e baseada na confiança que os outros depositam em sua palavra.",
+            mission: "Sua missão é salvaguardar os valores fundamentais do espírito humano. Você veio para ensinar o valor da lealdade sacrificial e da proteção aos mais vulneráveis."
+        },
+        "Porco": {
+            desc: "O Porco é o Filantropo Nobre, que encerra o ciclo do zodíaco com a vibração da generosidade e do prazer sensorial. Você é uma alma antiga que entende que a verdadeira riqueza reside na abundância compartilhada. Sistemicamente, você é o provedor de conforto e o pacificador final. Sua natureza é honesta, transparente e às vezes ingênua por acreditar na bondade intrínseca de todos. O desafio é o excesso de indulgência; você deve aprender a colocar limites em sua doação para não esgotar sua própria fonte vital.",
+            work: "Gastronomia, hotelaria, grandes artes ou filantropia corporativa. Você brilha em qualquer área que proporcione bem-estar aos outros. Sua sorte financeira é imensa, pois o dinheiro flui para você naturalmente para que você possa continuar sendo um canal de abundância para o mundo.",
+            mission: "Sua missão é celebrar a vida em sua plenitude. Você veio para ensinar que o prazer, a bondade e a fortuna são direitos divinos de todos os seres que vivem em harmonia."
+        }
     };
+
+    const ELEMENTOS_DESC = {
+        "Metal": "O <span class='highlight'>Elemento Metal</span> traz para sua essência a determinação cortante, a lógica e o senso de justiça. Ele funciona como uma armadura para o seu animal astrológico, tornando-o ambicioso e focado em resultados tangíveis. Sua vontade é de ferro, mas sua dificuldade reside em expressar vulnerabilidade emocional.",
+        "Água": "O <span class='highlight'>Elemento Água</span> confere à sua personalidade uma intuição fluida e um poder comunicativo persuasivo. Ele suaviza as arestas brutas do seu signo, permitindo que você contorne obstáculos com diplomacia. Sua força é a adaptabilidade, infiltrando-se nas brechas do destino para alcançar o oceano do sucesso.",
+        "Madeira": "O <span class='highlight'>Elemento Madeira</span> injeta em você o impulso do crescimento constante e uma ética social inabalável. Você é flexível como um bambu, mas possui raízes profundas na tradição. Sua criatividade é expansiva, buscando sempre o progresso coletivo e o bem-estar da sua comunidade.",
+        "Fogo": "O <span class='highlight'>Elemento Fogo</span> acende em sua alma a paixão expansiva, o carisma e a liderança visível. Você não nasceu para os bastidores; sua luz atrai atenção e seguidores. Sua força é o dinamismo, mas deve cuidar para que sua intensidade não queime as pontes que construiu no caminho.",
+        "Terra": "O <span class='highlight'>Elemento Terra</span> 'aterra' sua essência com pragmatismo, responsabilidade e cautela. Você é o nutridor do zodíaco, focado em segurança e resultados de longo prazo. Sua força é a estabilidade sólida, sendo a rocha sobre a qual todos os outros elementos buscam apoio em momentos de crise."
+    };
+
+    const ANIMAIS_LIST = ["Macaco","Galo","Cão","Porco","Rato","Boi","Tigre","Coelho","Dragão","Serpente","Cavalo","Cabra"];
+    const ELEMENTOS_LIST = ["Metal","Metal","Água","Água","Madeira","Madeira","Fogo","Fogo","Terra","Terra"];
+    const ICONS_MAP = {"Rato":"mouse","Boi":"bullhorn","Tigre":"cat","Coelho":"paw","Dragão":"dragon","Serpente":"staff-snake","Cavalo":"horse","Cabra":"bacon","Macaco":"atom","Galo":"crow","Cão":"dog","Porco":"piggy-bank"};
 
     function processarBazi(dataStr, nome) {
         try {
-            if (!dataStr) dataStr = "2000-01-01";
+            if (!dataStr) throw new Error("Data Ausente");
             const parts = dataStr.split('-');
-            let year = parseInt(parts[0]);
-            let month = parseInt(parts[1]);
-            let day = parseInt(parts[2]);
+            let y = parseInt(parts[0]);
+            let m = parseInt(parts[1]);
+            let d = parseInt(parts[2]);
 
-            // RIGOR TÉCNICO: Correção Li Chun (Pivot Solar em 4 de Fevereiro)
-            if (month < 2 || (month === 2 && day < 4)) {
-                year--;
-            }
+            // RIGOR TÉCNICO: Correção Li Chun (4 de Fevereiro)
+            if (m < 2 || (m === 2 && d < 4)) y--;
 
-            const animal = ANIMAIS_DB[year % 12];
-            const elemento = ELEMENTOS_DB[year % 10];
+            const animal = ANIMAIS_LIST[y % 12];
+            const elemento = ELEMENTOS_LIST[y % 10];
             
-            exibirDados(animal, elemento, year, nome);
-
+            exibirDados(animal, elemento, nome, y);
         } catch (e) {
-            console.error("Falha Crítica no Motor Bazi:", e);
-            // Protocolo de Segurança: Não esconde erro com finally se o dado não estiver pronto.
+            console.error(e);
         }
     }
 
-    function exibirDados(a, e, ano, nome) {
-        const iconClass = ICONS_DB[a] || "dragon";
-        document.getElementById('res-icon').innerHTML = `<i class="fas fa-${iconClass}"></i>`;
+    function exibirDados(a, e, nome, ano) {
+        document.getElementById('res-icon').innerHTML = `<i class="fas fa-${ICONS_MAP[a]}"></i>`;
         document.getElementById('res-animal').innerText = a;
-        document.getElementById('res-element').innerText = `${e.toUpperCase()} • POLARIDADE YIN/YANG`;
-        document.getElementById('user-info').innerText = `${nome.toUpperCase()} • NASCIDO EM ${ano+1}`;
+        document.getElementById('res-element').innerText = `${e.toUpperCase()} • PILAR ANUAL`;
+        document.getElementById('user-info').innerText = `${nome.toUpperCase()} • CICLO SOLAR ATIVO`;
 
+        const data = ANIMAIS_DATA[a];
         document.getElementById('report-area').innerHTML = `
             <div class="report-block">
                 <div class="block-title">A NATUREZA DO SEU ESPÍRITO: ${a.toUpperCase()}</div>
-                <p style="text-align:justify; color:#ccc;">${DESCRICOES_DENSAS[a]}</p>
-                <p style="text-align:justify; color:#aaa; font-style:italic; font-size:0.9em; margin-top:15px;">
-                    Sistemicamente, o ${a} representa como você se posiciona perante a sociedade e seus ancestrais. No Ano do Cavalo de Fogo (2026), sua interação com o cosmos exigirá ${a === 'Cavalo' ? 'intensidade total e foco em renovação estrutural' : 'flexibilidade e adaptabilidade estratégica'}.
-                </p>
+                <p class="deep-text">${data.desc}</p>
             </div>
             <div class="report-block">
                 <div class="block-title">A MATÉRIA ALQUÍMICA: ${e.toUpperCase()}</div>
-                <p style="text-align:justify; color:#ccc;">O elemento ${e} é a substância que dá temperamento ao seu animal astrológico. Ele define COMO você persegue seus objetivos materiais e espirituais.</p>
-                <p style="text-align:justify; color:#aaa; margin-top:15px;">
-                    Sendo regido por ${e}, sua essência possui uma camada de ${e === 'Metal' ? 'determinação cortante e lógica' : e === 'Água' ? 'intuição comunicativa e fluida' : e === 'Madeira' ? 'crescimento constante e ética social' : e === 'Fogo' ? 'paixão expansiva e carisma' : 'estabilidade sólida e responsabilidade'}.
-                </p>
+                <p class="deep-text">${ELEMENTOS_DESC[e]}</p>
             </div>
             <div class="report-block">
+                <div class="block-title">DINÂMICA DE CARREIRA E FORTUNA</div>
+                <p class="deep-text">${data.work}</p>
+            </div>
+            <div class="report-block" style="border-left-color: var(--gold);">
                 <div class="block-title">INTERAÇÃO COM 2026 (CAVALO DE FOGO)</div>
-                <p style="text-align:justify; color:#ccc;">O ano de 2026 é um acelerador de destinos. Para a vibração do ${a}, este ciclo funcionará como uma forja. Se você resistir ao movimento, haverá fricção; se fluir com a rapidez do Fogo, alcançará colheitas monumentais que foram plantadas nos últimos 12 anos.</p>
+                <p class="deep-text">O ano de 2026 funciona como um acelerador sistêmico para você. Para a essência do <span class='highlight'>${a}</span>, este ciclo exige um alinhamento cirúrgico entre seus desejos internos e sua ação no mundo. ${a === 'Cavalo' ? 'Este é o seu Ben Ming Nian (Ano do Signo): a intensidade é máxima e a renovação de identidade é obrigatória.' : 'Sua interação com o fogo do Cavalo exige que você abandone métodos lentos e adote uma postura de decisão rápida para não perder as janelas de oportunidade que se fecharão em 2027.'}</p>
+            </div>
+            <div class="report-block">
+                <div class="block-title">SÍNTESE DA MISSÃO DE ALMA</div>
+                <p class="deep-text">${data.mission}</p>
             </div>
         `;
 
-        // SÓ DESATIVA O LOADING APÓS O SUCESSO TOTAL DA RENDERIZAÇÃO
-        document.getElementById('loading-screen').style.opacity = '0';
-        setTimeout(() => { document.getElementById('loading-screen').style.display = 'none'; }, 500);
+        document.getElementById('loading-screen').style.display = 'none';
     }
 
     auth.onAuthStateChanged(user => {
         if(user) {
             db.collection("usuarios").doc(user.uid).get().then(doc => {
-                const d = doc.exists ? doc.data() : {};
-                processarBazi(d.dataNascimento || d.nascimento, d.nome || "Iniciado");
-            }).catch(() => processarBazi("2000-01-01", "Iniciado"));
-        } else {
-            window.location.href = 'index.html';
+                const d = doc.data();
+                processarBazi(d.dataNascimento || d.nascimento || "2000-01-01", d.nome || "Iniciado");
+            });
         }
     });
 </script>
