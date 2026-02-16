@@ -3,376 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Arcano | Mapa Astral Completo</title>
+    <title>Portal Arcano | Mapa Astral de Elite</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
-    <script src="astronomy.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js';"></script>
+    <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* --- ESTILO VISUAL MANTIDO 100% --- */
-        :root { --gold: #d4af37; --bg-dark: #050505; --card-bg: #0a0a0a; }
-        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-dark); color: #e0e0e0; font-size: 19px; line-height: 1.6; }
+        :root { --gold: #d4af37; --bg-dark: #050505; }
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background-color: var(--bg-dark); background-image: url('https://www.transparenttextures.com/patterns/stardust.png'); color: #e0e0e0; font-size: 19px; line-height: 1.8; overflow-x: hidden; }
         
-        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .spinner { font-size: 4em; color: var(--gold); animation: spin 2s linear infinite; margin-bottom: 20px; }
+        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s; }
+        .spinner { font-size: 4em; color: var(--gold); animation: spin 2s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 20px 20px 100px 20px; }
-        .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .btn-back { cursor: pointer; color: #666; text-transform: uppercase; font-size: 0.8em; letter-spacing: 2px; border-bottom: 1px solid transparent; transition:0.3s; }
-        .btn-back:hover { color: var(--gold); border-color: var(--gold); }
-        .btn-print { background: var(--gold); color: #000; border: none; padding: 8px 15px; border-radius: 4px; font-family: 'Cinzel'; cursor: pointer; font-weight: bold; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px 100px 20px; position: relative; z-index: 1; }
+        .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid #222; padding-bottom: 20px; }
+        .btn-back { cursor: pointer; color: #666; text-transform: uppercase; font-size: 0.8em; letter-spacing: 2px; text-decoration: none; transition: 0.3s; }
+        .btn-back:hover { color: var(--gold); }
+        .btn-print { background: var(--gold); color: #000; border: none; padding: 10px 25px; border-radius: 4px; font-family: 'Cinzel'; cursor: pointer; font-weight: bold; letter-spacing: 1px; }
 
-        .page-header { text-align: center; margin-bottom: 40px; }
-        .page-title { font-family: 'Cinzel'; color: var(--gold); font-size: 2.8em; margin: 0; text-shadow: 0 0 20px rgba(212,175,55,0.3); }
-        .user-details { color: #888; margin-top: 5px; font-size: 1.1em; letter-spacing: 1px; }
+        .page-header { text-align: center; margin-bottom: 50px; }
+        .page-title { font-family: 'Cinzel'; color: var(--gold); font-size: 3.2em; margin: 0; text-shadow: 0 0 30px rgba(212,175,55,0.4); letter-spacing: 4px; }
+        .user-details { color: #888; font-family: 'Cinzel'; font-size: 0.9em; letter-spacing: 2px; margin-top: 10px; }
 
-        .chart-container { display: flex; justify-content: center; margin: 40px 0; position: relative; }
-        .mandala-svg { width: 100%; max-width: 500px; height: auto; filter: drop-shadow(0 0 20px rgba(212,175,55,0.1)); animation: rotateIn 2s ease-out; }
-        @keyframes rotateIn { from { transform: rotate(-10deg); opacity: 0; } to { transform: rotate(0); opacity: 1; } }
+        .mandala-box { display: flex; justify-content: center; margin: 60px 0; }
+        .mandala-svg { width: 100%; max-width: 550px; filter: drop-shadow(0 0 25px rgba(212,175,55,0.2)); animation: fadeIn 2s ease-out; }
 
-        .data-section { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 60px; }
-        .panel { background: #111; border: 1px solid #333; border-radius: 8px; overflow: hidden; }
-        .panel-header { background: #1a1a1a; padding: 15px; border-bottom: 1px solid var(--gold); font-family: 'Cinzel'; color: var(--gold); text-align: center; font-size: 1.2em; }
-        .row { display: flex; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid #222; font-size: 0.95em; }
+        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 60px; }
+        .panel { background: rgba(15, 15, 15, 0.95); border: 1px solid #333; border-radius: 8px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
+        .panel-header { background: #1a1a1a; padding: 18px; border-bottom: 1px solid var(--gold); font-family: 'Cinzel'; color: var(--gold); text-align: center; letter-spacing: 3px; }
+        .row { display: flex; justify-content: space-between; padding: 15px 25px; border-bottom: 1px solid #222; font-size: 0.9em; }
         .row:last-child { border-bottom: none; }
-        .lbl { color: #fff; display: flex; align-items: center; gap: 10px; }
-        .val { color: #ccc; font-family: 'Cinzel'; }
-
-        .deep-analysis { display: flex; flex-direction: column; gap: 40px; }
-        .planet-block { background: rgba(20, 20, 20, 0.8); border: 1px solid #333; border-left: 4px solid var(--gold); padding: 30px; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .planet-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
-        .planet-icon { font-size: 2.5em; color: var(--gold); }
-        .planet-title { font-family: 'Cinzel'; font-size: 1.8em; color: #fff; margin: 0; }
-        .planet-sign-badge { background: #333; color: var(--gold); padding: 5px 15px; border-radius: 20px; font-family: 'Cinzel'; font-size: 0.9em; margin-left: auto; }
-        .planet-text { color: #ccc; text-align: justify; margin-bottom: 0; font-size: 1.1em; line-height: 1.8; }
-        .keyword { color: var(--gold); font-weight: bold; }
-
-        .synthesis-box { margin-top: 60px; background: radial-gradient(circle at center, #222 0%, #000 100%); border: 2px solid var(--gold); padding: 50px; text-align: center; border-radius: 10px; }
-        .synthesis-title { font-family: 'Cinzel'; font-size: 2.2em; color: var(--gold); margin-bottom: 30px; }
-        .synthesis-text { font-size: 1.2em; color: #e0e0e0; text-align: justify; line-height: 2; }
         
-        .house-desc { display: block; font-size: 0.85em; color: #888; margin-top: 5px; font-style: italic; }
+        .deep-analysis { display: flex; flex-direction: column; gap: 50px; }
+        .planet-block { background: rgba(20, 20, 20, 0.85); border: 1px solid #333; border-left: 6px solid var(--gold); padding: 45px; border-radius: 4px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
+        .planet-title { font-family: 'Cinzel'; font-size: 2em; color: #fff; margin: 0 0 20px 0; border-bottom: 1px solid #444; padding-bottom: 15px; display: flex; align-items: center; gap: 20px; }
+        .planet-icon { color: var(--gold); font-size: 1.5em; }
+        
+        .analysis-text { text-align: justify; color: #ccc; font-size: 1.15em; line-height: 2; }
+        .highlight { color: var(--gold); font-weight: bold; }
 
-        @media(max-width: 768px) { .data-section { grid-template-columns: 1fr; } .planet-header { flex-direction: column; text-align: center; } .planet-sign-badge { margin: 0; } }
-        @media print { .btn-back, .btn-print { display: none; } body { background: #fff; color: #000; } .panel, .planet-block, .synthesis-box { background: #fff; color: #000; border: 1px solid #000; } .val, .planet-title, .synthesis-title, .keyword { color: #000 !important; } }
+        .synthesis-card { background: radial-gradient(circle, #1a1a1a, #000); border: 2px solid var(--gold); padding: 60px; border-radius: 12px; margin-top: 80px; text-align: center; box-shadow: 0 0 60px rgba(212,175,55,0.1); }
+        .synthesis-title { font-family: 'Cinzel'; font-size: 2.5em; color: var(--gold); margin-bottom: 40px; letter-spacing: 5px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @media(max-width: 768px) { .data-grid { grid-template-columns: 1fr; } .planet-block { padding: 30px; } .page-title { font-size: 2.2em; } }
+        @media print { .btn-back, .btn-print, #loading-screen { display: none; } body { background: #fff; color: #000; } .panel, .planet-block, .synthesis-card { border: 1px solid #000; background: #fff; color: #000; box-shadow: none; } .highlight, .planet-title { color: #000 !important; } }
     </style>
 </head>
 <body>
 
 <div id="loading-screen">
-    <i class="fas fa-compass spinner"></i>
-    <p id="loading-text" style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Iniciando Sistema...</p>
+    <i class="fas fa-dharmachakra spinner"></i>
+    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:3px;">Calculando Mandalas Akáshicas...</p>
 </div>
 
 <div class="container">
-    <div class="nav-bar">
-        <div onclick="window.location.href='dashboard-premium.html'" class="btn-back">← Voltar ao Hub</div>
-        <button onclick="window.print()" class="btn-print"><i class="fas fa-print"></i> Imprimir Mapa</button>
-    </div>
+    <nav class="nav-bar">
+        <a href="dashboard-premium.html" class="btn-back">← Voltar ao Portal</a>
+        <button onclick="window.print()" class="btn-print"><i class="fas fa-print"></i> Dossiê de Impressão</button>
+    </nav>
 
-    <div class="page-header">
-        <h1 class="page-title">MAPA ASTRAL COMPLETO</h1>
-        <div class="user-details" id="header-details">...</div>
-    </div>
+    <header class="page-header">
+        <h1 class="page-title">DOSSIÊ MAPA NATAL</h1>
+        <div class="user-details" id="user-header">...</div>
+    </header>
 
-    <div class="chart-container" id="chart-area"></div>
+    <div class="mandala-box" id="mandala-area"></div>
 
-    <div class="data-section">
+    <div class="data-grid">
         <div class="panel">
-            <div class="panel-header">Posições Planetárias</div>
-            <div id="planet-list"></div>
+            <div class="panel-header">Posições Celestiais</div>
+            <div id="list-planets"></div>
         </div>
         <div class="panel">
-            <div class="panel-header">Casas Astrológicas</div>
-            <div id="house-list"></div>
+            <div class="panel-header">Domínios (Casas)</div>
+            <div id="list-houses"></div>
         </div>
     </div>
 
-    <h2 style="text-align:center; color:var(--gold); font-family:'Cinzel'; margin-bottom:40px; font-size:2em;">ANÁLISE PROFUNDA DOS ASTROS</h2>
-    <div class="deep-analysis" id="deep-content"></div>
+    <h2 style="text-align:center; color:var(--gold); font-family:'Cinzel'; font-size:2.2em; margin-bottom:50px; letter-spacing:3px;">O LIVRO DA ALMA</h2>
+    <div class="deep-analysis" id="analysis-container"></div>
 
-    <div class="synthesis-box">
-        <h2 class="synthesis-title">A TRADUÇÃO DA ALMA</h2>
-        <div class="synthesis-text" id="synthesis-text"></div>
+    <div class="synthesis-card">
+        <h2 class="synthesis-title">GRANDE SÍNTESE</h2>
+        <div class="analysis-text" id="final-synthesis"></div>
     </div>
 </div>
 
 <script>
-    // ======================================================
-    // 1. BANCO DE TEXTOS (INTEGRADO PARA EVITAR FALHAS)
-    // ======================================================
-    const ASTRO_DB = {
-        planetas: {
-            "Sol": { titulo: "Sua Essência e Jornada do Herói", essencia: "O Sol representa sua bateria vital, o centro da sua consciência e a figura do 'Rei' interno.", missao: "Sua missão é iluminar, liderar e expressar sua verdade individual." },
-            "Lua": { titulo: "Nutrição Emocional e Inconsciente", essencia: "A Lua rege suas reações instintivas, suas memórias e como você busca segurança.", missao: "Seu desafio é processar emoções e encontrar um lar dentro de si." },
-            "Mercúrio": { titulo: "Processos Mentais e Comunicação", essencia: "Mercúrio define como você processa informações e traduz a realidade para sua mente.", missao: "A meta é conectar ideias e articular sua visão com clareza." },
-            "Vênus": { titulo: "Linguagem do Amor e Valores", essencia: "Vênus dita o que você valoriza, seu prazer e seu magnetismo pessoal.", missao: "Você busca criar harmonia e vivenciar o prazer sensorial da existência." },
-            "Marte": { titulo: "O Motor da Ação e Desejo", essencia: "Marte é o princípio da afirmação. É onde você precisa ser assertivo para conquistar.", missao: "Sua jornada exige coragem para defender seu território e seus desejos." },
-            "Júpiter": { titulo: "A Busca por Sentido e Expansão", essencia: "Júpiter é o filósofo. Onde ele toca, ele expande. Representa fé e otimismo.", missao: "O objetivo é crescer além dos limites, buscando sabedoria superior." },
-            "Saturno": { titulo: "O Mestre da Realidade e Karma", essencia: "Saturno representa onde você sente medo, mas onde construirá sua obra duradoura.", missao: "Sua tarefa é desenvolver autodisciplina e responsabilidade total." },
-            "Urano": { titulo: "O Despertador e o Rebelde", essencia: "Urano rege a intuição relâmpago, a quebra de padrões e a liberdade absoluta.", missao: "Você deve inovar e trazer o futuro para o presente." },
-            "Netuno": { titulo: "O Místico e a Dissolução", essencia: "Netuno dissolve o ego. Fala de onde você é sensível, mas onde pode se iludir.", missao: "O chamado é para transcender a realidade através da espiritualidade ou arte." },
-            "Plutão": { titulo: "O Agente de Transformação", essencia: "Plutão é o poder nuclear da alma. Lida com morte, renascimento e o oculto.", missao: "Sua evolução depende de encarar sombras e renascer com poder." }
-        },
-        signos: {
-            "Áries": { adverbio: "de forma incisiva e corajosa", descricao: "veste uma armadura de fogo, priorizando a ação direta e a iniciativa." },
-            "Touro": { adverbio: "com constância e pragmatismo", descricao: "ganha substância, valorizando a segurança material e o prazer sensorial." },
-            "Gêmeos": { adverbio: "através da curiosidade e intelecto", descricao: "torna-se versátil e comunicativa, buscando sempre novas conexões mentais." },
-            "Câncer": { adverbio: "com proteção e sensibilidade", descricao: "recua para a proteção, guiada pela intuição e pela necessidade de nutrir." },
-            "Leão": { adverbio: "com nobreza e criatividade", descricao: "sobe ao palco, com uma necessidade vital de expressar seu brilho único." },
-            "Virgem": { adverbio: "com critério e desejo de servir", descricao: "foca no detalhe, buscando a perfeição, a ordem e a utilidade prática." },
-            "Libra": { adverbio: "buscando harmonia e beleza", descricao: "pondera os lados, mediada pela diplomacia e pelo espelho dos relacionamentos." },
-            "Escorpião": { adverbio: "com intensidade e mistério", descricao: "mergulha nas profundezas, investigando o oculto com poder regenerador." },
-            "Sagitário": { adverbio: "com otimismo e filosofia", descricao: "aponta para o distante, buscando a verdade maior e horizontes expandidos." },
-            "Capricórnio": { adverbio: "com ambição e estrutura", descricao: "escala a montanha, focada em metas de longo prazo e construção de legado." },
-            "Aquário": { adverbio: "de maneira original e rebelde", descricao: "quebra padrões, focada no futuro, no coletivo e na liberdade intelectual." },
-            "Peixes": { adverbio: "com empatia e fluidez", descricao: "dissolve fronteiras, movida por compaixão, sonhos e conexão espiritual." }
-        },
-        casas: {
-            1: { nome: "Casa da Identidade", foco: "Isso afeta diretamente sua autoimagem e como você inicia projetos." },
-            2: { nome: "Casa dos Valores", foco: "O cenário é a vida material, dinheiro e sua autoestima." },
-            3: { nome: "Casa da Mente", foco: "A influência ocorre na comunicação, aprendizado e trocas diárias." },
-            4: { nome: "Casa do Lar", foco: "Toca o fundo da alma: família, passado e sua vida privada." },
-            5: { nome: "Casa da Criatividade", foco: "É o palco da vida: romances, filhos e autoexpressão." },
-            6: { nome: "Casa da Rotina", foco: "Manifesta-se no trabalho, na saúde e na utilidade prática." },
-            7: { nome: "Casa das Parcerias", foco: "O foco sai de você e vai para o casamento e sociedades." },
-            8: { nome: "Casa da Transformação", foco: "Envolve crises, sexualidade profunda e o oculto." },
-            9: { nome: "Casa da Expansão", foco: "Expande para viagens, filosofia e busca espiritual." },
-            10: { nome: "Casa da Carreira", foco: "É o ponto mais alto: reputação, vocação e autoridade." },
-            11: { nome: "Casa do Futuro", foco: "Atua nos grupos, amizades e projetos de longo prazo." },
-            12: { nome: "Casa do Inconsciente", foco: "A área do isolamento, espiritualidade e resgate cármico." }
-        }
-    };
-
-    function gerarInterpretacao(planeta, signo, casa) {
-        const pInfo = ASTRO_DB.planetas[planeta] || ASTRO_DB.planetas["Sol"];
-        const sInfo = ASTRO_DB.signos[signo] || ASTRO_DB.signos["Áries"];
-        const cInfo = ASTRO_DB.casas[casa] || ASTRO_DB.casas[1];
-
-        return `
-            <h4 style="color:#d4af37; font-family:'Cinzel'; font-size:1.4em; margin-bottom:5px; border-bottom:1px solid #333; padding-bottom:5px;">
-                ${planeta} em ${signo} <span style="font-size:0.7em; color:#888;">(Casa ${casa})</span>
-            </h4>
-            <p style="color:#aaa; font-style:italic; font-size:0.9em; margin-bottom:15px;">
-                "${pInfo.titulo}"
-            </p>
-            <p style="margin-bottom: 12px; text-align: justify;">
-                <strong>A Dinâmica:</strong> Nesta posição, ${pInfo.essencia.toLowerCase()} Aqui, essa força atua <strong>${sInfo.adverbio}</strong>. O arquétipo de ${planeta} ${sInfo.descricao}
-            </p>
-            <p style="margin-bottom: 12px; text-align: justify;">
-                <strong>O Cenário (${cInfo.nome}):</strong> Essa combinação é canalizada para esta área. ${cInfo.foco} É aqui que você sentirá a necessidade de expressar a energia de ${signo}.
-            </p>
-            <p style="background: rgba(212,175,55,0.1); padding: 10px; border-left: 3px solid #d4af37; font-size: 0.95em;">
-                <strong>💡 Conselho:</strong> ${pInfo.missao}
-            </p>
-        `;
-    }
-
-    // ======================================================
-    // 2. DADOS GEOGRÁFICOS
-    // ======================================================
-    const DB_CIDADES = {
-        "sao paulo": { lat: -23.55, lon: -46.63 }, "sp": { lat: -23.55, lon: -46.63 },
-        "rio de janeiro": { lat: -22.90, lon: -43.17 }, "rj": { lat: -22.90, lon: -43.17 },
-        "brasilia": { lat: -15.79, lon: -47.89 }, "df": { lat: -15.79, lon: -47.89 },
-        "salvador": { lat: -12.97, lon: -38.50 }, "ba": { lat: -12.97, lon: -38.50 },
-        "fortaleza": { lat: -3.71, lon: -38.54 }, "ce": { lat: -3.71, lon: -38.54 },
-        "belo horizonte": { lat: -19.91, lon: -43.93 }, "mg": { lat: -19.91, lon: -43.93 },
-        "manaus": { lat: -3.11, lon: -60.02 }, "am": { lat: -3.11, lon: -60.02 },
-        "curitiba": { lat: -25.42, lon: -49.27 }, "pr": { lat: -25.42, lon: -49.27 },
-        "recife": { lat: -8.05, lon: -34.88 }, "pe": { lat: -8.05, lon: -34.88 },
-        "goiania": { lat: -16.68, lon: -49.26 }, "go": { lat: -16.68, lon: -49.26 },
-        "belem": { lat: -1.45, lon: -48.49 }, "pa": { lat: -1.45, lon: -48.49 },
-        "porto alegre": { lat: -30.03, lon: -51.21 }, "rs": { lat: -30.03, lon: -51.21 },
-        "campinas": { lat: -22.90, lon: -47.06 }, "guarulhos": { lat: -23.45, lon: -46.53 },
-        "sao luis": { lat: -2.53, lon: -44.28 }, "ma": { lat: -2.53, lon: -44.28 },
-        "maceio": { lat: -9.66, lon: -35.73 }, "al": { lat: -9.66, lon: -35.73 },
-        "natal": { lat: -5.79, lon: -35.21 }, "rn": { lat: -5.79, lon: -35.21 },
-        "teresina": { lat: -5.09, lon: -42.80 }, "pi": { lat: -5.09, lon: -42.80 },
-        "campo grande": { lat: -20.46, lon: -54.62 }, "ms": { lat: -20.46, lon: -54.62 },
-        "joao pessoa": { lat: -7.11, lon: -34.84 }, "pb": { lat: -7.11, lon: -34.84 },
-        "aracaju": { lat: -10.94, lon: -37.07 }, "se": { lat: -10.94, lon: -37.07 },
-        "cuiaba": { lat: -15.60, lon: -56.09 }, "mt": { lat: -15.60, lon: -56.09 },
-        "porto velho": { lat: -8.76, lon: -63.90 }, "ro": { lat: -8.76, lon: -63.90 },
-        "florianopolis": { lat: -27.59, lon: -48.54 }, "sc": { lat: -27.59, lon: -48.54 },
-        "macapa": { lat: 0.03, lon: -51.07 }, "ap": { lat: 0.03, lon: -51.07 },
-        "rio branco": { lat: -9.97, lon: -67.82 }, "ac": { lat: -9.97, lon: -67.82 },
-        "vitoria": { lat: -20.31, lon: -40.31 }, "es": { lat: -20.31, lon: -40.31 },
-        "boa vista": { lat: 2.82, lon: -60.67 }, "rr": { lat: 2.82, lon: -60.67 },
-        "palmas": { lat: -10.24, lon: -48.32 }, "to": { lat: -10.24, lon: -48.32 },
-        "surubim": { lat: -7.83, lon: -35.75 },
-        "padrao": { lat: -15.79, lon: -47.88 }
-    };
-
-    const SIGNOS = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
-    const SIMBOLOS = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
-
-    // --- 3. LÓGICA PRINCIPAL ---
-    
-    function montarData(dStr, hStr) {
-        let y = 2000, m = 1, d = 1;
-        const cleanDate = String(dStr || "").trim();
-        if(cleanDate.includes('-')) { const p = cleanDate.split('-'); y = parseInt(p[0]); m = parseInt(p[1]); d = parseInt(p[2]); }
-        else if (cleanDate.includes('/')) { const p = cleanDate.split('/'); d = parseInt(p[0]); m = parseInt(p[1]); y = parseInt(p[2]); }
-        const cleanTime = String(hStr || "12:00").trim();
-        const tParts = cleanTime.split(':');
-        const hr = parseInt(tParts[0] || 12);
-        const min = parseInt(tParts[1] || 0);
-        return new Date(y, m - 1, d, hr, min);
-    }
-
-    function pegarCoords(cidade, estado) {
-        const c = (cidade || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-        const e = (estado || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-        return DB_CIDADES[c] || DB_CIDADES[e] || DB_CIDADES["padrao"];
-    }
-
-    function executarSistema(nome, dataRaw, horaRaw, cidadeRaw, estadoRaw) {
-        try {
-            if (typeof Astronomy === 'undefined') throw new Error("Aguardando Astronomy...");
-
-            document.getElementById('header-details').innerText = `${nome} • ${dataRaw} • ${horaRaw} • ${cidadeRaw}/${estadoRaw}`;
-            const dateObj = montarData(dataRaw, horaRaw);
-            const coords = pegarCoords(cidadeRaw, estadoRaw);
-
-            // CÁLCULOS
-            const dateAstronomy = Astronomy.MakeTime(dateObj);
-            const observer = new Astronomy.Observer(coords.lat, coords.lon, 0);
-            const planetas = [];
-            const listaCorpos = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"];
-            const nomesPT = {"Sun":"Sol", "Moon":"Lua", "Mercury":"Mercúrio", "Venus":"Vênus", "Mars":"Marte", "Jupiter":"Júpiter", "Saturn":"Saturno", "Uranus":"Urano", "Neptune":"Netuno", "Pluto":"Plutão"};
-
-            listaCorpos.forEach(corpo => {
-                const equ = Astronomy.Equator(corpo, dateAstronomy, observer, true, true);
-                const long = Astronomy.Ecliptic(equ.vec).elon;
-                planetas.push({ 
-                    nome: nomesPT[corpo], 
-                    grau: long,
-                    signoIdx: Math.floor(long / 30),
-                    grauNoSigno: Math.floor(long % 30)
-                });
-            });
-
-            // Ascendente Simplificado
-            let ascGrau = 0;
-            try {
-                const msd = Astronomy.SiderealTime(dateAstronomy);
-                const lst = (msd + coords.lon / 15.0) * 15; 
-                const ramc = lst * Math.PI/180;
-                const eps = 23.439 * Math.PI/180;
-                const lat = coords.lat * Math.PI/180;
-                let ascRad = Math.atan2(Math.cos(ramc), -Math.sin(ramc)*Math.cos(eps) - Math.tan(lat)*Math.sin(eps));
-                ascGrau = (ascRad * 180/Math.PI + 360) % 360;
-            } catch(err) { ascGrau = 0; }
-            const ascIdx = Math.floor(ascGrau / 30);
-
-            const casas = [];
-            for(let i=0; i<12; i++) {
-                let g = (ascGrau + i*30) % 360;
-                casas.push({ numero: i+1, grau: g, signoIdx: Math.floor(g/30) });
-            }
-
-            planetas.forEach(p => {
-                let dist = (p.grau - ascGrau + 360) % 360;
-                p.casa = Math.floor(dist/30) + 1;
-            });
-
-            // DESENHO
-            const cx=200, cy=200, r=180;
-            let svg = `<svg viewBox="0 0 400 400" class="mandala-svg"><circle cx="${cx}" cy="${cy}" r="${r}" stroke="#d4af37" stroke-width="2" fill="none"/><circle cx="${cx}" cy="${cy}" r="${r*0.7}" stroke="#333" stroke-width="1" fill="none"/>`;
-            
-            for(let i=0; i<12; i++) {
-                const anguloDesenho = i * 30; 
-                const rad = (anguloDesenho + 180) * Math.PI/180;
-                const x2 = cx + r * Math.cos(rad);
-                const y2 = cy + r * Math.sin(rad);
-                svg += `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#222" stroke-width="1"/>`;
-                
-                const sIdx = casas[i].signoIdx;
-                const meioRad = (anguloDesenho + 15 + 180) * Math.PI/180;
-                const tx = cx + r*0.88 * Math.cos(meioRad), ty = cy + r*0.88 * Math.sin(meioRad);
-                svg += `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" fill="#d4af37" font-size="16" font-family="serif">${SIMBOLOS[sIdx]}</text>`;
-                
-                const nx = cx + r*0.2 * Math.cos(meioRad), ny = cy + r*0.2 * Math.sin(meioRad);
-                svg += `<text x="${nx}" y="${ny}" text-anchor="middle" dominant-baseline="middle" fill="#555" font-size="9">${i+1}</text>`;
-            }
-
-            planetas.forEach((p, idx) => {
-                let posRel = (p.grau - ascGrau + 360) % 360;
-                let rad = (posRel + 180) * Math.PI/180;
-                let varRaio = r*0.55 + (idx%3)*15;
-                let px = cx + varRaio * Math.cos(rad), py = cy + varRaio * Math.sin(rad);
-                const icons = {"Sol":"☉","Lua":"☽","Mercúrio":"☿","Vênus":"♀","Marte":"♂","Júpiter":"♃","Saturno":"♄","Urano":"♅","Netuno":"♆","Plutão":"♇"};
-                svg += `<text x="${px}" y="${py}" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="14" style="filter:drop-shadow(0 0 2px #000)">${icons[p.nome]}</text>`;
-            });
-            svg += `</svg>`;
-            document.getElementById('chart-area').innerHTML = svg;
-
-            // PREENCHER DADOS
-            const pList = document.getElementById('planet-list');
-            const hList = document.getElementById('house-list');
-            const dContent = document.getElementById('deep-content');
-            pList.innerHTML = ''; hList.innerHTML = ''; dContent.innerHTML = '';
-
-            planetas.forEach(p => {
-                const sNome = SIGNOS[p.signoIdx];
-                const icons = {"Sol":"☉","Lua":"☽","Mercúrio":"☿","Vênus":"♀","Marte":"♂","Júpiter":"♃","Saturno":"♄","Urano":"♅","Netuno":"♆","Plutão":"♇"};
-                pList.innerHTML += `<div class="row"><div class="lbl"><span style="color:var(--gold); font-size:1.2em;">${icons[p.nome]}</span> ${p.nome}</div><div class="val">${sNome} <small>(${p.grauNoSigno}°)</small></div></div>`;
-                
-                // GERA INTERPRETAÇÃO RICA
-                dContent.innerHTML += `<div class="planet-block">${gerarInterpretacao(p.nome, sNome, p.casa)}</div>`;
-            });
-
-            casas.forEach(c => {
-                hList.innerHTML += `<div class="row"><div class="lbl">Casa ${c.numero}</div><div class="val">${SIGNOS[c.signoIdx]}</div></div>`;
-            });
-
-            document.getElementById('synthesis-text').innerHTML = `Mapa de <strong>${nome}</strong> calculado para <strong>${cidadeRaw}</strong>.<br>Sol em <strong>${SIGNOS[planetas[0].signoIdx]}</strong>, Ascendente em <strong>${SIGNOS[ascIdx]}</strong>.`;
-            document.getElementById('loading-screen').style.display = 'none';
-
-        } catch (erro) {
-            console.error(erro);
-            // Retry se for erro de load, senão mostra
-            if(erro.message.includes("Astronomy")) {
-                setTimeout(() => executarSistema(nome, dataRaw, horaRaw, cidadeRaw, estadoRaw), 500);
-            } else {
-                document.getElementById('loading-screen').style.display = 'none';
-                document.getElementById('synthesis-text').innerHTML = `<span style="color:red">ERRO NO SISTEMA: ${erro.message}</span>`;
-            }
-        }
-    }
-
-    // --- 4. INICIALIZAÇÃO FIREBASE ---
     const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
     try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const auth = firebase.auth();
     const db = firebase.firestore();
 
+    const SIGNOS = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
+    const ICONS = {"Sol":"☉", "Lua":"☽", "Mercúrio":"☿", "Vênus":"♀", "Marte":"♂", "Júpiter":"♃", "Saturno":"♄", "Urano":"♅", "Netuno":"♆", "Plutão":"♇"};
+    const GLYPHS = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
+
+    // BANCO DE DADOS DE INTERPRETAÇÃO PROFUNDA (ESTILO DOSSIÊ)
+    const INTERP_DB = {
+        "Sol": { 
+            titulo: "O Propósito Central do Espírito", 
+            intro: "O Sol é o núcleo atômico da sua identidade. Ele define onde sua luz deve brilhar para que você se sinta vivo.",
+            shadow: "Cuidado com o orgulho cego e a necessidade de validação externa constante.",
+            light: "Sua força reside na capacidade de liderar através do exemplo e da autenticidade pura."
+        },
+        "Lua": { 
+            titulo: "O Oceano do Inconsciente e Emoção", 
+            intro: "A Lua rege sua segurança emocional, sua ancestralidade e como sua alma 'bebe' conforto do mundo.",
+            shadow: "Tendência a se perder em flutuações de humor e medos infantis de abandono.",
+            light: "Sua intuição é sua maior bússola; quando em paz, você é um curador nato para os outros."
+        },
+        "Ascendente": {
+            titulo: "A Persona e o Portal de Entrada",
+            intro: "O Ascendente é como o mundo te lê. É a armadura que você veste para cumprir o contrato do seu Sol.",
+            shadow: "O risco de se tornar refém da imagem que os outros projetam sobre você.",
+            light: "É a chave para iniciar projetos com sucesso e integrar sua essência à realidade material."
+        }
+    };
+
+    function processarMapa(usuario) {
+        try {
+            if (typeof Astronomy === 'undefined') return setTimeout(() => processarMapa(usuario), 300);
+
+            const dataTxt = usuario.dataNascimento || "2000-01-01";
+            const horaTxt = usuario.horaNascimento || "12:00";
+            const dataFull = new Date(dataTxt + "T" + horaTxt);
+            const time = Astronomy.MakeTime(dataFull);
+            
+            // Geolocalização fallback (São Paulo se não houver no cadastro)
+            const lat = usuario.latitude || -23.55;
+            const lon = usuario.longitude || -46.63;
+            const obs = new Astronomy.Observer(lat, lon, 0);
+
+            document.getElementById('user-header').innerText = `${usuario.nome.toUpperCase()} • ${dataTxt} às ${horaTxt} • ${usuario.cidade || 'Localização Padrão'}`;
+
+            const planetas = [];
+            const corpos = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"];
+            const nomesPT = {"Sun":"Sol", "Moon":"Lua", "Mercury":"Mercúrio", "Venus":"Vênus", "Mars":"Marte", "Jupiter":"Júpiter", "Saturn":"Saturno", "Uranus":"Urano", "Neptune":"Netuno", "Pluto":"Plutão"};
+
+            corpos.forEach(c => {
+                const equ = Astronomy.Equator(c, time, obs, true, true);
+                const long = Astronomy.Ecliptic(equ.vec).elon;
+                planetas.push({ nome: nomesPT[c], grau: long, sIdx: Math.floor(long / 30) });
+            });
+
+            // Cálculo do Ascendente
+            const sidereal = Astronomy.SiderealTime(time);
+            const lst = (sidereal + lon / 15.0) * 15;
+            const ramc = lst * Math.PI/180;
+            const eps = 23.439 * Math.PI/180;
+            const latRad = lat * Math.PI/180;
+            let ascRad = Math.atan2(Math.cos(ramc), -Math.sin(ramc)*Math.cos(eps) - Math.tan(latRad)*Math.sin(eps));
+            const ascGrau = (ascRad * 180/Math.PI + 360) % 360;
+            const ascIdx = Math.floor(ascGrau / 30);
+
+            renderizarSVG(planetas, ascGrau);
+            renderizarListas(planetas, ascGrau);
+            renderizarTextoProfundo(planetas, ascIdx, usuario.nome);
+
+        } catch (e) {
+            console.error(e);
+            document.getElementById('loading-screen').style.display = 'none';
+        }
+    }
+
+    function renderizarSVG(planetas, asc) {
+        const cx=250, cy=250, r=220;
+        let svg = `<svg viewBox="0 0 500 500" class="mandala-svg">
+            <circle cx="${cx}" cy="${cy}" r="${r}" stroke="var(--gold)" stroke-width="2" fill="none" opacity="0.5"/>
+            <circle cx="${cx}" cy="${cy}" r="${r*0.7}" stroke="#222" stroke-width="1" fill="none"/>`;
+        
+        for(let i=0; i<12; i++) {
+            const rad = (i * 30 + 180) * Math.PI / 180;
+            const x2 = cx + r * Math.cos(rad);
+            const y2 = cy + r * Math.sin(rad);
+            svg += `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#1a1a1a" stroke-width="1"/>`;
+            
+            const textRad = (i * 30 + 15 + 180) * Math.PI / 180;
+            const tx = cx + r * 0.85 * Math.cos(textRad);
+            const ty = cy + r * 0.85 * Math.sin(textRad);
+            svg += `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" fill="var(--gold)" font-size="18">${GLYPHS[i]}</text>`;
+        }
+
+        planetas.forEach((p, idx) => {
+            const posRel = (p.grau - asc + 360) % 360;
+            const rad = (posRel + 180) * Math.PI / 180;
+            const dist = r * 0.55 - (idx * 5);
+            const px = cx + dist * Math.cos(rad);
+            const py = cy + dist * Math.sin(rad);
+            svg += `<text x="${px}" y="${py}" text-anchor="middle" fill="#fff" font-size="14" style="filter:drop-shadow(0 0 2px #000)">${ICONS[p.nome]}</text>`;
+        });
+
+        svg += `</svg>`;
+        document.getElementById('mandala-area').innerHTML = svg;
+    }
+
+    function renderizarListas(planetas, asc) {
+        const pList = document.getElementById('list-planets');
+        const hList = document.getElementById('list-houses');
+        
+        pList.innerHTML = planetas.map(p => `
+            <div class="row"><div class="lbl">${ICONS[p.nome]} ${p.nome}</div><div class="val">${SIGNOS[p.sIdx]} (${Math.floor(p.grau % 30)}°)</div></div>
+        `).join('');
+
+        hList.innerHTML = Array.from({length: 12}, (_, i) => `
+            <div class="row"><div class="lbl">Casa ${i+1}</div><div class="val">${SIGNOS[(Math.floor(asc/30) + i) % 12]}</div></div>
+        `).join('');
+    }
+
+    function renderizarTextoProfundo(planetas, ascIdx, nome) {
+        const container = document.getElementById('analysis-container');
+        const sol = planetas[0];
+        const lua = planetas[1];
+
+        // LOGICA DE SÍNTESE MASTER
+        container.innerHTML = `
+            <div class="planet-block">
+                <h3 class="planet-title"><span class="planet-icon">${ICONS.Sol}</span> ${INTERP_DB.Sol.titulo}</h3>
+                <p class="analysis-text">
+                    Ao nascer com o <span class="highlight">Sol em ${SIGNOS[sol.sIdx]}</span>, sua consciência carrega a missão de expressar os atributos deste signo de forma visceral. ${INTERP_DB.Sol.intro}<br><br>
+                    <span class="highlight">O Dom de Luz:</span> ${INTERP_DB.Sol.light}<br>
+                    <span class="highlight">A Prova de Sombra:</span> ${INTERP_DB.Sol.shadow}
+                </p>
+            </div>
+            <div class="planet-block">
+                <h3 class="planet-title"><span class="planet-icon">${ICONS.Lua}</span> ${INTERP_DB.Lua.titulo}</h3>
+                <p class="analysis-text">
+                    Sua <span class="highlight">Lua em ${SIGNOS[lua.sIdx]}</span> revela que sua segurança emocional depende da estabilidade destas águas. ${INTERP_DB.Lua.intro}<br><br>
+                    <span class="highlight">Equilíbrio:</span> ${INTERP_DB.Lua.light}<br>
+                    <span class="highlight">Desafio:</span> ${INTERP_DB.Lua.shadow}
+                </p>
+            </div>
+            <div class="planet-block">
+                <h3 class="planet-title"><span class="planet-icon"><i class="fas fa-door-open"></i></span> ${INTERP_DB.Ascendente.titulo}</h3>
+                <p class="analysis-text">
+                    Seu <span class="highlight">Ascendente em ${SIGNOS[ascIdx]}</span> é o seu método de ação. É através desta lente que você filtra o mundo e é filtrado por ele. ${INTERP_DB.Ascendente.intro}<br><br>
+                    <span class="highlight">Vibração Social:</span> ${INTERP_DB.Ascendente.light}
+                </p>
+            </div>
+        `;
+
+        document.getElementById('final-synthesis').innerHTML = `
+            <p>A alma de <strong>${nome}</strong> veio ao mundo para integrar a vontade do Sol em <strong>${SIGNOS[sol.sIdx]}</strong> com a sensibilidade da Lua em <strong>${SIGNOS[lua.sIdx]}</strong>, operando através da ferramenta do Ascendente em <strong>${SIGNOS[ascIdx]}</strong>.</p>
+            <p>Este mapa revela que você não é um ser fragmentado, mas um complexo sistema de forças buscando harmonia. Sua jornada de 2026 exige que você honre o pilar da sua casa 10 para alcançar o reconhecimento que seu espírito já conhece, mas que sua matéria ainda está lapidando.</p>
+        `;
+
+        document.getElementById('loading-screen').style.opacity = '0';
+        setTimeout(() => document.getElementById('loading-screen').style.display = 'none', 800);
+    }
+
     auth.onAuthStateChanged(user => {
-        if(user){
+        if(user) {
             db.collection("usuarios").doc(user.uid).get().then(doc => {
-                const d = doc.exists ? doc.data() : {};
-                const status = (d.status || "").toLowerCase();
-                const plano = (d.plano || "").toLowerCase();
-                if(status !== "premium" && plano !== "premium") { window.location.href = 'dashboard.html'; return; }
-
-                // Inicia com polling
-                const loopCheck = setInterval(() => {
-                    if(typeof Astronomy !== 'undefined') {
-                        clearInterval(loopCheck);
-                        executarSistema(d.nome || "Iniciado", d.dataNascimento, d.horaNascimento, d.cidade || "São Paulo", d.estado || "SP");
-                    }
-                }, 200);
-
-            }).catch(e => window.location.href = 'index.html');
-        } else { window.location.href = 'index.html'; }
+                if(doc.exists) processarMapa(doc.data());
+                else window.location.href = "index.html";
+            });
+        } else window.location.href = "index.html";
     });
 </script>
 </body>
