@@ -34,8 +34,8 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // RIGOR TÉCNICO: ID validado conforme image_892fcf.png
-        const ID_ASSINATURA = "price_1T1ProL12Q2zNNHl5Q8qF2aM"; 
+        // ID ATUALIZADO CONFORME image_8a18e2.png
+        const ID_ASSINATURA = "price_1T1TO1Lc8MnSdAQGTLSfGS34"; 
 
         document.getElementById('btn-comprar').addEventListener('click', async () => {
             const user = auth.currentUser;
@@ -46,12 +46,7 @@
                 const response = await fetch('/api/create-checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        priceId: ID_ASSINATURA, 
-                        uid: user.uid, 
-                        email: user.email, 
-                        mode: 'subscription' 
-                    })
+                    body: JSON.stringify({ priceId: ID_ASSINATURA, uid: user.uid, email: user.email, mode: 'subscription' })
                 });
                 const data = await response.json();
                 if (data.url) window.location.href = data.url;
