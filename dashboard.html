@@ -7,7 +7,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-functions-compat.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -15,8 +14,10 @@
     <style>
         :root { --gold: #d4af37; --bg-dark: #050505; }
         body { margin: 0; font-family: 'Cormorant Garamond', serif; background-color: var(--bg-dark); background-image: url('https://www.transparenttextures.com/patterns/stardust.png'); color: #e0e0e0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+        
         .header-container { text-align: center; padding-top: 60px; width: 100%; margin-bottom: 40px; }
         .main-title { font-family: 'Cinzel', serif; font-size: 3em; color: var(--gold); text-shadow: 0 0 20px rgba(212,175,55,0.4); margin: 0; letter-spacing: 2px; }
+        
         .stats-row { display: flex; justify-content: center; gap: 60px; margin-top: 30px; }
         .stat-box { text-align: center; }
         .stat-label { font-family: 'Cinzel', serif; font-size: 0.7em; color: #666; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 5px; display: block; }
@@ -31,8 +32,10 @@
         .lock-icon { font-size: 2em; color: var(--gold); text-shadow: 0 0 15px var(--gold); }
         
         .cta-box { border: 1px solid var(--gold); padding: 50px; background: rgba(10, 10, 10, 0.95); border-radius: 12px; margin-top: 60px; box-shadow: 0 0 40px rgba(212,175,55,0.15); }
-        .btn-buy { background: linear-gradient(45deg, #d4af37, #b8860b); color: #000; font-family: 'Cinzel'; font-size: 1.3em; padding: 20px 60px; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; margin-top: 30px; transition: 0.3s; width: 100%; max-width: 400px; }
-        .btn-buy:hover { transform: scale(1.05); background: #fff; }
+        .btn-buy { background: linear-gradient(45deg, #d4af37, #b8860b); color: #000; font-family: 'Cinzel'; font-size: 1.1em; padding: 20px 30px; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; margin-top: 30px; transition: 0.3s; width: 100%; max-width: 450px; letter-spacing: 1px; }
+        .btn-buy:hover { transform: scale(1.03); background: #fff; }
+        .btn-buy:disabled { background: #333; color: #666; cursor: not-allowed; transform: none; }
+
         .btn-logout { background: transparent; border: 1px solid #333; color: #666; padding: 10px 30px; margin-top: 40px; cursor: pointer; font-family: 'Cinzel'; }
     </style>
 </head>
@@ -41,13 +44,13 @@
     <div class="header-container">
         <h1 class="main-title">CONHECIMENTO PARCIAL</h1>
         <div class="stats-row">
-            <div class="stat-box"><span class="stat-label">SIGNO</span><span class="stat-value" id="user-signo">...</span></div>
-            <div class="stat-box"><span class="stat-label">ASCENDENTE</span><span class="stat-value" id="user-ascendente">...</span></div>
+            <div class="stat-box"><span class="stat-label">SIGNO</span><span class="stat-value" id="user-signo">Carregando...</span></div>
+            <div class="stat-box"><span class="stat-label">ASCENDENTE</span><span class="stat-value" id="user-ascendente">Carregando...</span></div>
         </div>
     </div>
 
     <div class="container-free">
-        <p style="color: #888;">Os portais de 2026 ainda estão selados para você. Torne-se um Iniciado de Elite para acessar os Dossiês.</p>
+        <p style="color: #888;">Os portais de 2026 ainda estão selados. Torne-se um Iniciado de Elite para acessar os Dossiês Masters.</p>
 
         <div class="grid-premium-preview">
             <div class="preview-card">
@@ -58,7 +61,7 @@
             <div class="preview-card">
                 <div class="lock-overlay"><i class="fas fa-lock lock-icon"></i></div>
                 <h3 style="font-family:'Cinzel'; color:var(--gold);">Ciclos de Maturidade</h3>
-                <div class="blur-content">Você está entrando no seu Retorno de Saturno, o que exige cautela extrema com finanças nos próximos 7 meses...</div>
+                <div class="blur-content">Você está entrando no seu Retorno de Saturno, o que exige cautela extrema com finanças nos próximos meses...</div>
             </div>
             <div class="preview-card">
                 <div class="lock-overlay"><i class="fas fa-lock lock-icon"></i></div>
@@ -68,9 +71,10 @@
         </div>
 
         <div class="cta-box">
-            <h1 style="font-family:'Cinzel'; color:var(--gold); margin-bottom:15px;">DESBLOQUEIE O ARCANO</h1>
-            <p style="font-size:1.2em;">Tenha acesso vitalício a todos os 10 módulos de autoconhecimento profundo.</p>
-            <button class="btn-buy" id="btn-comprar">LIBERAR DOSSIÊ COMPLETO</button>
+            <h1 style="font-family:'Cinzel'; color:var(--gold); margin-bottom:15px;">ACESSO PREMIUM</h1>
+            <p style="font-size:1.1em; color:#ccc;">Desbloqueie todos os 10 módulos, IA Regente e Banhos Alquímicos por uma pequena contribuição mensal.</p>
+            <h2 style="font-family:'Cinzel'; color:#fff; margin-top:20px;">R$ 49,90 / MÊS</h2>
+            <button class="btn-buy" id="btn-comprar">ASSINAR PORTAL PREMIUM</button>
         </div>
 
         <button class="btn-logout" onclick="firebase.auth().signOut()">Sair do Templo</button>
@@ -82,19 +86,63 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
+        // ID da Assinatura cadastrado no Stripe e no Vercel
+        const ID_ASSINATURA = "price_1T1ProL12Q2zNNHl5Q8qF2aM";
+
         auth.onAuthStateChanged(user => {
             if (user) {
-                db.collection("usuarios").doc(user.uid).get().then(doc => {
-                    const data = doc.data();
-                    if (data.status === "premium") window.location.href = "dashboard-premium.html";
-                    document.getElementById('user-signo').innerText = "Apurando...";
+                db.collection("usuarios").doc(user.uid).onSnapshot(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        // Redireciona se o status for Premium
+                        if (data.status === "premium") {
+                            window.location.href = "dashboard-premium.html";
+                        }
+                        document.getElementById('user-signo').innerText = data.signo || "Calculando...";
+                        document.getElementById('user-ascendente').innerText = data.ascendente || "Calculando...";
+                    }
                 });
-            } else window.location.href = "index.html";
+            } else {
+                window.location.href = "index.html";
+            }
         });
 
+        // MOTOR DE PAGAMENTO (INTEGRAÇÃO VERCEL + STRIPE)
         document.getElementById('btn-comprar').addEventListener('click', async () => {
-            alert("Redirecionando para o Alinhamento Financeiro...");
-            // Integração com Stripe/MercadoPago via Cloud Functions viria aqui
+            const user = auth.currentUser;
+            if(!user) return;
+
+            const btn = document.getElementById('btn-comprar');
+            btn.innerText = "SINTONIZANDO PORTAL...";
+            btn.disabled = true;
+
+            try {
+                // Chama a API que criamos no Vercel
+                const response = await fetch('/api/create-checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        priceId: ID_ASSINATURA,
+                        uid: user.uid,
+                        email: user.email,
+                        mode: 'subscription' // Modo recorrente
+                    })
+                });
+
+                const session = await response.json();
+
+                if (session.url) {
+                    window.location.href = session.url; // Vai para o Stripe
+                } else {
+                    throw new Error(session.error || "Erro ao conectar.");
+                }
+
+            } catch (error) {
+                console.error("Erro no checkout:", error);
+                alert("Falha no alinhamento financeiro. Verifique sua conexão e tente novamente.");
+                btn.innerText = "ASSINAR PORTAL PREMIUM";
+                btn.disabled = false;
+            }
         });
     </script>
 </body>
