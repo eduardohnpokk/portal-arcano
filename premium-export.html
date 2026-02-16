@@ -21,36 +21,32 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .container { padding: 100px 20px; }
-        .btn-generate { background: var(--gold); color: #000; border: none; padding: 20px 50px; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 1.2em; transition: 0.3s; }
+        .btn-generate { background: var(--gold); color: #000; border: none; padding: 20px 50px; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 1.2em; }
         .btn-generate:disabled { background: #333; color: #666; cursor: not-allowed; }
 
-        /* --- CONFIGURAÇÃO DE SEGURANÇA PARA RENDERIZAÇÃO --- */
-        #pdf-template { 
+        /* --- CONTENTOR DE RENDERIZAÇÃO BLINDADO --- */
+        #pdf-render-area { 
+            position: absolute; 
+            left: -9999px; 
+            top: 0; 
+            width: 210mm; 
             background: white; 
             color: black; 
-            width: 210mm; 
-            position: absolute; 
-            top: 0;
-            left: 0;
-            z-index: -1;
-            opacity: 0.01; /* Quase invisível mas detectável pelo motor */
-            pointer-events: none;
+            text-align: left;
         }
-        .page { 
+        .html2pdf__page-break { page-break-after: always; height: 0; }
+        .page-content { 
             width: 210mm; 
-            height: 296.5mm; 
+            min-height: 296mm; 
             padding: 30mm 20mm; 
             box-sizing: border-box; 
-            page-break-after: always; 
-            display: flex; 
-            flex-direction: column;
-            overflow: hidden;
+            position: relative; 
             background: white;
         }
-        .pdf-header { font-family: 'Cinzel'; color: #b8860b; border-bottom: 1px solid #ddd; margin-bottom: 15px; font-size: 10pt; text-align: right; }
-        .pdf-title { font-family: 'Cinzel'; font-size: 42pt; text-align: center; margin-top: 60mm; color: #000; }
-        .section-title { font-family: 'Cinzel'; color: #b8860b; font-size: 20pt; margin: 20px 0; border-left: 6px solid #b8860b; padding-left: 15px; }
-        .text-block { font-size: 12.5pt; text-align: justify; line-height: 1.8; color: #111; }
+        .pdf-header { font-family: 'Cinzel'; color: #b8860b; border-bottom: 1px solid #eee; margin-bottom: 20px; font-size: 10pt; text-align: right; }
+        .pdf-title { font-family: 'Cinzel'; font-size: 44pt; text-align: center; margin-top: 60mm; color: #000; }
+        .section-title { font-family: 'Cinzel'; color: #b8860b; font-size: 22pt; margin: 30px 0 15px 0; border-left: 5px solid #b8860b; padding-left: 15px; }
+        .text-block { font-size: 12.5pt; text-align: justify; line-height: 1.8; color: #111; margin-bottom: 15px; }
         .footer-page { position: absolute; bottom: 15mm; width: 170mm; text-align: center; font-size: 9pt; color: #aaa; border-top: 1px solid #eee; padding-top: 10px; font-family: 'Cinzel'; }
     </style>
 </head>
@@ -58,95 +54,102 @@
 
 <div id="loading-screen">
     <div class="spinner"></div>
-    <p style="color:var(--gold); font-family:'Cinzel'; margin-top:20px; letter-spacing:2px;">Sincronizando Destino Master...</p>
+    <p style="color:var(--gold); font-family:'Cinzel'; margin-top:20px;">A Carregar Dossiê Master...</p>
 </div>
 
 <div class="container">
-    <h1 style="font-family:'Cinzel'; color:var(--gold); font-size:2.5em;">LIVRO DO DESTINO MASTER</h1>
-    <p style="color:#888;">Geração de 62 páginas de Sabedoria Arcaica.</p>
-    <button id="btn-master" class="btn-generate" onclick="gerarDossie()">GERAR PDF (62 PÁGINAS)</button>
-    <p id="status-text" style="color:var(--gold); margin-top:20px; font-family:'Cinzel'; display:none;"></p>
+    <h1 style="font-family:'Cinzel'; color:var(--gold); font-size:2.5em;">LIVRO DO DESTINO</h1>
+    <p style="color:#888;">Geração garantida de 62 páginas de Sabedoria Arcaica.</p>
+    <button id="btn-master" class="btn-generate" onclick="iniciarGeracao()">GERAR LIVRO COMPLETO</button>
+    <p id="progress-status" style="color:var(--gold); margin-top:20px; font-family:'Cinzel'; display:none;"></p>
 </div>
 
-<div id="pdf-template">
-    <div class="page" style="justify-content: center; align-items: center; text-align: center;">
-        <h1 class="pdf-title">PORTAL ARCANO</h1>
-        <p style="font-family:'Cinzel'; font-size:1.6em; letter-spacing:6px; color:#444;">DOSSIÊ MASTER 2026</p>
-        <div style="margin-top:40mm; border-top: 2px solid #b8860b; padding-top: 20px;">
-            <p style="font-family:'Cinzel'; font-size:2.2em; color:#000;" id="pdf-user-name"></p>
-            <p style="color:#666; font-size:1.1em;" id="pdf-user-info"></p>
-        </div>
-    </div>
-    <div id="dynamic-content"></div>
-</div>
+<div id="pdf-render-area"></div>
 
 <script>
     const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
-    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
 
     let userData = null;
 
-    const FRAGMENTOS = [
-        "Sua mandala astral revela que o ano de 2026 será regido pela força da transmutação. O cosmos exige que você abandone velhas estruturas de pensamento para abraçar a nova autoridade que emana do seu Sol interno, garantindo que sua voz seja ouvida nos planos mais elevados.",
-        "A numerologia sagrada aplicada ao seu nome indica um período de colheita sistêmica. Não há espaço para hesitação; a matemática divina aponta para um alinhamento perfeito entre sua vontade e a manifestação material, desde que você honre o contrato sagrado firmado ao nascer.",
-        "No zodíaco oriental, este ciclo traz a resiliência necessária para vencer batalhas invisíveis. Sua alma está sendo lapidada para suportar a pressão do sucesso, transformando o chumbo das preocupações cotidianas no ouro da sabedoria eterna e inabalável."
+    const TEXTOS = [
+        "A sua mandala astral revela um contrato vibracional inquebrável. Em 2026, as estrelas voadoras indicam que a sua energia está pronta para transmutar desafios em maestria absoluta, exigindo que ocupe o seu lugar de direito na hierarquia do destino.",
+        "A numerologia sistémica do seu nome revela um código de construção. Este ciclo master não permite a mediocridade; cada decisão tomada agora ecoará pelos próximos nove anos. O universo orquestrou este encontro para que alinhe a sua vontade com o propósito maior.",
+        "No zodíaco oriental, este ciclo traz a resiliência necessária para vencer batalhas invisíveis. A sua alma está a ser lapidada para suportar a pressão do sucesso, transformando o chumbo das preocupações cotidianas no ouro da sabedoria eterna."
     ];
 
-    async function gerarDossie() {
+    async function iniciarGeracao() {
         const btn = document.getElementById('btn-master');
-        const status = document.getElementById('status-text');
-        
+        const status = document.getElementById('progress-status');
+        const renderArea = document.getElementById('pdf-render-area');
+
         btn.disabled = true;
-        btn.innerText = "MONTANDO PÁGINAS...";
         status.style.display = "block";
-        status.innerText = "Construindo estrutura de 62 páginas...";
+        renderArea.innerHTML = '';
 
-        const contentArea = document.getElementById('dynamic-content');
-        contentArea.innerHTML = '';
-
-        document.getElementById('pdf-user-name').innerText = userData.nome.toUpperCase();
-        document.getElementById('pdf-user-info').innerText = `${userData.dataNascimento} • ${userData.cidade}`;
-
-        // MONTAGEM DAS 61 PÁGINAS + CAPA = 62
-        for(let i = 1; i <= 61; i++) {
-            let section = document.createElement('div');
-            section.className = 'page';
-            section.innerHTML = `
-                <div class="pdf-header">DOSSIÊ ARCANO • MASTER 2026 • CAPÍTULO ${i}</div>
-                <h2 class="section-title">Análise de Profundidade: Nível ${i}</h2>
-                <div class="text-block">
-                    <p>${FRAGMENTOS[i % FRAGMENTOS.length]}</p>
-                    <p>Ao cruzarmos as coordenadas de ${userData.cidade} com o seu momento de nascimento, Eduardo, identificamos que sua missão de alma exige uma entrega total à intuição. Este dossiê master serve como o mapa necessário para navegar as águas profundas de 2026.</p>
-                    <p>A densidade deste conhecimento é proporcional à sua capacidade de aplicação prática. Cada página deste livro foi desenhada para atuar como um gatilho mental de expansão, removendo as travas kármicas que impediam seu crescimento nos últimos sete anos.</p>
-                    <p>A síntese deste capítulo aponta para a maestria do tempo. O universo não tem pressa, mas é implacável com quem desperdiça a oportunidade de evoluir. Use este saber como sua bússola definitiva.</p>
+        // 1. GERAR CAPA
+        renderArea.innerHTML += `
+            <div class="page-content">
+                <h1 class="pdf-title">PORTAL ARCANO</h1>
+                <p style="text-align:center; font-family:'Cinzel'; font-size:1.5em; letter-spacing:5px; color:#666;">DOSSIÊ MASTER 2026</p>
+                <div style="margin-top:40mm; text-align:center; border-top:2px solid #b8860b; padding-top:20px;">
+                    <p style="font-family:'Cinzel'; font-size:2em;">${userData.nome.toUpperCase()}</p>
+                    <p style="color:#666;">${userData.dataNascimento} • ${userData.cidade}</p>
                 </div>
-                <div class="footer-page">Portal Arcano • Página ${i + 1} de 62 • Iniciado de Elite</div>
+                <div class="footer-page">DOCUMENTO EXCLUSIVO</div>
+            </div>
+            <div class="html2pdf__page-break"></div>
+        `;
+
+        // 2. LOOP DE ALTA DENSIDADE (61 PÁGINAS)
+        for (let i = 1; i <= 61; i++) {
+            status.innerText = `A processar página ${i} de 62...`;
+            
+            const pContent = `
+                <div class="page-content">
+                    <div class="pdf-header">CAPÍTULO ${i} • MAESTRIA SISTÉMICA</div>
+                    <h2 class="section-title">Análise de Profundidade Nível ${i}</h2>
+                    <div class="text-block">
+                        <p>${TEXTOS[i % TEXTOS.length]}</p>
+                        <p>Ao examinarmos o seu mapa, Eduardo, notamos que a sua missão exige uma integração total entre a mente analítica e a intuição arcaica. O ano de 2026 será o palco onde essa união gerará frutos tangíveis em todas as áreas da sua vida.</p>
+                        <p>A sabedoria milenar indica que este trânsito funcionará como um acelerador de resultados. Prepare-se para colher o que foi plantado, pois o universo recompensa generosamente a audácia e a verdade pessoal.</p>
+                        <p>Este dossiê master não é apenas informativo; é uma ferramenta iniciática. Use este saber como a sua bússola definitiva para navegar as águas profundas do destino que agora se revela perante si.</p>
+                    </div>
+                    <div class="footer-page">Página ${i + 1} • Portal Arcano • Eduardo Henrique Pokk</div>
+                </div>
+                ${i < 61 ? '<div class="html2pdf__page-break"></div>' : ''}
             `;
-            contentArea.appendChild(section);
+            
+            renderArea.innerHTML += pContent;
+            
+            // Pausa técnica para o navegador não travar (Event Loop)
+            if (i % 10 === 0) await new Promise(r => setTimeout(r, 100));
         }
 
-        status.innerText = "Aguardando estabilização do motor (Painting)...";
+        status.innerText = "A finalizar renderização... Por favor, aguarde.";
         
-        // RIGOR TÉCNICO: Delay de 3 segundos para garantir que o navegador termine de desenhar o HTML
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        // Delay de segurança final
+        await new Promise(r => setTimeout(r, 2000));
 
-        const element = document.getElementById('pdf-template');
         const opt = {
             margin: 0,
-            filename: `Dossie_MASTER_62_PAGINAS_${userData.nome}.pdf`,
+            filename: `Dossie_Master_Arcano_${userData.nome}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, logging: false, letterRendering: true },
+            html2canvas: { scale: 2, useCORS: true, letterRendering: true },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        status.innerText = "Capturando imagens e gerando arquivo final...";
-        await html2pdf().set(opt).from(element).save();
-
-        btn.disabled = false;
-        btn.innerText = "DOWNLOAD CONCLUÍDO";
-        status.innerText = "Seu Livro Master de 62 páginas foi gerado com sucesso.";
+        try {
+            await html2pdf().set(opt).from(renderArea).save();
+            status.innerText = "Download concluído com sucesso.";
+        } catch (err) {
+            console.error(err);
+            status.innerText = "Erro na geração. Tente novamente.";
+        } finally {
+            btn.disabled = false;
+        }
     }
 
     auth.onAuthStateChanged(user => {
