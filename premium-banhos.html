@@ -18,7 +18,7 @@
         :root { --gold: #d4af37; --bg-dark: #050505; }
         body { margin: 0; font-family: 'Cormorant Garamond', serif; background-color: var(--bg-dark); background-image: url('https://www.transparenttextures.com/patterns/stardust.png'); color: #e0e0e0; font-size: 19px; line-height: 1.8; overflow-x: hidden; }
         
-        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.6s ease; }
         .spinner { font-size: 4em; color: var(--gold); animation: spin 2s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
@@ -54,8 +54,8 @@
 
         .ritual-title { font-family: 'Cinzel'; font-size: 2.2em; color: #fff; margin: 0; }
         .ritual-science { 
-            margin: 25px 0; padding: 20px; background: rgba(0,0,0,0.3); 
-            border-radius: 4px; border-left: 2px solid var(--gold); font-style: italic; color: #aaa;
+            margin: 25px 0; padding: 25px; background: rgba(0,0,0,0.4); 
+            border-radius: 4px; border-left: 2px solid var(--gold); font-style: italic; color: #aaa; text-align: justify;
         }
         
         .ing-list { list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 25px 0; }
@@ -77,8 +77,8 @@
 <body>
 
 <div id="loading-screen">
-    <i class="fas fa-moon spinner"></i>
-    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Sincronizando Éteres Planetários...</p>
+    <i class="fas fa-mortar-pestle spinner"></i>
+    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Sintonizando Éteres Planetários...</p>
 </div>
 
 <div class="container">
@@ -91,7 +91,7 @@
     <p style="text-align:center; color:#666; margin-bottom:40px;">Sua prescrição vibracional baseada no posicionamento astronômico exato.</p>
     
     <div class="today-box">
-        <div style="font-family:'Cinzel'; color:var(--gold); letter-spacing:4px; font-size:1em; margin-bottom:20px;">Céu de Hoje</div>
+        <div style="font-family:'Cinzel'; color:var(--gold); letter-spacing:4px; font-size:1em; margin-bottom:20px;">Monitoramento Celeste em Tempo Real</div>
         <div class="astro-grid">
             <div class="astro-item">
                 <span class="astro-label">Fase Lunar</span>
@@ -109,8 +109,7 @@
         <div id="rec-geral" style="color:#888; font-size:0.9em; margin-top:15px; font-style:italic;">Aguardando alinhamento dos dados...</div>
     </div>
 
-    <div id="ritual-list">
-        </div>
+    <div id="ritual-list"></div>
 </div>
 
 <script>
@@ -123,109 +122,111 @@
             id: "limpeza", 
             title: "Despolarização Iônica Áurica", 
             tags: "Banimento • Purificação • Corte Sistêmico",
-            science: "Este ritual baseia-se na Lei da Absorção Cristalina. O Sal Grosso atua como um descarregador de eletricidade estática acumulada no campo áurico, enquanto a Arruda e Guiné funcionam como fitoterápicos astrais, eliminando parasitas energéticos e formas-pensamento de baixa vibração.",
-            ings: ["7 Ramos de Arruda Fresca", "7 Folhas de Guiné", "3 Punhados de Sal Grosso Marinho", "2 Litros de Água de Nascente ou Mineral"],
-            steps: "1. Ferva a água e desligue o fogo. 2. Adicione as ervas, abafe e deixe repousar por 15 minutos. 3. Tome seu banho de higiene normal. 4. Jogue a água com sal do pescoço para baixo para descarregar. 5. Por fim, jogue o chá de ervas morno, visualizando uma redoma de proteção prata ao seu redor. Não enxágue."
+            science: "A eficácia deste ritual reside na Lei da Osmose Vibracional. O Cloreto de Sódio, em sua estrutura cristalina, atua como um descarregador natural de íons positivos acumulados no corpo etérico (estresse e estática mental). As propriedades alcaloides da Arruda e da Guiné penetram a barreira cutânea e estimulam o sistema límbico via olfação, forçando o cérebro a abandonar padrões de pensamento de baixa frequência e restaurando a integridade do bio-campo.",
+            ings: ["7 Ramos de Arruda Fresca", "7 Folhas de Guiné", "3 Punhados de Sal Grosso Marinho", "2 Litros de Água de Nascente"],
+            steps: "Ferva a água e desligue o fogo imediatamente. Adicione as ervas, abafe e deixe repousar por 15 minutos até que a água absorva os óleos essenciais. Tome seu banho de higiene habitual. Despeje a água com sal do pescoço para baixo (limpeza grossa) e, em seguida, o chá de ervas (blindagem). Visualize uma malha de proteção prata se formando ao redor da sua pele."
         },
         { 
             id: "prosperidade", 
             title: "Sintonização de Frequência Solar", 
-            tags: "Abundância • Expansão • Reconhecimento",
-            science: "Ritual de Atração por Ressonância. A Canela é um termogênico energético que acelera a vibração das células, enquanto o Louro invoca o arquétipo histórico do triunfo e da clareza mental. O açúcar harmoniza as tensões, tornando o indivíduo magnético para novas fontes de recurso.",
-            ings: ["3 Paus de Canela Inteiros", "7 Folhas de Louro Secas", "3 Colheres de Açúcar Mascavo", "1 Moeda de valor corrente (limpa)"],
-            steps: "1. Ferva todos os ingredientes (exceto a moeda) por 7 minutos. 2. Deixe amornar. 3. Coloque a moeda no fundo do recipiente enquanto despeja o líquido do pescoço para baixo. 4. Mentalize o sol aquecendo suas mãos para a criação. 5. Carregue a moeda na carteira como um talismã físico da sua intenção."
+            tags: "Abundância • Expansão • Realização",
+            science: "Este banho utiliza a Termogênese Energética. A Canela (Cinnamomum verum) é um catalisador de fogo que acelera a circulação sanguínea e a vibração celular, combatendo a inércia e a procrastinação. O Louro introduz compostos aromáticos que historicamente induzem estados de confiança e vitória. O açúcar serve como um agente aglutinante vibracional, suavizando a resistência do ego e tornando seu campo eletromagnético receptivo a novas correntes de recurso e reconhecimento.",
+            ings: ["3 Paus de Canela Inteiros", "7 Folhas de Louro", "3 Colheres de Açúcar Mascavo", "1 Moeda limpa"],
+            steps: "Ferva os ingredientes por 7 minutos para extrair a potência solar das especiarias. Deixe amornar. Coloque a moeda no fundo do recipiente enquanto despeja o líquido sobre os ombros e peito. Sinta o calor da mistura 'acordando' sua ambição divina. Carregue a moeda na carteira para ancorar fisicamente essa frequência em sua vida material."
         },
         { 
             id: "amor", 
             title: "Alquimia da Receptividade", 
-            tags: "Autoestima • Magnetismo • Doçura",
-            science: "Trabalha a emanação do Chakra Cardíaco e o sistema límbico. A Rosa Vermelha possui uma das maiores frequências vibracionais do reino vegetal. Combinada ao mel, ela reduz a 'acidez' emocional e as barreiras inconscientes que impedem a entrada do afeto e da admiração alheia.",
-            ings: ["Pétalas de 2 Rosas Vermelhas", "1 Colher de Mel Silvestre", "3 Borrifadas do seu Perfume Pessoal", "Água Morna (não ferver)"],
-            steps: "1. Coloque a água morna em uma bacia. 2. Adicione o mel e o perfume. 3. Macere as pétalas com as mãos, transferindo sua própria energia para a água. 4. Despeje lentamente sobre o peito e rosto (com olhos fechados), sentindo-se digno de ser amado. Deixe secar naturalmente ao luar ou ambiente calmo."
+            tags: "Magnetismo • Doçura • Cura do Feminino/Masculino",
+            science: "A Rosa Vermelha possui uma das maiores frequências medidas em Hertz do reino vegetal, ressonando diretamente com o Chakra Cardíaco. Combinada ao mel silvestre, ela atua no sistema límbico para reduzir a produção de cortisol e estimular a liberação de ocitocina e endorfinas. O objetivo científico é reduzir a acidez das defesas emocionais, permitindo que sua 'assinatura vibracional' transmita segurança e atração, facilitando a entrada do afeto genuíno.",
+            ings: ["Pétalas de 2 Rosas Vermelhas", "1 Colher de Mel Puro", "3 Borrifadas do seu Perfume de uso diário", "Água Morna"],
+            steps: "Nunca ferva a rosa para não destruir suas proteínas vibracionais. Aqueça a água, adicione o mel e perfume. Macere as pétalas com as mãos na água morna, transferindo sua intenção para o líquido. Despeje lentamente sobre o corpo, com foco no peito, permitindo-se sentir digno de admiração. Deixe a pele secar naturalmente para absorver os nutrientes e o magnetismo."
         }
     ];
 
-    function iniciarAlquimia() {
+    function iniciarSistema() {
         try {
             // VERIFICAÇÃO DE RIGOR TÉCNICO (BIBLIOTECA)
             if (typeof Astronomy === 'undefined') {
-                setTimeout(iniciarAlquimia, 200);
+                setTimeout(iniciarSistema, 300);
                 return;
             }
 
             const agora = new Date();
             const time = Astronomy.MakeTime(agora);
-            const phase = Astronomy.MoonPhase(time); // 0-360
-            const diaSemana = agora.getDay(); // 0-6
+            const phase = Astronomy.MoonPhase(time); 
+            const illum = Math.round(Astronomy.MoonIllumination(time) * 100);
+            const diaSemana = agora.getDay(); 
 
-            // DETERMINAÇÃO DE FASE LUNAR (EXATA)
-            let luaInfo = { nome: "", rec: "" };
-            if (phase < 90) { luaInfo.nome = "Crescente"; luaInfo.rec = "Ideal para Expansão e Atração."; }
-            else if (phase < 180) { luaInfo.nome = "Cheia"; luaInfo.rec = "Poder Máximo de Magnetismo e Brilho."; }
-            else if (phase < 270) { luaInfo.nome = "Minguante"; luaInfo.rec = "Fase de Banimento e Limpeza Profunda."; }
-            else { luaInfo.nome = "Nova"; luaInfo.rec = "Planejamento e Início de Novos Projetos."; }
+            let luaNome = "";
+            let recTexto = "";
 
-            const planetas = ["Sol (Vitalidade)", "Lua (Emoções)", "Marte (Ação)", "Mercúrio (Trocas)", "Júpiter (Sorte)", "Vênus (Afeto)", "Saturno (Estrutura)"];
+            if (phase < 90) { luaNome = "Crescente"; recTexto = "Fase de crescimento: Alinhamento para Prosperidade."; }
+            else if (phase < 180) { luaNome = "Cheia"; recTexto = "Vibração máxima: Ideal para Amor e Magnetismo."; }
+            else if (phase < 270) { luaNome = "Minguante"; recTexto = "Fase de banimento: Momento de Limpeza Profunda."; }
+            else { luaNome = "Nova"; recTexto = "Renovação: Planejamento de novas estruturas."; }
+
+            const planetas = ["Sol (Energia)", "Lua (Emoção)", "Marte (Ação)", "Mercúrio (Intelecto)", "Júpiter (Sorte)", "Vênus (Afeto)", "Saturno (Foco)"];
             
             // ATUALIZAÇÃO DO PAINEL
-            document.getElementById('txt-lua').innerText = luaInfo.nome;
-            document.getElementById('txt-luz').innerText = Math.round(Astronomy.MoonIllumination(time) * 100) + "%";
+            document.getElementById('txt-lua').innerText = luaNome;
+            document.getElementById('txt-luz').innerText = illum + "%";
             document.getElementById('txt-dia').innerText = planetas[diaSemana];
-            document.getElementById('rec-geral').innerText = `Conselho: ${luaInfo.rec}`;
+            document.getElementById('rec-geral').innerText = "Conselho: " + recTexto;
 
-            // LÓGICA DE RECOMENDAÇÃO (ESPECIALISTA)
-            // Prioridade: Banimento na Minguante, Atração na Crescente/Cheia, Magnetismo na Sexta (Vênus)
+            // LÓGICA DE RECOMENDAÇÃO DE ESPECIALISTA
             let ritualAlvo = "prosperidade"; 
-            if (diaSemana === 5 || luaInfo.nome === "Cheia") ritualAlvo = "amor";
-            if (diaSemana === 6 || luaInfo.nome === "Minguante") ritualAlvo = "limpeza";
+            if (diaSemana === 5 || luaNome === "Cheia") ritualAlvo = "amor";
+            if (diaSemana === 6 || luaNome === "Minguante") ritualAlvo = "limpeza";
 
-            renderizar(ritualAlvo);
+            renderizarFinal(ritualAlvo);
 
-        } catch (error) {
-            console.error("Falha Crítica no Motor de Alquimia:", error);
-            // Fallback silencioso não é permitido pelas regras. 
-            // O loading screen só sai se o cálculo estiver pronto.
+        } catch (err) {
+            console.error("Falha no Motor:", err);
+            // Em caso de falha rara, recarrega para garantir a entrega correta
+            location.reload();
         }
     }
 
-    function renderizar(recomendadoId) {
+    function renderizarFinal(recomendadoId) {
         const area = document.getElementById('ritual-list');
+        if(!area) return;
+        
         area.innerHTML = "";
-
         GRIMORIO.forEach(ritual => {
             const isRec = (ritual.id === recomendadoId);
             area.innerHTML += `
                 <div class="ritual-card ${isRec ? 'recommended' : ''}">
                     ${isRec ? '<span class="badge-rec"><i class="fas fa-star"></i> RECOMENDADO PARA AGORA</span>' : ''}
-                    <div style="color:var(--gold); font-family:'Cinzel'; font-size:0.7em; letter-spacing:2px; margin-bottom:5px;">${ritual.tags}</div>
+                    <div style="color:var(--gold); font-family:'Cinzel'; font-size:0.75em; letter-spacing:2px; margin-bottom:8px;">${ritual.tags}</div>
                     <h2 class="ritual-title">${ritual.title}</h2>
                     
                     <div class="ritual-science">
                         ${ritual.science}
                     </div>
 
-                    <span class="step-title">Ingredientes Necessários:</span>
+                    <span class="step-title">Ingredientes Essenciais:</span>
                     <div class="ing-list">
                         ${ritual.ings.map(i => `<div class="ing-item"><i class="fas fa-leaf"></i> ${i}</div>`).join('')}
                     </div>
 
                     <div class="step-box">
-                        <span class="step-title">Processo do Ritual:</span>
+                        <span class="step-title">Processo de Preparação:</span>
                         <p style="color:#ccc; font-size:0.95em; margin:0;">${ritual.steps}</p>
                     </div>
                 </div>
             `;
         });
 
-        // SÓ DESATIVA O LOADING APÓS A RENDERIZAÇÃO COMPLETA DOS DADOS CORRETOS
-        document.getElementById('loading-screen').style.opacity = '0';
-        setTimeout(() => { document.getElementById('loading-screen').style.display = 'none'; }, 500);
+        // DESATIVA O LOADING APENAS APÓS O SUCESSO TOTAL DA RENDERIZAÇÃO
+        const screen = document.getElementById('loading-screen');
+        screen.style.opacity = '0';
+        setTimeout(() => { screen.style.display = 'none'; }, 600);
     }
 
-    // NÚCLEO DE EXECUÇÃO
     auth.onAuthStateChanged(user => {
         if(user) {
-            iniciarAlquimia();
+            iniciarSistema();
         } else {
             window.location.href = 'index.html';
         }
