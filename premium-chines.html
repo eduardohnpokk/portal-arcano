@@ -58,25 +58,37 @@
     const ICONS_DB = {"Rato":"mouse","Boi":"ox","Tigre":"cat","Coelho":"paw","Dragão":"dragon","Serpente":"staff-snake","Cavalo":"horse","Cabra":"bacon","Macaco":"atom","Galo":"crow","Cão":"dog","Porco":"piggy-bank"};
 
     function processarBazi(dataStr) {
-        const parts = dataStr.split('-');
-        let year = parseInt(parts[0]);
-        let month = parseInt(parts[1]);
-        let day = parseInt(parts[2]);
+        try {
+            // Tratamento de segurança para data
+            if (!dataStr || dataStr.length < 4) dataStr = "2000-01-01";
+            
+            const parts = dataStr.split('-');
+            let year = parseInt(parts[0]);
+            let month = parseInt(parts[1]);
+            let day = parseInt(parts[2]);
 
-        // EVOLUÇÃO ABSURDA: Correção Li Chun (Início do ano solar chinês)
-        // Se nasceu antes de 4 de fevereiro, sistemicamente ainda pertence ao ano anterior.
-        if (month < 2 || (month === 2 && day < 4)) {
-            year--;
+            if (isNaN(year)) year = 2000;
+
+            // Correção Li Chun (Início do ano solar chinês)
+            if (month < 2 || (month === 2 && day < 4)) {
+                year--;
+            }
+
+            const animal = ANIMAIS_DB[year % 12];
+            const elemento = ELEMENTOS_DB[year % 10];
+            
+            exibir(animal, elemento);
+        } catch (e) {
+            console.error(e);
+            exibir("Dragão", "Metal"); // Fallback seguro
+        } finally {
+            document.getElementById('loading-screen').style.display = 'none';
         }
-
-        const animal = ANIMAIS_DB[year % 12];
-        const elemento = ELEMENTOS_DB[year % 10];
-        
-        exibir(animal, elemento);
     }
 
     function exibir(a, e) {
-        document.getElementById('res-icon').innerHTML = `<i class="fas fa-${ICONS_DB[a]}"></i>`;
+        const iconClass = ICONS_DB[a] || "dragon";
+        document.getElementById('res-icon').innerHTML = `<i class="fas fa-${iconClass}"></i>`;
         document.getElementById('res-animal').innerText = a;
         document.getElementById('res-element').innerText = e + " (Pilar Anual)";
 
@@ -90,7 +102,6 @@
                 <p style="text-align:justify; color:#ccc;">O elemento ${e} é o sangue que corre nas veias do seu animal. Ele define COMO você persegue seus objetivos. O ${e} traz uma camada de ${e === 'Metal' ? 'determinação inflexível' : e === 'Água' ? 'intuição fluida' : e === 'Madeira' ? 'crescimento constante' : e === 'Fogo' ? 'paixão expansiva' : 'estabilidade sólida'} para sua personalidade.</p>
             </div>
         `;
-        document.getElementById('loading-screen').style.display = 'none';
     }
 
     const auth = firebase.auth();
@@ -98,9 +109,14 @@
     auth.onAuthStateChanged(user => {
         if(user) {
             db.collection("usuarios").doc(user.uid).get().then(doc => {
-                const d = doc.data();
+                const d = doc.exists ? doc.data() : {};
                 processarBazi(d.dataNascimento || "2000-01-01");
+            }).catch(e => {
+                processarBazi("2000-01-01");
             });
+        } else {
+            // Redirecionamento de segurança
+            window.location.href = 'index.html';
         }
     });
 </script>
