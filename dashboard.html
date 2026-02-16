@@ -36,6 +36,8 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+
+        // ID DE PRODUÇÃO: price_1T1TO1Lc8MnSdAQGTLSfGS34
         const ID_ASSINATURA = "price_1T1TO1Lc8MnSdAQGTLSfGS34"; 
 
         document.getElementById('btn-comprar').addEventListener('click', async () => {
@@ -58,26 +60,25 @@
             }
         });
 
-        // FUNÇÃO CIRÚRGICA: Cancelamento de Conta
         async function cancelAccount() {
-            const confirmacao = confirm("AVISO DO TEMPLO: Esta ação é definitiva. Seus dados e acessos serão apagados para sempre. Deseja prosseguir?");
+            const confirmacao = confirm("AVISO: Esta ação é definitiva. Deseja prosseguir?");
             if(!confirmacao) return;
             const user = auth.currentUser;
             if(!user) return;
             try {
                 await db.collection("usuarios").doc(user.uid).delete();
                 await user.delete();
-                alert("CONTA EXCLUÍDA. Sua jornada no Portal Arcano foi encerrada.");
+                alert("CONTA EXCLUÍDA.");
                 window.location.href = "index.html";
-            } catch (e) {
-                alert("ERRO DE SEGURANÇA: Para excluir sua conta, você precisa ter feito login recentemente. Saia e entre novamente antes de tentar excluir.");
-            }
+            } catch (e) { alert("Erro de segurança. Tente sair e entrar novamente."); }
         }
 
         auth.onAuthStateChanged(user => {
             if (user) {
                 db.collection("usuarios").doc(user.uid).onSnapshot(doc => {
-                    if (doc.exists && doc.data().status === "premium") window.location.href = "dashboard-premium.html";
+                    if (doc.exists && doc.data().status === "premium") {
+                        window.location.href = "dashboard-premium.html";
+                    }
                 });
             } else window.location.href = "index.html";
         });
