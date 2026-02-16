@@ -53,7 +53,6 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // DADOS DAS ESTRELAS VOADORAS DE 2026 (Xuan Kong)
     const STARS_2026 = {
         "Norte": { id: 1, type: "Prosperidade futura", cure: "Metais" },
         "Sul": { id: 9, type: "Multiplicação de Ganho", cure: "Luz/Vermelho" },
@@ -66,23 +65,37 @@
     };
 
     function calcularKua(dataStr, gen) {
-        const parts = dataStr.split('-');
-        let year = parseInt(parts[0]);
-        if (parseInt(parts[1]) < 2 || (parseInt(parts[1]) === 2 && parseInt(parts[2]) < 4)) year--;
+        try {
+            if (!dataStr || dataStr.length < 4) dataStr = "2000-01-01";
+            
+            const parts = dataStr.split('-');
+            let year = parseInt(parts[0]);
+            
+            // Segurança contra NaN
+            if (isNaN(year)) year = 2000;
 
-        let sum = 0;
-        String(year).split('').forEach(n => sum += parseInt(n));
-        while(sum > 9) sum = String(sum).split('').reduce((a,b) => parseInt(a)+parseInt(b), 0);
+            if (parseInt(parts[1]) < 2 || (parseInt(parts[1]) === 2 && parseInt(parts[2]) < 4)) year--;
 
-        let k = (gen === 'female') ? sum + 4 : 11 - sum;
-        while(k > 9) k = String(k).split('').reduce((a,b) => parseInt(a)+parseInt(b), 0);
-        if (k === 5) k = (gen === 'female') ? 8 : 2;
-        
-        render(k);
+            let sum = 0;
+            String(year).split('').forEach(n => sum += parseInt(n));
+            while(sum > 9) sum = String(sum).split('').reduce((a,b) => parseInt(a)+parseInt(b), 0);
+
+            let k = (gen === 'female') ? sum + 4 : 11 - sum;
+            while(k > 9) k = String(k).split('').reduce((a,b) => parseInt(a)+parseInt(b), 0);
+            if (k === 5) k = (gen === 'female') ? 8 : 2;
+            
+            render(k);
+        } catch (e) {
+            console.error("Erro Kua:", e);
+            render(9); // Fallback
+        }
     }
 
     function render(k) {
         document.getElementById('val-kua').innerText = k;
+        const elem = [1].includes(k)?"Água":[2,5,8].includes(k)?"Terra":[3,4].includes(k)?"Madeira":[6,7].includes(k)?"Metal":"Fogo";
+        document.getElementById('val-element').innerText = "Elemento: " + elem;
+
         const grid = document.getElementById('dir-grid');
         grid.innerHTML = "";
 
@@ -106,9 +119,13 @@
     auth.onAuthStateChanged(user => {
         if(user) {
             db.collection("usuarios").doc(user.uid).get().then(doc => {
-                const d = doc.data();
+                const d = doc.exists ? doc.data() : {};
                 calcularKua(d.dataNascimento || "2000-01-01", d.genero || "male");
+            }).catch(() => {
+                calcularKua("2000-01-01", "male");
             });
+        } else {
+            window.location.href = 'index.html';
         }
     });
 </script>
