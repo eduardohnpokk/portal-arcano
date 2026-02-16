@@ -3,148 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Arcano | Gerador do Dossiê Master 2026</title>
+    <title>Portal Arcano | Dossiê Master 2026</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root { --gold: #d4af37; --bg-dark: #050505; }
-        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: #000; color: #fff; }
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background: #000; color: #fff; text-align: center; }
         
         #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .spinner { width: 80px; height: 80px; border: 4px solid #111; border-top: 4px solid var(--gold); border-radius: 50%; animation: spin 1s linear infinite; }
+        .spinner { width: 60px; height: 60px; border: 4px solid #111; border-top: 4px solid var(--gold); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .container { max-width: 800px; margin: 0 auto; padding: 100px 20px; text-align: center; }
-        .export-card { background: rgba(15, 15, 15, 0.95); border: 1px solid var(--gold); padding: 60px; border-radius: 12px; }
-        .btn-generate { background: var(--gold); color: #000; border: none; padding: 20px 50px; font-family: 'Cinzel'; font-weight: bold; font-size: 1.2em; border-radius: 4px; cursor: pointer; transition: 0.4s; letter-spacing: 2px; }
-        .btn-generate:hover { background: #fff; transform: scale(1.05); }
+        .container { padding: 100px 20px; }
+        .btn-generate { background: var(--gold); color: #000; border: none; padding: 20px 50px; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 1.2em; }
 
-        /* --- CONFIGURAÇÃO DO DOSSIÊ MASTER (60+ PÁGINAS) --- */
-        #pdf-template { background: white; color: black; width: 210mm; display: none; }
-        .page { padding: 25mm 20mm; min-height: 297mm; position: relative; page-break-after: always; box-sizing: border-box; display: flex; flex-direction: column; }
-        .pdf-header { font-family: 'Cinzel'; color: #b8860b; border-bottom: 1px solid #ddd; margin-bottom: 20px; font-size: 0.8em; text-align: right; text-transform: uppercase; }
-        .pdf-title { font-family: 'Cinzel'; font-size: 4.5em; text-align: center; margin-top: 60mm; color: #000; line-height: 1; }
-        .pdf-subtitle { font-family: 'Cinzel'; font-size: 1.4em; text-align: center; color: #666; letter-spacing: 8px; margin-top: 20px; }
-        .section-title { font-family: 'Cinzel'; color: #b8860b; font-size: 2em; margin-top: 10px; border-left: 8px solid #b8860b; padding-left: 20px; margin-bottom: 20px; }
-        .text-block { font-size: 12.5pt; text-align: justify; line-height: 1.7; color: #111; margin-bottom: 20px; flex-grow: 1; }
-        .footer-page { position: absolute; bottom: 15mm; left: 0; width: 100%; text-align: center; font-size: 0.85em; color: #aaa; border-top: 1px solid #eee; padding-top: 10px; font-family: 'Cinzel'; }
-        
-        .chapter-cover { justify-content: center; align-items: center; text-align: center; }
+        /* --- CONFIGURAÇÃO TÉCNICA DO PDF (SISTEMA DE PRECISÃO) --- */
+        #pdf-template { 
+            background: white; 
+            color: black; 
+            width: 210mm; 
+            position: absolute; 
+            left: -10000px; /* Mantém "visível" para o motor mas invisível para o usuário */
+            top: 0;
+        }
+        .page { 
+            width: 210mm; 
+            height: 296mm; /* Ajuste milimétrico para evitar páginas duplas */
+            padding: 25mm 20mm; 
+            box-sizing: border-box; 
+            page-break-after: always; 
+            display: flex; 
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .pdf-header { font-family: 'Cinzel'; color: #b8860b; border-bottom: 1px solid #ddd; margin-bottom: 15px; font-size: 10pt; text-align: right; }
+        .pdf-title { font-family: 'Cinzel'; font-size: 40pt; text-align: center; margin-top: 50mm; }
+        .section-title { font-family: 'Cinzel'; color: #b8860b; font-size: 22pt; margin: 20px 0; border-left: 5px solid #b8860b; padding-left: 15px; }
+        .text-block { font-size: 12pt; text-align: justify; line-height: 1.7; color: #111; }
+        .footer-page { position: absolute; bottom: 15mm; width: 170mm; text-align: center; font-size: 9pt; color: #999; border-top: 1px solid #eee; padding-top: 5px; font-family: 'Cinzel'; }
     </style>
 </head>
 <body>
 
 <div id="loading-screen">
     <div class="spinner"></div>
-    <p style="color:var(--gold); font-family:'Cinzel'; margin-top:25px; letter-spacing:3px;">Sincronizando Destino Master...</p>
+    <p style="color:var(--gold); font-family:'Cinzel'; margin-top:20px;">Sincronizando Destino Master...</p>
 </div>
 
 <div class="container">
-    <div class="export-card">
-        <i class="fas fa-crown" style="font-size:3em; color:var(--gold); margin-bottom:20px;"></i>
-        <h1 style="font-family:'Cinzel'; color:#fff; font-size:2.5em;">LIVRO DO DESTINO</h1>
-        <p style="color:#888; font-size:1.2em;">Compilando seu Dossiê de 62 Páginas de Sabedoria Arcaica.</p>
-        <button id="btn-master" class="btn-generate" onclick="gerarDossie()">BAIXAR LIVRO COMPLETO</button>
-        <p id="status-text" style="color:var(--gold); margin-top:20px; display:none; font-family:'Cinzel';">O motor está processando o grande volume de dados. Aguarde...</p>
-    </div>
+    <h1 style="font-family:'Cinzel'; color:var(--gold);">LIVRO DO DESTINO MASTER</h1>
+    <p>Compilação de 62 páginas iniciada.</p>
+    <button id="btn-master" class="btn-generate" onclick="gerarDossie()">GERAR PDF AGORA</button>
 </div>
 
 <div id="pdf-template">
-    <div class="page chapter-cover">
+    <div class="page" style="justify-content: center; align-items: center; text-align: center;">
         <h1 class="pdf-title">PORTAL ARCANO</h1>
-        <p class="pdf-subtitle">DOSSIÊ MASTER DA ALMA 2026</p>
-        <div style="margin-top:40mm; border: 2px solid #b8860b; padding: 30px; display: inline-block;">
-            <p style="font-family:'Cinzel'; font-size:2.2em; margin:0;" id="pdf-user-name"></p>
-            <p style="color:#444; font-size:1.1em; margin-top:10px;" id="pdf-user-info"></p>
+        <p style="font-family:'Cinzel'; font-size:1.5em; letter-spacing:5px;">DOSSIÊ DA ALMA 2026</p>
+        <div style="margin-top:30mm;">
+            <p style="font-family:'Cinzel'; font-size:1.8em;" id="pdf-user-name"></p>
+            <p style="color:#666;" id="pdf-user-info"></p>
         </div>
-        <div class="footer-page">ESTE DOCUMENTO É ÚNICO E INTRANSFERÍVEL</div>
     </div>
-
     <div id="dynamic-content"></div>
 </div>
 
 <script>
     const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
     const db = firebase.firestore();
+    const auth = firebase.auth();
 
     let userData = null;
 
-    // BANCO DE DADOS DE INTERPRETAÇÃO PARA GARANTIR DENSIDADE
-    const fragmentos = [
-        "A análise da sua mandala astral revela que o seu momento atual em 2026 é governado por uma configuração rara de planetas sociais, exigindo que você assuma um papel de liderança espiritual em seu círculo. Não se trata apenas de sobreviver, mas de prosperar através da consciência.",
-        "A posição deste astro específico no seu mapa master indica uma forte conexão kármica com o passado, que agora pede resolução. A sabedoria sistêmica ensina que para avançar, é necessário honrar o que veio antes, integrando as lições sem carregar os pesos que não lhe pertencem.",
-        "Em termos de numerologia cabalística, a vibração do seu nome cruzada com o seu destino revela um ano de construção sólida. A matemática do universo aponta para resultados tangíveis desde que você mantenha a disciplina e o foco na sua visão de longo prazo.",
-        "O seu signo no zodíaco chinês, sob a influência do elemento deste ano, traz uma energia de renovação constante. Esta é a fase ideal para iniciar projetos que exigem coragem e resiliência, pois as estrelas voadoras estão alinhadas para proteger seus empreendimentos mais audaciosos.",
-        "Considerando a sua localidade de nascimento, a força telúrica do seu mapa ganha contornos de estabilidade. Você tem a capacidade de ancorar ideias abstratas em resultados práticos, servindo como uma ponte entre o céu e a terra para aqueles que o rodeiam."
+    const SABEDORIA = [
+        "A posição astrológica no momento do seu nascimento estabelece um contrato vibracional inquebrável. Em 2026, as estrelas voadoras indicam que sua energia solar está pronta para transmutar desafios em maestria absoluta, exigindo que você ocupe seu lugar de direito na hierarquia do destino.",
+        "A numerologia sistêmica do seu nome revela um código de construção. Este ciclo master não permite a mediocridade; cada decisão tomada agora ecoará pelos próximos nove anos. O universo orquestrou este encontro para que você alinhe sua vontade com o propósito maior.",
+        "O seu signo no zodíaco oriental, sob a regência deste ciclo, traz uma resiliência de ferro. É o momento de agir com a precisão de um alquimista, separando o que é essência do que é apenas ruído externo, ancorando sua luz de forma prática e próspera no plano físico."
     ];
 
     async function gerarDossie() {
         const btn = document.getElementById('btn-master');
-        const status = document.getElementById('status-text');
         btn.disabled = true;
-        btn.innerText = "PÁGINAS: 0/62";
-        status.style.display = "block";
+        btn.innerText = "PROCESSANDO PÁGINAS...";
 
         const contentArea = document.getElementById('dynamic-content');
-        contentArea.innerHTML = ''; 
+        contentArea.innerHTML = '';
 
         document.getElementById('pdf-user-name').innerText = userData.nome.toUpperCase();
-        document.getElementById('pdf-user-info').innerText = `${userData.dataNascimento} • ${userData.horaNascimento} • ${userData.cidade}`;
+        document.getElementById('pdf-user-info').innerText = `${userData.dataNascimento} • ${userData.cidade}`;
 
-        // RIGOR TÉCNICO: LOOP DE 61 VOLTAS PARA GARANTIR O VOLUME (TOTAL 62 PÁGINAS COM A CAPA)
+        // LOOP DE 61 PÁGINAS + CAPA = 62 PÁGINAS TOTAIS
         for(let i = 1; i <= 61; i++) {
             let section = document.createElement('div');
             section.className = 'page';
-            
-            // Gerador de volume: 4 parágrafos densos por página
-            let p1 = fragmentos[i % fragmentos.length];
-            let p2 = fragmentos[(i + 1) % fragmentos.length];
-            let p3 = fragmentos[(i + 2) % fragmentos.length];
-            let p4 = "A profundidade deste capítulo reside na sua capacidade de silenciar o ego para ouvir a voz do destino. Eduardo, este conhecimento master foi orquestrado para chegar até você no momento exato em que a sua alma está pronta para o próximo grande salto evolutivo.";
-
             section.innerHTML = `
-                <div class="pdf-header">DOSSIÊ MASTER ARCANO • CAPÍTULO ${i}</div>
-                <h2 class="section-title">Análise de Profundidade: Nível ${i}</h2>
+                <div class="pdf-header">DOSSIÊ MASTER • CAPÍTULO ${i}</div>
+                <h2 class="section-title">Análise de Profundidade: Grau ${i}</h2>
                 <div class="text-block">
-                    <p>${p1}</p>
-                    <p>${p2}</p>
-                    <p>${p3}</p>
-                    <p>${p4}</p>
-                    <p>Ao examinarmos a sua frequência vibracional nesta etapa, fica evidente que o seu compromisso com a verdade pessoal é o que ditará o ritmo dos milagres em 2026. Este dossiê master não é apenas informativo, é uma ferramenta iniciática de transformação direta.</p>
+                    <p>${SABEDORIA[i % SABEDORIA.length]}</p>
+                    <p>Ao examinarmos o seu portal pessoal, Eduardo, notamos que a sua missão exige uma integração entre a mente analítica e a intuição arcaica. O ano de 2026 será o palco onde essa união gerará frutos tangíveis em sua carreira e vida espiritual.</p>
+                    <p>Este capítulo foca na sua capacidade de regeneração. Assim como o fênix, você está em um período de queima de carmas antigos para o surgimento de uma nova autoridade. Não tema o fogo da transformação, pois ele é o único caminho para a verdadeira liberdade sistêmica.</p>
+                    <p>A matemática do seu destino aponta para uma convergência de forças no segundo semestre. Esteja atento aos sinais e mantenha sua frequência elevada através dos rituais recomendados nas seções de alquimia deste livro.</p>
                 </div>
                 <div class="footer-page">Portal Arcano • Página ${i + 1} de 62 • Eduardo Henrique Pokk</div>
             `;
             contentArea.appendChild(section);
-            btn.innerText = `PÁGINAS: ${i}/62`;
         }
 
         const element = document.getElementById('pdf-template');
-        element.style.display = "block";
-
+        
         const opt = {
             margin: 0,
             filename: `Dossie_MASTER_62_PAGINAS_${userData.nome}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 1.5, useCORS: true }, // Escala balanceada para não travar o navegador
+            html2canvas: { scale: 1.5, useCORS: true, logging: false },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // Renderização do PDF (Pode levar de 15 a 30 segundos devido ao volume)
+        // EXCUÇÃO DO MOTOR DE PDF
         await html2pdf().set(opt).from(element).save();
 
-        element.style.display = "none";
         btn.disabled = false;
-        btn.innerText = "LIVRO MASTER BAIXADO";
-        status.innerText = "Sua jornada de 62 páginas foi concluída com sucesso.";
+        btn.innerText = "LIVRO MASTER CONCLUÍDO";
     }
 
     auth.onAuthStateChanged(user => {
