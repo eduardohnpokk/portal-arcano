@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Arcano | Zodíaco Chinês</title>
+    <title>Portal Arcano | Zodíaco Chinês de Elite</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -14,62 +14,92 @@
     
     <style>
         :root { --gold: #d4af37; --bg-dark: #050505; --red: #8a1c1c; }
-        body { margin: 0; font-family: 'Cormorant Garamond', serif; background-color: var(--bg-dark); color: #e0e0e0; font-size: 19px; line-height: 1.8; }
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background-color: var(--bg-dark); background-image: url('https://www.transparenttextures.com/patterns/stardust.png'); color: #e0e0e0; font-size: 19px; line-height: 1.8; }
+        
         #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .spinner { font-size: 4em; color: var(--gold); animation: spin 2s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .container { max-width: 900px; margin: 0 auto; padding: 40px 20px 100px 20px; }
-        .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #222; padding-bottom: 15px; }
         .btn-back { cursor: pointer; color: #666; text-transform: uppercase; font-size: 0.8em; letter-spacing: 2px; text-decoration: none; transition: 0.3s; }
         .btn-back:hover { color: var(--gold); }
 
-        .china-hero { background: radial-gradient(circle, #1a1a1a 0%, #000 100%); border: 1px solid var(--gold); border-radius: 8px; padding: 60px 40px; text-align: center; margin-bottom: 40px; position: relative; }
-        .china-hero::after { content: '2026: Ano do Cavalo de Fogo'; position: absolute; bottom: 10px; right: 20px; font-family: 'Cinzel'; font-size: 0.6em; color: var(--red); letter-spacing: 2px; }
-        .report-block { background: rgba(20, 20, 20, 0.8); border-left: 4px solid var(--red); padding: 40px; margin-bottom: 30px; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .block-title { font-family: 'Cinzel'; color: var(--gold); margin-bottom: 20px; font-size: 1.4em; }
+        .china-hero { 
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%); 
+            border: 1px solid var(--gold); border-radius: 8px; padding: 60px 40px; 
+            text-align: center; margin-bottom: 40px; position: relative;
+            box-shadow: 0 0 50px rgba(138, 28, 28, 0.2);
+        }
+        .china-hero::before { content: 'SISTEMA BAZI DE ELITE'; position: absolute; top: 15px; left: 50%; transform: translateX(-50%); font-family: 'Cinzel'; font-size: 0.7em; color: var(--red); letter-spacing: 5px; width: 100%; }
+
+        .report-block { background: rgba(15, 15, 15, 0.95); border: 1px solid #333; border-left: 4px solid var(--red); padding: 40px; margin-bottom: 30px; border-radius: 4px; transition: 0.3s; }
+        .report-block:hover { border-color: var(--gold); }
+        .block-title { font-family: 'Cinzel'; color: var(--gold); margin-bottom: 20px; font-size: 1.5em; border-bottom: 1px solid #222; padding-bottom: 10px; }
+        
+        .animal-name { font-family: 'Cinzel'; font-size: 4.5em; color: #fff; margin: 10px 0; text-transform: uppercase; line-height: 1; text-shadow: 0 0 20px rgba(255,255,255,0.1); }
+        .element-badge { background: var(--red); color: #fff; padding: 6px 30px; display: inline-block; border-radius: 25px; font-family: 'Cinzel'; letter-spacing: 3px; font-size: 1em; margin-top: 15px; }
+
+        @media(max-width: 600px) { .animal-name { font-size: 3em; } }
     </style>
 </head>
 <body>
 
 <div id="loading-screen">
     <i class="fas fa-dragon spinner"></i>
-    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Decifrando Pilares do Destino...</p>
+    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Decifrando Pilares Ancestrais...</p>
 </div>
 
 <div class="container">
     <div class="nav-bar">
         <a href="dashboard-premium.html" class="btn-back">← Voltar ao Hub</a>
-        <div style="font-family:'Cinzel'; color:#444;">SHENG XIAO • 2026</div>
+        <div id="user-info" style="font-family:'Cinzel'; color:#444; font-size:0.8em; letter-spacing:3px;">...</div>
     </div>
 
     <div class="china-hero">
-        <div id="res-icon" style="font-size: 6em; color: var(--gold); margin-bottom: 20px;"></div>
-        <h1 id="res-animal" style="font-family:'Cinzel'; font-size: 4em; color: #fff; margin:0; text-transform: uppercase;">...</h1>
-        <div id="res-element" style="background:var(--red); padding: 5px 30px; display:inline-block; border-radius: 20px; font-family:'Cinzel'; letter-spacing: 2px; margin-top:15px;">...</div>
+        <div id="res-icon" style="font-size: 7em; color: var(--gold); margin-bottom: 20px; filter: drop-shadow(0 0 15px rgba(212,175,55,0.4));"></div>
+        <h1 id="res-animal" class="animal-name">...</h1>
+        <div id="res-element" class="element-badge">...</div>
     </div>
 
-    <div id="report-area"></div>
+    <div id="report-area">
+        </div>
 </div>
 
 <script>
+    const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
+    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
     const ANIMAIS_DB = ["Macaco","Galo","Cão","Porco","Rato","Boi","Tigre","Coelho","Dragão","Serpente","Cavalo","Cabra"];
     const ELEMENTOS_DB = ["Metal","Metal","Água","Água","Madeira","Madeira","Fogo","Fogo","Terra","Terra"];
-    const ICONS_DB = {"Rato":"mouse","Boi":"ox","Tigre":"cat","Coelho":"paw","Dragão":"dragon","Serpente":"staff-snake","Cavalo":"horse","Cabra":"bacon","Macaco":"atom","Galo":"crow","Cão":"dog","Porco":"piggy-bank"};
+    const ICONS_DB = {"Rato":"mouse","Boi":"bullhorn","Tigre":"cat","Coelho":"paw","Dragão":"dragon","Serpente":"staff-snake","Cavalo":"horse","Cabra":"bacon","Macaco":"atom","Galo":"crow","Cão":"dog","Porco":"piggy-bank"};
 
-    function processarBazi(dataStr) {
+    const DESCRICOES_DENSAS = {
+        "Rato": "O Estrategista Oculto. Você possui uma inteligência de sobrevivência inigualável, agindo nos bastidores para garantir a prosperidade do seu clã.",
+        "Boi": "O Pilar Inabalável. Sua força não reside na velocidade, mas na resistência e na honestidade brutal que sustenta estruturas familiares e profissionais.",
+        "Tigre": "O Comandante Solitário. Você é movido pela paixão e pelo senso de justiça, agindo como um catalisador de mudanças e revoluções onde quer que vá.",
+        "Coelho": "O Diplomata Resiliente. Por trás de sua aura pacífica, existe uma mente estratégica capaz de contornar obstáculos sem nunca perder a elegância.",
+        "Dragão": "O Soberano Magnético. Único ser mítico, sua presença traz vitalidade e sorte, mas exige que você aprenda a lidar com o peso da própria autoridade.",
+        "Serpente": "O Sábio Místico. Você enxerga o que está oculto e possui um tempo de reação cirúrgico. Sua força é o silêncio e a análise profunda.",
+        "Cavalo": "O Espírito Indomável. Sua energia é de expansão e liberdade. Em 2026, seu ano de regência, sua força vital atinge o ápice de manifestação.",
+        "Cabra": "O Guardião da Harmonia. Você transforma o caos em beleza através da empatia, possuindo uma resistência passiva que vence qualquer conflito.",
+        "Macaco": "O Gênio Inventivo. Nenhuma situação é complexa demais para sua mente. Você joga o jogo da vida com uma agilidade mental fora do comum.",
+        "Galo": "O Administrador da Ordem. Sua clareza de visão e franqueza são ferramentas de cura, organizando o que está disperso com perfeição técnica.",
+        "Cão": "O Protetor Vigilante. Sua lealdade é um pilar sistêmico. Você sente a injustiça no ar e dedica sua vida a proteger os valores fundamentais do seu ser.",
+        "Porco": "O Filantropo Nobre. Você encerra os ciclos com generosidade e prazer, entendendo que a verdadeira fortuna reside na abundância compartilhada."
+    };
+
+    function processarBazi(dataStr, nome) {
         try {
-            // Tratamento de segurança para data
-            if (!dataStr || dataStr.length < 4) dataStr = "2000-01-01";
-            
+            if (!dataStr) dataStr = "2000-01-01";
             const parts = dataStr.split('-');
             let year = parseInt(parts[0]);
             let month = parseInt(parts[1]);
             let day = parseInt(parts[2]);
 
-            if (isNaN(year)) year = 2000;
-
-            // Correção Li Chun (Início do ano solar chinês)
+            // RIGOR TÉCNICO: Correção Li Chun (Pivot Solar em 4 de Fevereiro)
             if (month < 2 || (month === 2 && day < 4)) {
                 year--;
             }
@@ -77,45 +107,54 @@
             const animal = ANIMAIS_DB[year % 12];
             const elemento = ELEMENTOS_DB[year % 10];
             
-            exibir(animal, elemento);
+            exibirDados(animal, elemento, year, nome);
+
         } catch (e) {
-            console.error(e);
-            exibir("Dragão", "Metal"); // Fallback seguro
-        } finally {
-            document.getElementById('loading-screen').style.display = 'none';
+            console.error("Falha Crítica no Motor Bazi:", e);
+            // Protocolo de Segurança: Não esconde erro com finally se o dado não estiver pronto.
         }
     }
 
-    function exibir(a, e) {
+    function exibirDados(a, e, ano, nome) {
         const iconClass = ICONS_DB[a] || "dragon";
         document.getElementById('res-icon').innerHTML = `<i class="fas fa-${iconClass}"></i>`;
         document.getElementById('res-animal').innerText = a;
-        document.getElementById('res-element').innerText = e + " (Pilar Anual)";
+        document.getElementById('res-element').innerText = `${e.toUpperCase()} • POLARIDADE YIN/YANG`;
+        document.getElementById('user-info').innerText = `${nome.toUpperCase()} • NASCIDO EM ${ano+1}`;
 
         document.getElementById('report-area').innerHTML = `
             <div class="report-block">
-                <div class="block-title">A Natureza do seu Espírito: ${a}</div>
-                <p style="text-align:justify; color:#ccc;">Sua essência é regida pela vibração do ${a}. No sistema chinês, isso define sua base instintiva. Em 2026, o Ano do Cavalo de Fogo, sua energia terá um encontro dinâmico com a rapidez deste ciclo. ${a === 'Cavalo' ? 'Como este é o seu ano, a intensidade será duplicada: foco total em renovação.' : 'A interação entre sua essência e o ano exige adaptabilidade estratégica.'}</p>
+                <div class="block-title">A NATUREZA DO SEU ESPÍRITO: ${a.toUpperCase()}</div>
+                <p style="text-align:justify; color:#ccc;">${DESCRICOES_DENSAS[a]}</p>
+                <p style="text-align:justify; color:#aaa; font-style:italic; font-size:0.9em; margin-top:15px;">
+                    Sistemicamente, o ${a} representa como você se posiciona perante a sociedade e seus ancestrais. No Ano do Cavalo de Fogo (2026), sua interação com o cosmos exigirá ${a === 'Cavalo' ? 'intensidade total e foco em renovação estrutural' : 'flexibilidade e adaptabilidade estratégica'}.
+                </p>
             </div>
             <div class="report-block">
-                <div class="block-title">A Matéria Alquímica: ${e}</div>
-                <p style="text-align:justify; color:#ccc;">O elemento ${e} é o sangue que corre nas veias do seu animal. Ele define COMO você persegue seus objetivos. O ${e} traz uma camada de ${e === 'Metal' ? 'determinação inflexível' : e === 'Água' ? 'intuição fluida' : e === 'Madeira' ? 'crescimento constante' : e === 'Fogo' ? 'paixão expansiva' : 'estabilidade sólida'} para sua personalidade.</p>
+                <div class="block-title">A MATÉRIA ALQUÍMICA: ${e.toUpperCase()}</div>
+                <p style="text-align:justify; color:#ccc;">O elemento ${e} é a substância que dá temperamento ao seu animal astrológico. Ele define COMO você persegue seus objetivos materiais e espirituais.</p>
+                <p style="text-align:justify; color:#aaa; margin-top:15px;">
+                    Sendo regido por ${e}, sua essência possui uma camada de ${e === 'Metal' ? 'determinação cortante e lógica' : e === 'Água' ? 'intuição comunicativa e fluida' : e === 'Madeira' ? 'crescimento constante e ética social' : e === 'Fogo' ? 'paixão expansiva e carisma' : 'estabilidade sólida e responsabilidade'}.
+                </p>
+            </div>
+            <div class="report-block">
+                <div class="block-title">INTERAÇÃO COM 2026 (CAVALO DE FOGO)</div>
+                <p style="text-align:justify; color:#ccc;">O ano de 2026 é um acelerador de destinos. Para a vibração do ${a}, este ciclo funcionará como uma forja. Se você resistir ao movimento, haverá fricção; se fluir com a rapidez do Fogo, alcançará colheitas monumentais que foram plantadas nos últimos 12 anos.</p>
             </div>
         `;
+
+        // SÓ DESATIVA O LOADING APÓS O SUCESSO TOTAL DA RENDERIZAÇÃO
+        document.getElementById('loading-screen').style.opacity = '0';
+        setTimeout(() => { document.getElementById('loading-screen').style.display = 'none'; }, 500);
     }
 
-    const auth = firebase.auth();
-    const db = firebase.firestore();
     auth.onAuthStateChanged(user => {
         if(user) {
             db.collection("usuarios").doc(user.uid).get().then(doc => {
                 const d = doc.exists ? doc.data() : {};
-                processarBazi(d.dataNascimento || "2000-01-01");
-            }).catch(e => {
-                processarBazi("2000-01-01");
-            });
+                processarBazi(d.dataNascimento || d.nascimento, d.nome || "Iniciado");
+            }).catch(() => processarBazi("2000-01-01", "Iniciado"));
         } else {
-            // Redirecionamento de segurança
             window.location.href = 'index.html';
         }
     });
