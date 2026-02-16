@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Arcano | Visão Parcial</title>
-    
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
@@ -15,233 +14,88 @@
 
     <style>
         :root { --gold: #d4af37; --bg-dark: #050505; }
-        
-        body { 
-            margin: 0; 
-            font-family: 'Cormorant Garamond', serif; 
-            background-color: var(--bg-dark);
-            background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
-            color: #e0e0e0; 
-            min-height: 100vh; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* HEADER (IGUAL AO PREMIUM) */
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background-color: var(--bg-dark); background-image: url('https://www.transparenttextures.com/patterns/stardust.png'); color: #e0e0e0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
         .header-container { text-align: center; padding-top: 60px; width: 100%; margin-bottom: 40px; }
-        .main-title { font-family: 'Cinzel', serif; font-size: 3.5em; color: var(--gold); text-shadow: 0 0 20px rgba(212,175,55,0.4); margin: 0; letter-spacing: 2px; }
+        .main-title { font-family: 'Cinzel', serif; font-size: 3em; color: var(--gold); text-shadow: 0 0 20px rgba(212,175,55,0.4); margin: 0; letter-spacing: 2px; }
         .stats-row { display: flex; justify-content: center; gap: 60px; margin-top: 30px; }
         .stat-box { text-align: center; }
-        .stat-label { font-family: 'Cinzel', serif; font-size: 0.75em; color: #666; letter-spacing: 3px; text-transform: uppercase; display: block; margin-bottom: 5px; }
-        .stat-value { font-family: 'Cormorant Garamond', serif; font-size: 1.8em; color: #fff; }
-        .stat-value.num-highlight { color: var(--gold); font-family: 'Cinzel', serif; font-weight: bold; }
-
-        /* ÁREA DE CONTEÚDO FREE (Bloqueada) */
-        .container-free { max-width: 800px; width: 90%; text-align: center; padding-bottom: 50px; }
+        .stat-label { font-family: 'Cinzel', serif; font-size: 0.7em; color: #666; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .stat-value { font-size: 1.5em; color: #fff; }
         
-        .preview-card { 
-            background: rgba(17, 17, 17, 0.8); 
-            border: 1px solid #333; 
-            padding: 25px; 
-            margin-bottom: 20px; 
-            text-align: left; 
-            border-radius: 8px; 
-            position: relative;
-            overflow: hidden;
-        }
+        .container-free { max-width: 1000px; width: 90%; text-align: center; padding-bottom: 100px; }
+        .grid-premium-preview { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 40px; }
         
-        .card-header { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
-        .card-icon { color: var(--gold); font-size: 1.5em; }
-        .card-title { color: var(--gold); font-family:'Cinzel'; margin: 0; font-size: 1.2em; }
+        .preview-card { background: rgba(17, 17, 17, 0.8); border: 1px solid #222; padding: 30px; border-radius: 8px; text-align: left; position: relative; overflow: hidden; }
+        .blur-content { filter: blur(4px); opacity: 0.4; user-select: none; }
+        .lock-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2; }
+        .lock-icon { font-size: 2em; color: var(--gold); text-shadow: 0 0 15px var(--gold); }
         
-        .blur-text { filter: blur(5px); user-select: none; opacity: 0.5; transition: 0.3s; }
-        .lock-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.8) 100%);
-            display: flex; align-items: center; justify-content: flex-end;
-            padding-right: 30px;
-        }
-        
-        .cta-box { border: 1px solid var(--gold); padding: 40px; background: rgba(15, 15, 15, 0.95); border-radius: 10px; margin-top: 40px; box-shadow: 0 0 30px rgba(212,175,55,0.1); }
-        .btn-buy { background: linear-gradient(45deg, #d4af37, #b8860b); color: #000; font-family: 'Cinzel'; font-size: 1.2em; padding: 15px 40px; border: none; cursor: pointer; font-weight: bold; width: 100%; max-width: 300px; margin-top: 20px; border-radius: 4px; transition: 0.3s; }
-        .btn-buy:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(212,175,55,0.4); }
-        .btn-logout { background: transparent; border: 1px solid #555; color: #888; padding: 8px 20px; margin-top: 50px; cursor: pointer; font-family: 'Cinzel'; transition: 0.3s; }
-        .btn-logout:hover { border-color: #fff; color: #fff; }
-
-        @media(max-width: 768px) {
-            .stats-row { gap: 20px; flex-wrap: wrap; }
-            .main-title { font-size: 2.5em; }
-        }
+        .cta-box { border: 1px solid var(--gold); padding: 50px; background: rgba(10, 10, 10, 0.95); border-radius: 12px; margin-top: 60px; box-shadow: 0 0 40px rgba(212,175,55,0.15); }
+        .btn-buy { background: linear-gradient(45deg, #d4af37, #b8860b); color: #000; font-family: 'Cinzel'; font-size: 1.3em; padding: 20px 60px; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; margin-top: 30px; transition: 0.3s; width: 100%; max-width: 400px; }
+        .btn-buy:hover { transform: scale(1.05); background: #fff; }
+        .btn-logout { background: transparent; border: 1px solid #333; color: #666; padding: 10px 30px; margin-top: 40px; cursor: pointer; font-family: 'Cinzel'; }
     </style>
 </head>
 <body>
 
     <div class="header-container">
-        <h1 class="main-title">VISÃO PARCIAL</h1>
-        
+        <h1 class="main-title">CONHECIMENTO PARCIAL</h1>
         <div class="stats-row">
-            <div class="stat-box">
-                <span class="stat-label">SIGNO</span>
-                <span class="stat-value" id="user-signo">...</span>
-            </div>
-            <div class="stat-box">
-                <span class="stat-label">ASCENDENTE</span>
-                <span class="stat-value" id="user-ascendente">...</span>
-            </div>
-            <div class="stat-box">
-                <span class="stat-label">NUMEROLOGIA</span>
-                <span class="stat-value num-highlight" id="user-numerologia">...</span>
-            </div>
+            <div class="stat-box"><span class="stat-label">SIGNO</span><span class="stat-value" id="user-signo">...</span></div>
+            <div class="stat-box"><span class="stat-label">ASCENDENTE</span><span class="stat-value" id="user-ascendente">...</span></div>
         </div>
     </div>
 
     <div class="container-free">
-        <p style="color: #888; margin-bottom: 40px; font-size: 1.1em;">Você é um Iniciado, mas seu acesso completo aos mistérios ainda não foi desbloqueado.</p>
+        <p style="color: #888;">Os portais de 2026 ainda estão selados para você. Torne-se um Iniciado de Elite para acessar os Dossiês.</p>
 
-        <div class="preview-card">
-            <div class="card-header">
-                <i class="fas fa-chart-pie card-icon"></i>
-                <h3 class="card-title">Mapa Astral Completo</h3>
+        <div class="grid-premium-preview">
+            <div class="preview-card">
+                <div class="lock-overlay"><i class="fas fa-lock lock-icon"></i></div>
+                <h3 style="font-family:'Cinzel'; color:var(--gold);">Revolução Solar 2026</h3>
+                <div class="blur-content">Seu Ascendente anual revela que este ano será marcado por uma grande mudança profissional em Outubro...</div>
             </div>
-            <p>Sua posição solar indica força, mas... <span class="blur-text">a casa 8 revela um segredo oculto sobre sua vida financeira que precisa ser resolvido agora para evitar perdas futuras.</span></p>
-            <div class="lock-overlay"><i class="fas fa-lock" style="color:var(--gold)"></i></div>
-        </div>
-
-        <div class="preview-card">
-            <div class="card-header">
-                <i class="fas fa-eye card-icon"></i>
-                <h3 class="card-title">Oráculo Sagrado</h3>
+            <div class="preview-card">
+                <div class="lock-overlay"><i class="fas fa-lock lock-icon"></i></div>
+                <h3 style="font-family:'Cinzel'; color:var(--gold);">Ciclos de Maturidade</h3>
+                <div class="blur-content">Você está entrando no seu Retorno de Saturno, o que exige cautela extrema com finanças nos próximos 7 meses...</div>
             </div>
-            <p>As cartas mostram um caminho novo... <span class="blur-text">que se abrirá apenas se você abandonar um vício antigo que drena sua energia vital e bloqueia o amor verdadeiro.</span></p>
-            <div class="lock-overlay"><i class="fas fa-lock" style="color:var(--gold)"></i></div>
-        </div>
-
-        <div class="preview-card">
-            <div class="card-header">
-                <i class="fas fa-star card-icon"></i>
-                <h3 class="card-title">Seu Céu Agora</h3>
+            <div class="preview-card">
+                <div class="lock-overlay"><i class="fas fa-lock lock-icon"></i></div>
+                <h3 style="font-family:'Cinzel'; color:var(--gold);">Feng Shui Sistêmico</h3>
+                <div class="blur-content">A Estrela 5 está no seu setor de trabalho. Para neutralizar a perda de dinheiro, use curas de metal...</div>
             </div>
-            <p>Saturno está pressionando sua Casa... <span class="blur-text">o que exige cautela extrema em contratos hoje. Ignore este aviso e poderá perder uma oportunidade única.</span></p>
-            <div class="lock-overlay"><i class="fas fa-lock" style="color:var(--gold)"></i></div>
         </div>
 
         <div class="cta-box">
-            <i class="fas fa-lock" style="font-size: 2em; color: var(--gold); margin-bottom: 20px;"></i>
-            <h1 style="font-family:'Cinzel'; color:var(--gold); margin:0;">DESBLOQUEIE O PORTAL</h1>
-            <p>Tenha acesso vitalício ao Mapa Completo, Oráculo, Horóscopo Preditivo e Rituais.</p>
-            <button class="btn-buy" id="btn-comprar">LIBERAR ACESSO AGORA</button>
+            <h1 style="font-family:'Cinzel'; color:var(--gold); margin-bottom:15px;">DESBLOQUEIE O ARCANO</h1>
+            <p style="font-size:1.2em;">Tenha acesso vitalício a todos os 10 módulos de autoconhecimento profundo.</p>
+            <button class="btn-buy" id="btn-comprar">LIBERAR DOSSIÊ COMPLETO</button>
         </div>
 
-        <button class="btn-logout" onclick="firebase.auth().signOut()">Sair do Portal</button>
+        <button class="btn-logout" onclick="firebase.auth().signOut()">Sair do Templo</button>
     </div>
 
-<script>
-    const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
-    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    const functions = firebase.functions();
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
+        try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-    // VERIFICAÇÃO DE STATUS
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            db.collection("usuarios").doc(user.uid).get().then(doc => {
-                if (doc.exists) {
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                db.collection("usuarios").doc(user.uid).get().then(doc => {
                     const data = doc.data();
-                    const status = (data.status || "").toLowerCase();
-                    const plano = (data.plano || "").toLowerCase();
+                    if (data.status === "premium") window.location.href = "dashboard-premium.html";
+                    document.getElementById('user-signo').innerText = "Apurando...";
+                });
+            } else window.location.href = "index.html";
+        });
 
-                    // Se for PREMIUM -> Redireciona para o Premium
-                    if (status === "premium" || plano === "premium") {
-                        window.location.href = "dashboard-premium.html";
-                        return;
-                    }
-
-                    // Se for FREE -> Calcula cabeçalho
-                    if (data.dataNascimento) {
-                        const signo = getSigno(data.dataNascimento);
-                        const numerologia = getNumerologia(data.dataNascimento);
-                        const ascendente = getAscendenteEstimado(data.horaNascimento, signo);
-
-                        document.getElementById('user-signo').innerText = signo;
-                        document.getElementById('user-numerologia').innerText = numerologia;
-                        document.getElementById('user-ascendente').innerText = ascendente;
-                    } else {
-                        document.getElementById('user-signo').innerText = "N/A";
-                    }
-                }
-            });
-        } else {
-            window.location.href = "index.html";
-        }
-    });
-
-    // FUNÇÕES DE CÁLCULO
-    function getSigno(dateString) {
-        const date = new Date(dateString + "T12:00:00");
-        const day = date.getDate();
-        const month = date.getMonth() + 1;
-        if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) return "Aquário";
-        if ((month == 2 && day >= 19) || (month == 3 && day <= 20)) return "Peixes";
-        if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) return "Áries";
-        if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) return "Touro";
-        if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) return "Gêmeos";
-        if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) return "Câncer";
-        if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) return "Leão";
-        if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) return "Virgem";
-        if ((month == 9 && day >= 23) || (month == 10 && day <= 22)) return "Libra";
-        if ((month == 10 && day >= 23) || (month == 11 && day <= 21)) return "Escorpião";
-        if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) return "Sagitário";
-        if ((month == 12 && day >= 22) || (month == 1 && day <= 19)) return "Capricórnio";
-        return "Indefinido";
-    }
-
-    function getNumerologia(dateString) {
-        let str = dateString.replace(/\D/g, '');
-        let sum = 0;
-        for(let char of str) sum += parseInt(char);
-        while(sum > 9 && sum !== 11 && sum !== 22) {
-            let tempStr = sum.toString();
-            let tempSum = 0;
-            for(let char of tempStr) tempSum += parseInt(char);
-            sum = tempSum;
-        }
-        return sum;
-    }
-
-    function getAscendenteEstimado(timeString, signoSolar) {
-        if(!timeString) return "Desconhecido";
-        const signos = ["Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio", "Aquário", "Peixes"];
-        const [hora, min] = timeString.split(':').map(Number);
-        const indexSolar = signos.indexOf(signoSolar);
-        let diff = hora - 6;
-        let casas = Math.floor(diff / 2);
-        let indexAsc = (indexSolar + casas) % 12;
-        if (indexAsc < 0) indexAsc += 12;
-        return signos[indexAsc];
-    }
-
-    // CORREÇÃO DO PAGAMENTO
-    document.getElementById('btn-comprar').addEventListener('click', async () => {
-        const btn = document.getElementById('btn-comprar');
-        btn.innerText = "Processando...";
-        try {
-            const criarPagamento = functions.httpsCallable('criarPagamento');
-            const result = await criarPagamento();
-            
-            if (result.data && result.data.link) {
-                window.location.href = result.data.link;
-            } else {
-                throw new Error("Link não recebido");
-            }
-
-        } catch (error) {
-            console.error(error);
-            alert("Erro ao conectar com pagamento. Tente novamente.");
-            btn.innerText = "LIBERAR ACESSO AGORA";
-        }
-    });
-</script>
+        document.getElementById('btn-comprar').addEventListener('click', async () => {
+            alert("Redirecionando para o Alinhamento Financeiro...");
+            // Integração com Stripe/MercadoPago via Cloud Functions viria aqui
+        });
+    </script>
 </body>
 </html>
