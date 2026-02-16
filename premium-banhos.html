@@ -54,35 +54,50 @@
         <div id="rec-display" style="color:var(--gold); font-weight:bold; margin-top:10px;">Aguardando alinhamento...</div>
     </div>
 
-    <div id="ritual-list">
-        </div>
+    <div id="ritual-list"></div>
 </div>
 
 <script>
     const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
     try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+    const auth = firebase.auth();
 
     const RITUAIS = [
-        { id: "limpeza", title: "O Descarrego Maior", tags: "Limpeza • Corte de Inveja", planets: [6, 1], science: "O Sal Grosso neutraliza íons positivos (estática áurica), enquanto a Arruda age como 'antibiótico astral' contra formas-pensamento parasitárias.", ings: ["7 Ramos de Arruda", "7 Folhas de Guiné", "3 Punhados de Sal Grosso", "2L de Água"], steps: "Dissolva o sal primeiro e jogue do pescoço para baixo. Finalize com as ervas maceradas na água morna." },
-        { id: "prosperidade", title: "Caminhos Dourados", tags: "Abundância • Sucesso", planets: [0, 4], science: "A Canela acelera a frequência vibracional (fogo). O Louro é o arquétipo da vitória solar. O açúcar harmoniza o campo magnético para atração de recursos.", ings: ["3 Paus de Canela", "3 Folhas de Louro", "3 Chaves (talismãs)", "1L de Água"], steps: "Ferva os ingredientes por 7 min. Use na casa (chão da entrada) ou no corpo para magnetizar oportunidades." },
-        { id: "amor", title: "Banho de Vênus", tags: "Magnetismo • Autoamor", planets: [5, 4], science: "Trabalha a emanação do chakra cardíaco. A Rosa Vermelha vibra na frequência da paixão, enquanto o mel suaviza a resistência inconsciente ao prazer.", ings: ["Pétalas de 1 Rosa", "1 Colher de Mel", "3 Borrifadas de Perfume", "Água Morna"], steps: "Não ferva a rosa. Macere as pétalas com mel na água morna e deixe o líquido escorrer suavemente sobre o peito." }
+        { id: "limpeza", title: "O Descarrego Maior", tags: "Limpeza • Corte de Inveja", science: "O Sal Grosso neutraliza íons positivos (estática áurica), enquanto a Arruda age como 'antibiótico astral' contra formas-pensamento parasitárias.", ings: ["7 Ramos de Arruda", "7 Folhas de Guiné", "3 Punhados de Sal Grosso", "2L de Água"], steps: "Dissolva o sal primeiro e jogue do pescoço para baixo. Finalize com as ervas maceradas na água morna." },
+        { id: "prosperidade", title: "Caminhos Dourados", tags: "Abundância • Sucesso", science: "A Canela acelera a frequência vibracional (fogo). O Louro é o arquétipo da vitória solar. O açúcar harmoniza o campo magnético para atração de recursos.", ings: ["3 Paus de Canela", "3 Folhas de Louro", "3 Chaves (talismãs)", "1L de Água"], steps: "Ferva os ingredientes por 7 min. Use na casa (chão da entrada) ou no corpo para magnetizar oportunidades." },
+        { id: "amor", title: "Banho de Vênus", tags: "Magnetismo • Autoamor", science: "Trabalha a emanação do chakra cardíaco. A Rosa Vermelha vibra na frequência da paixão, enquanto o mel suaviza a resistência inconsciente ao prazer.", ings: ["Pétalas de 1 Rosa", "1 Colher de Mel", "3 Borrifadas de Perfume", "Água Morna"], steps: "Não ferva a rosa. Macere as pétalas com mel na água morna e deixe o líquido escorrer suavemente sobre o peito." }
     ];
-
-    function calcularEletiva() {
-        const agora = new Date();
-        const time = Astronomy.MakeTime(agora);
-        const phase = Astronomy.MoonPhase(time);
-        const illum = Astronomy.MoonIllumination(time) * 100;
-        const diaSemana = agora.getDay(); 
-
-        let luaNome = phase < 90 ? "Crescente" : phase < 180 ? "Cheia" : phase < 270 ? "Minguante" : "Nova";
-        document.getElementById('astro-display').innerHTML = `Lua ${luaNome} (${illum.toFixed(1)}% iluminada) | Dia de Regência: ${getPlanetaDia(diaSemana)}`;
-
-        renderRituais(diaSemana, luaNome);
-    }
 
     function getPlanetaDia(d) {
         return ["Sol (Domingo)", "Lua (Segunda)", "Marte (Terça)", "Mercúrio (Quarta)", "Júpiter (Quinta)", "Vênus (Sexta)", "Saturno (Sábado)"][d];
+    }
+
+    function iniciarSistema() {
+        try {
+            // Verifica se a biblioteca carregou
+            if (typeof Astronomy === 'undefined') {
+                setTimeout(iniciarSistema, 500);
+                return;
+            }
+
+            const agora = new Date();
+            const time = Astronomy.MakeTime(agora);
+            const phase = Astronomy.MoonPhase(time);
+            const illum = Astronomy.MoonIllumination(time) * 100;
+            const diaSemana = agora.getDay(); 
+
+            let luaNome = phase < 90 ? "Crescente" : phase < 180 ? "Cheia" : phase < 270 ? "Minguante" : "Nova";
+            
+            document.getElementById('astro-display').innerHTML = `Lua ${luaNome} (${illum.toFixed(1)}% iluminada) | Dia de Regência: ${getPlanetaDia(diaSemana)}`;
+
+            renderRituais(diaSemana, luaNome);
+        } catch (e) {
+            console.error(e);
+            document.getElementById('astro-display').innerText = "Erro ao calcular astros.";
+        } finally {
+            // GARANTIA DE SAÍDA DO LOADING
+            document.getElementById('loading-screen').style.display = 'none';
+        }
     }
 
     function renderRituais(dia, lua) {
@@ -90,7 +105,9 @@
         area.innerHTML = "";
         
         let recId = (dia === 5) ? "amor" : (dia === 4 || dia === 0) ? "prosperidade" : (dia === 6 || lua === "Minguante") ? "limpeza" : "prosperidade";
-        document.getElementById('rec-display').innerText = "Ritual Recomendado: " + RITUAIS.find(r => r.id === recId).title;
+        
+        const ritualRec = RITUAIS.find(r => r.id === recId);
+        if(ritualRec) document.getElementById('rec-display').innerText = "Ritual Recomendado: " + ritualRec.title;
 
         RITUAIS.forEach(r => {
             const isRec = r.id === recId;
@@ -106,10 +123,15 @@
                 </div>
             `;
         });
-        document.getElementById('loading-screen').style.display = 'none';
     }
 
-    calcularEletiva();
+    auth.onAuthStateChanged(user => {
+        if(user) {
+            iniciarSistema();
+        } else {
+            window.location.href = 'index.html';
+        }
+    });
 </script>
 </body>
 </html>
