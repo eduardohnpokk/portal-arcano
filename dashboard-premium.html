@@ -1,4 +1,149 @@
-const ID_LIVRO_MASTER = "price_1T1PskL12Q2zNNHlhCJqARTz";
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Arcano | Hub Iniciado de Elite</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root { --gold: #d4af37; --bg-dark: #050505; --accent-red: #8a1c1c; }
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background-color: var(--bg-dark); background-image: url('https://www.transparenttextures.com/patterns/stardust.png'); color: #e0e0e0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+        
+        #loading { position: fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:999; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+        
+        .header-container { text-align: center; padding-top: 60px; width: 100%; margin-bottom: 40px; }
+        .main-title { font-family: 'Cinzel', serif; font-size: 3.5em; color: var(--gold); text-shadow: 0 0 20px rgba(212,175,55,0.4); margin: 0; letter-spacing: 5px; }
+        .sub-badge { font-family: 'Cinzel'; color: #2e7d32; font-size: 0.8em; letter-spacing: 2px; margin-top: 10px; display: block; }
+
+        .master-product-area { width: 90%; max-width: 1200px; margin-bottom: 40px; }
+        .book-card { 
+            background: linear-gradient(135deg, #1a1a1a 0%, #000 100%); 
+            border: 2px solid var(--gold); border-radius: 12px; padding: 40px; 
+            display: flex; align-items: center; justify-content: space-between; 
+            box-shadow: 0 0 50px rgba(212,175,55,0.15); transition: 0.4s; cursor: pointer;
+        }
+        .book-card:hover { transform: scale(1.01); box-shadow: 0 0 70px rgba(212,175,55,0.25); }
+        .book-info { text-align: left; }
+        .book-info h2 { font-family: 'Cinzel'; color: #fff; margin: 0; font-size: 1.8em; }
+        .book-info p { color: #888; margin: 10px 0 0 0; }
+        .book-price-tag { background: var(--gold); color: #000; padding: 10px 25px; border-radius: 4px; font-family: 'Cinzel'; font-weight: bold; }
+
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1200px; width: 90%; padding: 20px 20px 80px 20px; }
+        .card { 
+            background: rgba(10, 10, 10, 0.85); border: 1px solid #333; border-radius: 6px; padding: 35px 20px; text-align: center; 
+            transition: 0.4s; cursor: pointer; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; min-height: 200px; justify-content: center;
+        }
+        .card:hover { border-color: var(--gold); box-shadow: 0 0 30px rgba(212,175,55,0.1); transform: translateY(-5px); }
+        .card::before { content:''; position:absolute; top:0; left:0; width:100%; height:3px; background:var(--gold); transform: scaleX(0); transition: 0.3s; }
+        .card:hover::before { transform: scaleX(1); }
+        
+        .card-icon { font-size: 2.2em; color: var(--gold); margin-bottom: 15px; }
+        .card h3 { font-family: 'Cinzel'; font-size: 1em; color: #fff; text-transform: uppercase; margin: 0 0 10px 0; }
+        .card p { font-size: 0.85em; color: #888; margin: 0; }
+
+        .btn-logout { background: transparent; border: 1px solid #333; color: #666; padding: 10px 30px; font-family: 'Cinzel'; cursor: pointer; margin-bottom: 50px; }
+        
+        @media(max-width: 768px) { 
+            .book-card { flex-direction: column; text-align: center; gap: 20px; } 
+            .main-title { font-size: 2.2em; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading">
+        <i class="fas fa-compass fa-spin" style="font-size: 3em; color: var(--gold);"></i>
+        <p style="color:#666; font-family:'Cinzel'; margin-top:20px;">Sincronizando sua Maestria...</p>
+    </div>
+
+    <div class="header-container">
+        <h1 class="main-title" id="welcome-name">INICIADO DE ELITE</h1>
+        <span class="sub-badge"><i class="fas fa-check-circle"></i> ASSINATURA MENSAL ATIVA (49,90)</span>
+    </div>
+
+    <div class="master-product-area">
+        <div class="book-card" id="card-livro">
+            <div style="display:flex; align-items:center; gap:30px;">
+                <i class="fas fa-book-dead" style="font-size: 3.5em; color: var(--gold);"></i>
+                <div class="book-info">
+                    <h2 id="livro-status-title">O LIVRO DO DESTINO MASTER</h2>
+                    <p id="livro-status-desc">Dossiê Completo e Vitalício de 60+ páginas.</p>
+                </div>
+            </div>
+            <div id="livro-action-area">
+                <span class="book-price-tag" id="livro-btn-text">ADQUIRIR AGORA</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="cards-grid">
+        <div class="card" onclick="window.location.href='premium-sintese.html'" style="border: 1px solid var(--gold);">
+            <div class="card-icon"><i class="fas fa-brain"></i></div>
+            <h3 style="color:var(--gold)">IA Regente</h3>
+            <p>A unificação diária de todas as suas inteligências.</p>
+        </div>
+        <div class="card" onclick="window.location.href='premium-mapa.html'">
+            <div class="card-icon"><i class="fas fa-chart-pie"></i></div>
+            <h3>Mapa Astral Natal</h3>
+            <p>Sua mandala de nascimento completa.</p>
+        </div>
+        <div class="card" onclick="window.location.href='premium-revolucao.html'">
+            <div class="card-icon"><i class="fas fa-sun"></i></div>
+            <h3>Revolução Solar</h3>
+            <p>Seu mapa exclusivo para 2026.</p>
+        </div>
+        <div class="card" onclick="window.location.href='premium-ciclos.html'">
+            <div class="card-icon"><i class="fas fa-hourglass-half"></i></div>
+            <h3>Ciclos de Maturidade</h3>
+            <p>Trânsitos geracionais e crises evolutivas.</p>
+        </div>
+        <div class="card" onclick="window.location.href='premium-eletiva.html'">
+            <div class="card-icon"><i class="fas fa-calendar-check"></i></div>
+            <h3>Astrologia Eletiva</h3>
+            <p>O GPS de datas de poder para o mês.</p>
+        </div>
+        <div class="card" onclick="window.location.href='premium-numerologia.html'">
+            <div class="card-icon"><i class="fas fa-arrow-up-9-1"></i></div>
+            <h3>Numerologia Cabalística</h3>
+            <p>A vibração sistêmica do seu nome.</p>
+        </div>
+        <div class="card" onclick="window.location.href='premium-chines.html'">
+            <div class="card-icon"><i class="fas fa-dragon"></i></div>
+            <h3>Zodíaco Chinês</h3>
+            <p>Seu pilar BaZi e influências de 2026.</p>
+        </div>
+        <div class="card" onclick="window.location.href='premium-fengshui.html'">
+            <div class="card-icon"><i class="fas fa-wind"></i></div>
+            <h3>Feng Shui Pessoal</h3>
+            <p>Ativações e curas para seus ambientes.</p>
+        </div>
+        <div class="card" onclick="window.location.href='premium-banhos.html'">
+            <div class="card-icon"><i class="fas fa-mortar-pestle"></i></div>
+            <h3>Alquimia & Banhos</h3>
+            <p>Rituais por Horas Planetárias Reais.</p>
+        </div>
+        <div class="card" onclick="window.location.href='tarot-room.html'">
+            <div class="card-icon"><i class="fas fa-eye"></i></div>
+            <h3>Oráculo Sagrado</h3>
+            <p>Tarot com Inteligência Arcaica.</p>
+        </div>
+    </div>
+
+    <button class="btn-logout" onclick="firebase.auth().signOut()">ENCERRAR SESSÃO</button>
+
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
+        try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        const ID_LIVRO_MASTER = "price_1T1PskL12Q2zNNHlhCJqARTz";
 
         async function comprarLivro() {
             const user = auth.currentUser;
@@ -20,7 +165,6 @@ const ID_LIVRO_MASTER = "price_1T1PskL12Q2zNNHlhCJqARTz";
                     })
                 });
 
-                // Estudo de Falhas: Verifica se o servidor respondeu com erro
                 const data = await response.json();
 
                 if (!response.ok) {
@@ -34,8 +178,42 @@ const ID_LIVRO_MASTER = "price_1T1PskL12Q2zNNHlhCJqARTz";
                 }
             } catch (error) {
                 console.error("Erro técnico capturado:", error);
-                // PRIORIDADE CINCO: O alerta agora mostrará a mensagem técnica real para correção cirúrgica
                 alert("ALERTA TÉCNICO: " + error.message);
                 btnText.innerText = "ADQUIRIR AGORA";
             }
         }
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                db.collection("usuarios").doc(user.uid).onSnapshot(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        const status = (data.status || "").toLowerCase();
+                        
+                        if(status !== "premium") {
+                            window.location.href = "dashboard.html";
+                            return;
+                        }
+
+                        const cardLivro = document.getElementById('card-livro');
+                        if(data.livro_adquirido === true) {
+                            document.getElementById('livro-status-title').innerText = "SEU LIVRO ESTÁ PRONTO";
+                            document.getElementById('livro-status-desc').innerText = "Clique para baixar seu Dossiê Personalizado.";
+                            document.getElementById('livro-btn-text').innerText = "GERAR PDF";
+                            cardLivro.style.borderColor = "#2e7d32";
+                            cardLivro.onclick = () => window.location.href = 'premium-export.html';
+                        } else {
+                            cardLivro.onclick = comprarLivro;
+                        }
+
+                        document.getElementById('welcome-name').innerText = (data.nome || "INICIADO").toUpperCase();
+                        document.getElementById('loading').style.display = 'none';
+                    } else {
+                        window.location.href = "index.html";
+                    }
+                });
+            } else window.location.href = "index.html";
+        });
+    </script>
+</body>
+</html>
