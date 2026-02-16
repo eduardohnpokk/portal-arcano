@@ -35,7 +35,6 @@ export default async function handler(req, res) {
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // SONDA 1: Evento recebido com sucesso
     console.log(`DEBUG WEBHOOK: Evento recebido -> ${event.type}`);
 
     if (event.type === 'checkout.session.completed') {
@@ -43,9 +42,7 @@ export default async function handler(req, res) {
         const uid = session.client_reference_id;
         const priceId = session.metadata ? session.metadata.priceId : null;
         
-        // SONDA 2: Extração de Metadados
-        console.log(`DEBUG WEBHOOK: UID extraído: ${uid}`);
-        console.log(`DEBUG WEBHOOK: PriceID extraído: ${priceId}`);
+        console.log(`DEBUG WEBHOOK: UID extraído: ${uid} | PriceID: ${priceId}`);
 
         if (!uid) {
             console.error("DEBUG WEBHOOK: UID não encontrado na sessão!");
@@ -77,8 +74,9 @@ export default async function handler(req, res) {
                 console.warn(`DEBUG WEBHOOK: PriceID ${priceId} não corresponde aos IDs configurados.`);
             }
         } catch (dbError) {
-            console.error("DEBUG WEBHOOK: Falha ao gravar no Firestore!", dbError.message);
-            return res.status(500).json({ error: "Erro de banco de dados" });
+            // Este log capturou o erro 'protobufjs'. Agora ele passará liso.
+            console.error("ERRO AO GRAVAR NO FIRESTORE:", dbError.message);
+            return res.status(500).json({ error: "Erro interno ao atualizar usuário." });
         }
     }
 
