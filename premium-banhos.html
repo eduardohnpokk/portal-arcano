@@ -8,6 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -15,46 +16,101 @@
     
     <style>
         :root { --gold: #d4af37; --bg-dark: #050505; }
-        body { margin: 0; font-family: 'Cormorant Garamond', serif; background-color: var(--bg-dark); background-image: url('https://www.transparenttextures.com/patterns/stardust.png'); color: #e0e0e0; font-size: 19px; line-height: 1.8; }
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background-color: var(--bg-dark); background-image: url('https://www.transparenttextures.com/patterns/stardust.png'); color: #e0e0e0; font-size: 19px; line-height: 1.8; overflow-x: hidden; }
+        
         #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .spinner { font-size: 4em; color: var(--gold); animation: spin 2s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px 100px 20px; }
-        .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px 100px 20px; position: relative; z-index: 1; }
+        .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #222; padding-bottom: 15px; }
         .btn-back { cursor: pointer; color: #666; text-transform: uppercase; font-size: 0.8em; letter-spacing: 2px; text-decoration: none; transition: 0.3s; }
         .btn-back:hover { color: var(--gold); }
 
-        .today-box { background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%); border: 2px solid var(--gold); border-radius: 8px; padding: 30px; text-align: center; margin-bottom: 50px; box-shadow: 0 0 40px rgba(212,175,55,0.2); }
-        .ritual-card { background: rgba(20, 20, 20, 0.9); border: 1px solid #333; padding: 40px; border-radius: 8px; border-left: 5px solid var(--gold); margin-bottom: 40px; transition: 0.4s; }
-        .ritual-card.recommended { border-color: var(--gold); box-shadow: 0 0 30px rgba(212,175,55,0.1); transform: scale(1.02); }
-        .ing-list { list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
-        .ing-item { background: rgba(212,175,55,0.05); padding: 10px; border: 1px solid #222; border-radius: 4px; font-size: 0.9em; }
-        .highlight-gold { color: var(--gold); font-weight: bold; }
+        /* PAINEL DE MONITORAMENTO */
+        .today-box { 
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%); 
+            border: 2px solid var(--gold); border-radius: 8px; padding: 35px; 
+            text-align: center; margin-bottom: 50px; 
+            box-shadow: 0 0 40px rgba(212,175,55,0.15);
+        }
+        .astro-grid { display: flex; justify-content: space-around; margin: 20px 0; border-top: 1px solid #222; padding-top: 20px; }
+        .astro-item { display: flex; flex-direction: column; gap: 5px; }
+        .astro-label { font-family: 'Cinzel'; font-size: 0.7em; color: #888; letter-spacing: 2px; }
+        .astro-val { color: var(--gold); font-weight: bold; }
+
+        /* CARTÕES DE RITUAIS */
+        .ritual-card { 
+            background: rgba(15, 15, 15, 0.95); border: 1px solid #333; padding: 45px; 
+            border-radius: 8px; border-left: 5px solid #222; margin-bottom: 50px; 
+            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .ritual-card.recommended { 
+            border-left-color: var(--gold); 
+            background: linear-gradient(135deg, rgba(212,175,55,0.05) 0%, rgba(0,0,0,0) 100%);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.8);
+            transform: scale(1.01);
+        }
+
+        .ritual-title { font-family: 'Cinzel'; font-size: 2.2em; color: #fff; margin: 0; }
+        .ritual-science { 
+            margin: 25px 0; padding: 20px; background: rgba(0,0,0,0.3); 
+            border-radius: 4px; border-left: 2px solid var(--gold); font-style: italic; color: #aaa;
+        }
+        
+        .ing-list { list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 25px 0; }
+        .ing-item { background: rgba(255,255,255,0.03); padding: 12px 18px; border: 1px solid #222; border-radius: 4px; font-size: 0.9em; }
+        .ing-item i { color: var(--gold); margin-right: 10px; width: 20px; text-align: center; }
+
+        .step-box { background: #0a0a0a; padding: 30px; border: 1px solid #1a1a1a; border-radius: 4px; }
+        .step-title { font-family: 'Cinzel'; color: var(--gold); font-size: 0.9em; margin-bottom: 15px; display: block; letter-spacing: 2px; }
+        
+        .badge-rec { 
+            background: var(--gold); color: #000; padding: 4px 12px; 
+            border-radius: 20px; font-family: 'Cinzel'; font-size: 0.7em; 
+            font-weight: bold; margin-bottom: 10px; display: inline-block;
+        }
+
+        @media(max-width: 768px) { .ing-list { grid-template-columns: 1fr; } .astro-grid { flex-direction: column; gap: 20px; } }
     </style>
 </head>
 <body>
 
 <div id="loading-screen">
-    <i class="fas fa-mortar-pestle spinner"></i>
-    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Sintonizando Éteres...</p>
+    <i class="fas fa-moon spinner"></i>
+    <p style="color:#666; font-family:'Cinzel'; margin-top:15px; letter-spacing:2px;">Sincronizando Éteres Planetários...</p>
 </div>
 
 <div class="container">
     <div class="nav-bar">
         <a href="dashboard-premium.html" class="btn-back">← Voltar ao Hub</a>
-        <div style="font-family:'Cinzel'; color:#444;">ALQUIMIA BOTÂNICA</div>
+        <div style="font-family:'Cinzel'; color:#444; font-size:0.8em; letter-spacing:3px;">ALQUIMIA BOTÂNICA PREDIRETA</div>
     </div>
 
-    <h1 style="font-family:'Cinzel'; color:var(--gold); text-align:center; font-size:2.8em;">GRIMÓRIO DE RITUAIS</h1>
+    <h1 style="font-family:'Cinzel'; color:var(--gold); text-align:center; font-size:3em; margin-bottom:10px;">GRIMÓRIO DE RITUAIS</h1>
+    <p style="text-align:center; color:#666; margin-bottom:40px;">Sua prescrição vibracional baseada no posicionamento astronômico exato.</p>
     
     <div class="today-box">
-        <div style="font-family:'Cinzel'; color:#888; letter-spacing:3px; font-size:0.8em; margin-bottom:10px;">Monitoramento Celeste em Tempo Real</div>
-        <div id="astro-display" style="font-size:1.4em; color:#fff;">Calculando...</div>
-        <div id="rec-display" style="color:var(--gold); font-weight:bold; margin-top:10px;">Aguardando alinhamento...</div>
+        <div style="font-family:'Cinzel'; color:var(--gold); letter-spacing:4px; font-size:1em; margin-bottom:20px;">Céu de Hoje</div>
+        <div class="astro-grid">
+            <div class="astro-item">
+                <span class="astro-label">Fase Lunar</span>
+                <span id="txt-lua" class="astro-val">Calculando...</span>
+            </div>
+            <div class="astro-item">
+                <span class="astro-label">Iluminação</span>
+                <span id="txt-luz" class="astro-val">--%</span>
+            </div>
+            <div class="astro-item">
+                <span class="astro-label">Regente do Dia</span>
+                <span id="txt-dia" class="astro-val">...</span>
+            </div>
+        </div>
+        <div id="rec-geral" style="color:#888; font-size:0.9em; margin-top:15px; font-style:italic;">Aguardando alinhamento dos dados...</div>
     </div>
 
-    <div id="ritual-list"></div>
+    <div id="ritual-list">
+        </div>
 </div>
 
 <script>
@@ -62,72 +118,114 @@
     try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const auth = firebase.auth();
 
-    const RITUAIS = [
-        { id: "limpeza", title: "O Descarrego Maior", tags: "Limpeza • Corte de Inveja", science: "O Sal Grosso neutraliza íons positivos (estática áurica), enquanto a Arruda age como 'antibiótico astral' contra formas-pensamento parasitárias.", ings: ["7 Ramos de Arruda", "7 Folhas de Guiné", "3 Punhados de Sal Grosso", "2L de Água"], steps: "Dissolva o sal primeiro e jogue do pescoço para baixo. Finalize com as ervas maceradas na água morna." },
-        { id: "prosperidade", title: "Caminhos Dourados", tags: "Abundância • Sucesso", science: "A Canela acelera a frequência vibracional (fogo). O Louro é o arquétipo da vitória solar. O açúcar harmoniza o campo magnético para atração de recursos.", ings: ["3 Paus de Canela", "3 Folhas de Louro", "3 Chaves (talismãs)", "1L de Água"], steps: "Ferva os ingredientes por 7 min. Use na casa (chão da entrada) ou no corpo para magnetizar oportunidades." },
-        { id: "amor", title: "Banho de Vênus", tags: "Magnetismo • Autoamor", science: "Trabalha a emanação do chakra cardíaco. A Rosa Vermelha vibra na frequência da paixão, enquanto o mel suaviza a resistência inconsciente ao prazer.", ings: ["Pétalas de 1 Rosa", "1 Colher de Mel", "3 Borrifadas de Perfume", "Água Morna"], steps: "Não ferva a rosa. Macere as pétalas com mel na água morna e deixe o líquido escorrer suavemente sobre o peito." }
+    const GRIMORIO = [
+        { 
+            id: "limpeza", 
+            title: "Despolarização Iônica Áurica", 
+            tags: "Banimento • Purificação • Corte Sistêmico",
+            science: "Este ritual baseia-se na Lei da Absorção Cristalina. O Sal Grosso atua como um descarregador de eletricidade estática acumulada no campo áurico, enquanto a Arruda e Guiné funcionam como fitoterápicos astrais, eliminando parasitas energéticos e formas-pensamento de baixa vibração.",
+            ings: ["7 Ramos de Arruda Fresca", "7 Folhas de Guiné", "3 Punhados de Sal Grosso Marinho", "2 Litros de Água de Nascente ou Mineral"],
+            steps: "1. Ferva a água e desligue o fogo. 2. Adicione as ervas, abafe e deixe repousar por 15 minutos. 3. Tome seu banho de higiene normal. 4. Jogue a água com sal do pescoço para baixo para descarregar. 5. Por fim, jogue o chá de ervas morno, visualizando uma redoma de proteção prata ao seu redor. Não enxágue."
+        },
+        { 
+            id: "prosperidade", 
+            title: "Sintonização de Frequência Solar", 
+            tags: "Abundância • Expansão • Reconhecimento",
+            science: "Ritual de Atração por Ressonância. A Canela é um termogênico energético que acelera a vibração das células, enquanto o Louro invoca o arquétipo histórico do triunfo e da clareza mental. O açúcar harmoniza as tensões, tornando o indivíduo magnético para novas fontes de recurso.",
+            ings: ["3 Paus de Canela Inteiros", "7 Folhas de Louro Secas", "3 Colheres de Açúcar Mascavo", "1 Moeda de valor corrente (limpa)"],
+            steps: "1. Ferva todos os ingredientes (exceto a moeda) por 7 minutos. 2. Deixe amornar. 3. Coloque a moeda no fundo do recipiente enquanto despeja o líquido do pescoço para baixo. 4. Mentalize o sol aquecendo suas mãos para a criação. 5. Carregue a moeda na carteira como um talismã físico da sua intenção."
+        },
+        { 
+            id: "amor", 
+            title: "Alquimia da Receptividade", 
+            tags: "Autoestima • Magnetismo • Doçura",
+            science: "Trabalha a emanação do Chakra Cardíaco e o sistema límbico. A Rosa Vermelha possui uma das maiores frequências vibracionais do reino vegetal. Combinada ao mel, ela reduz a 'acidez' emocional e as barreiras inconscientes que impedem a entrada do afeto e da admiração alheia.",
+            ings: ["Pétalas de 2 Rosas Vermelhas", "1 Colher de Mel Silvestre", "3 Borrifadas do seu Perfume Pessoal", "Água Morna (não ferver)"],
+            steps: "1. Coloque a água morna em uma bacia. 2. Adicione o mel e o perfume. 3. Macere as pétalas com as mãos, transferindo sua própria energia para a água. 4. Despeje lentamente sobre o peito e rosto (com olhos fechados), sentindo-se digno de ser amado. Deixe secar naturalmente ao luar ou ambiente calmo."
+        }
     ];
 
-    function getPlanetaDia(d) {
-        return ["Sol (Domingo)", "Lua (Segunda)", "Marte (Terça)", "Mercúrio (Quarta)", "Júpiter (Quinta)", "Vênus (Sexta)", "Saturno (Sábado)"][d];
-    }
-
-    function iniciarSistema() {
+    function iniciarAlquimia() {
         try {
-            // Verifica se a biblioteca carregou
+            // VERIFICAÇÃO DE RIGOR TÉCNICO (BIBLIOTECA)
             if (typeof Astronomy === 'undefined') {
-                setTimeout(iniciarSistema, 500);
+                setTimeout(iniciarAlquimia, 200);
                 return;
             }
 
             const agora = new Date();
             const time = Astronomy.MakeTime(agora);
-            const phase = Astronomy.MoonPhase(time);
-            const illum = Astronomy.MoonIllumination(time) * 100;
-            const diaSemana = agora.getDay(); 
+            const phase = Astronomy.MoonPhase(time); // 0-360
+            const diaSemana = agora.getDay(); // 0-6
 
-            let luaNome = phase < 90 ? "Crescente" : phase < 180 ? "Cheia" : phase < 270 ? "Minguante" : "Nova";
+            // DETERMINAÇÃO DE FASE LUNAR (EXATA)
+            let luaInfo = { nome: "", rec: "" };
+            if (phase < 90) { luaInfo.nome = "Crescente"; luaInfo.rec = "Ideal para Expansão e Atração."; }
+            else if (phase < 180) { luaInfo.nome = "Cheia"; luaInfo.rec = "Poder Máximo de Magnetismo e Brilho."; }
+            else if (phase < 270) { luaInfo.nome = "Minguante"; luaInfo.rec = "Fase de Banimento e Limpeza Profunda."; }
+            else { luaInfo.nome = "Nova"; luaInfo.rec = "Planejamento e Início de Novos Projetos."; }
+
+            const planetas = ["Sol (Vitalidade)", "Lua (Emoções)", "Marte (Ação)", "Mercúrio (Trocas)", "Júpiter (Sorte)", "Vênus (Afeto)", "Saturno (Estrutura)"];
             
-            document.getElementById('astro-display').innerHTML = `Lua ${luaNome} (${illum.toFixed(1)}% iluminada) | Dia de Regência: ${getPlanetaDia(diaSemana)}`;
+            // ATUALIZAÇÃO DO PAINEL
+            document.getElementById('txt-lua').innerText = luaInfo.nome;
+            document.getElementById('txt-luz').innerText = Math.round(Astronomy.MoonIllumination(time) * 100) + "%";
+            document.getElementById('txt-dia').innerText = planetas[diaSemana];
+            document.getElementById('rec-geral').innerText = `Conselho: ${luaInfo.rec}`;
 
-            renderRituais(diaSemana, luaNome);
-        } catch (e) {
-            console.error(e);
-            document.getElementById('astro-display').innerText = "Erro ao calcular astros.";
-        } finally {
-            // GARANTIA DE SAÍDA DO LOADING
-            document.getElementById('loading-screen').style.display = 'none';
+            // LÓGICA DE RECOMENDAÇÃO (ESPECIALISTA)
+            // Prioridade: Banimento na Minguante, Atração na Crescente/Cheia, Magnetismo na Sexta (Vênus)
+            let ritualAlvo = "prosperidade"; 
+            if (diaSemana === 5 || luaInfo.nome === "Cheia") ritualAlvo = "amor";
+            if (diaSemana === 6 || luaInfo.nome === "Minguante") ritualAlvo = "limpeza";
+
+            renderizar(ritualAlvo);
+
+        } catch (error) {
+            console.error("Falha Crítica no Motor de Alquimia:", error);
+            // Fallback silencioso não é permitido pelas regras. 
+            // O loading screen só sai se o cálculo estiver pronto.
         }
     }
 
-    function renderRituais(dia, lua) {
+    function renderizar(recomendadoId) {
         const area = document.getElementById('ritual-list');
         area.innerHTML = "";
-        
-        let recId = (dia === 5) ? "amor" : (dia === 4 || dia === 0) ? "prosperidade" : (dia === 6 || lua === "Minguante") ? "limpeza" : "prosperidade";
-        
-        const ritualRec = RITUAIS.find(r => r.id === recId);
-        if(ritualRec) document.getElementById('rec-display').innerText = "Ritual Recomendado: " + ritualRec.title;
 
-        RITUAIS.forEach(r => {
-            const isRec = r.id === recId;
+        GRIMORIO.forEach(ritual => {
+            const isRec = (ritual.id === recomendadoId);
             area.innerHTML += `
                 <div class="ritual-card ${isRec ? 'recommended' : ''}">
-                    <div style="font-family:'Cinzel'; color:var(--gold); font-size:0.8em; margin-bottom:5px;">${r.tags}</div>
-                    <h2 style="font-family:'Cinzel'; margin:0; font-size:1.8em; color:#fff;">${r.title}</h2>
-                    <p style="font-size:0.95em; color:#aaa; margin:15px 0;">${r.science}</p>
-                    <div class="highlight-gold" style="font-size:0.8em; margin-bottom:10px;">INGREDIENTES ESSENCIAIS:</div>
-                    <div class="ing-list">${r.ings.map(i => `<div class="ing-item"><i class="fas fa-check"></i> ${i}</div>`).join('')}</div>
-                    <div class="highlight-gold" style="font-size:0.8em; margin-bottom:10px;">EXECUÇÃO DO RITUAL:</div>
-                    <div style="color:#ccc; font-size:0.9em;">${r.steps}</div>
+                    ${isRec ? '<span class="badge-rec"><i class="fas fa-star"></i> RECOMENDADO PARA AGORA</span>' : ''}
+                    <div style="color:var(--gold); font-family:'Cinzel'; font-size:0.7em; letter-spacing:2px; margin-bottom:5px;">${ritual.tags}</div>
+                    <h2 class="ritual-title">${ritual.title}</h2>
+                    
+                    <div class="ritual-science">
+                        ${ritual.science}
+                    </div>
+
+                    <span class="step-title">Ingredientes Necessários:</span>
+                    <div class="ing-list">
+                        ${ritual.ings.map(i => `<div class="ing-item"><i class="fas fa-leaf"></i> ${i}</div>`).join('')}
+                    </div>
+
+                    <div class="step-box">
+                        <span class="step-title">Processo do Ritual:</span>
+                        <p style="color:#ccc; font-size:0.95em; margin:0;">${ritual.steps}</p>
+                    </div>
                 </div>
             `;
         });
+
+        // SÓ DESATIVA O LOADING APÓS A RENDERIZAÇÃO COMPLETA DOS DADOS CORRETOS
+        document.getElementById('loading-screen').style.opacity = '0';
+        setTimeout(() => { document.getElementById('loading-screen').style.display = 'none'; }, 500);
     }
 
+    // NÚCLEO DE EXECUÇÃO
     auth.onAuthStateChanged(user => {
         if(user) {
-            iniciarSistema();
+            iniciarAlquimia();
         } else {
             window.location.href = 'index.html';
         }
