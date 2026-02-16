@@ -32,7 +32,6 @@
     </style>
 </head>
 <body>
-
     <div id="loading"><i class="fas fa-compass fa-spin" style="font-size: 3em; color: var(--gold);"></i></div>
 
     <div class="header-container">
@@ -68,7 +67,6 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // RIGOR TÉCNICO: ID validado conforme image_89300d.png
         const ID_LIVRO_MASTER = "price_1T1PskL12Q2zNNHlhCJqARTz";
 
         async function comprarLivro() {
@@ -83,8 +81,8 @@
                     body: JSON.stringify({ priceId: ID_LIVRO_MASTER, uid: user.uid, email: user.email, mode: 'payment' })
                 });
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.error || "Erro no servidor Vercel.");
                 if (data.url) window.location.href = data.url;
+                else throw new Error(data.error);
             } catch (error) {
                 alert("ALERTA TÉCNICO: " + error.message);
                 btnText.innerText = "ADQUIRIR AGORA";
@@ -104,7 +102,7 @@
                         } else { cardLivro.onclick = comprarLivro; }
                         document.getElementById('welcome-name').innerText = (data.nome || "INICIADO").toUpperCase();
                         document.getElementById('loading').style.display = 'none';
-                    } else window.location.href = "index.html";
+                    }
                 });
             } else window.location.href = "index.html";
         });
