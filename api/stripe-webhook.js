@@ -2,7 +2,6 @@ import Stripe from 'stripe';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 
-// INICIALIZAÇÃO DE ELITE: SEGURA E ÚNICA
 if (!getApps().length) {
     initializeApp({
         credential: cert({
@@ -28,56 +27,45 @@ export default async function handler(req, res) {
 
     let event;
     try {
-        // RIGOR TÉCNICO: Verificação do Segredo de Assinatura (whsec_)
+        // RIGOR TÉCNICO: O STRIPE_WEBHOOK_SECRET deve ser o whsec_live no Vercel
         event = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
     } catch (err) {
-        console.error("DEBUG WEBHOOK: Erro de Assinatura!", err.message);
+        console.error("ERRO WEBHOOK PRODUÇÃO:", err.message);
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    console.log(`DEBUG WEBHOOK: Evento recebido -> ${event.type}`);
+    // IDs REAIS DE PRODUÇÃO (Substitua pelos novos gerados no Live Mode)
+    const ID_LIVE_MENSAL = "COLE_AQUI_O_ID_DO_PRINT_1";
+    const ID_LIVE_LIVRO = "COLE_AQUI_O_ID_DO_PRINT_2";
 
-    if (event.type === 'checkout.session.completed') {
-        const session = event.data.object;
-        const uid = session.client_reference_id;
-        const priceId = session.metadata ? session.metadata.priceId : null;
-        
-        console.log(`DEBUG WEBHOOK: UID extraído: ${uid} | PriceID: ${priceId}`);
+    const session = event.data.object;
+    const uid = session.client_reference_id || session.metadata?.uid;
 
-        if (!uid) {
-            console.error("DEBUG WEBHOOK: UID não encontrado na sessão!");
-            return res.status(200).json({ received: true });
-        }
-
-        const userRef = db.collection("usuarios").doc(uid);
-
-        // IDs CONFIGURADOS CONFORME PRINTS DE 16/02/2026
-        const ID_MENSAL_NOVO = "price_1T1TO1Lc8MnSdAQGTLSfGS34";
-        const ID_LIVRO_NOVO = "price_1T1TOkLc8MnSdAQGz5JdrjkB";
-
-        try {
-            if (priceId === ID_MENSAL_NOVO) {
-                await userRef.update({ 
-                    status: "premium", 
-                    plano: "mensal_49_90",
-                    data_assinatura: FieldValue.serverTimestamp() 
-                });
-                console.log(`[SUCESSO] Firebase atualizado: Acesso Premium para ${uid}`);
-            } 
-            else if (priceId === ID_LIVRO_NOVO) {
-                await userRef.update({ 
-                    livro_adquirido: true, 
-                    data_compra_livro: FieldValue.serverTimestamp() 
-                });
-                console.log(`[SUCESSO] Firebase atualizado: Livro Master para ${uid}`);
-            } else {
-                console.warn(`DEBUG WEBHOOK: PriceID ${priceId} não corresponde aos IDs configurados.`);
+    switch (event.type) {
+        case 'checkout.session.completed':
+            const priceId = session.metadata.priceId;
+            if (priceId === ID_LIVE_MENSAL) {
+                await db.collection("usuarios").doc(uid).update({ status: "premium", plano: "mensal_live", data_assinatura: FieldValue.serverTimestamp() });
+            } else if (priceId === ID_LIVE_LIVRO) {
+                await db.collection("usuarios").doc(uid).update({ livro_adquirido: true, data_compra_livro: FieldValue.serverTimestamp() });
             }
-        } catch (dbError) {
-            // Este log capturou o erro 'protobufjs'. Agora ele passará liso.
-            console.error("ERRO AO GRAVAR NO FIRESTORE:", dbError.message);
-            return res.status(500).json({ error: "Erro interno ao atualizar usuário." });
-        }
+            break;
+
+        case 'invoice.paid':
+            // Garante a renovação mensal automática
+            const subId = session.subscription;
+            if (subId) {
+                const subscription = await stripe.subscriptions.retrieve(subId);
+                const customerUid = subscription.metadata.uid;
+                await db.collection("usuarios").doc(customerUid).update({ status: "premium", ultima_renovacao: FieldValue.serverTimestamp() });
+            }
+            break;
+
+        case 'customer.subscription.deleted':
+            // Revogação de acesso por falta de pagamento ou cancelamento
+            const canceledUid = session.metadata.uid;
+            await db.collection("usuarios").doc(canceledUid).update({ status: "free", plano: "cancelado" });
+            break;
     }
 
     res.status(200).json({ received: true });
