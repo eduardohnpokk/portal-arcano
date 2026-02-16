@@ -2,17 +2,12 @@ import Stripe from 'stripe';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 
-/**
- * PRIORIDADE 13: PENSAR COMO ESPECIALISTA EM TI
- * Inicialização do Firebase Admin com Rigor Técnico.
- * Verifica se já existe uma instância ativa para evitar erros de redeploy no Vercel.
- */
+// INICIALIZAÇÃO DE ELITE: INDIVIDUAL E SEGURA
 if (!getApps().length) {
     initializeApp({
         credential: cert({
             projectId: process.env.FIREBASE_PROJECT_ID,
             clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            // Tradução técnica das quebras de linha da chave privada no ambiente Vercel
             privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
         }),
     });
@@ -21,7 +16,6 @@ if (!getApps().length) {
 const db = getFirestore();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Configuração obrigatória para que o Stripe consiga validar a assinatura do Webhook
 export const config = { api: { bodyParser: false } };
 
 export default async function handler(req, res) {
@@ -33,19 +27,13 @@ export default async function handler(req, res) {
     const sig = req.headers['stripe-signature'];
 
     let event;
-
     try {
-        // Validação do Lacre de Segurança (Webhook Secret)
         event = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
     } catch (err) {
-        console.error("ERRO DE SEGURANÇA: Assinatura do Webhook inválida.", err.message);
+        console.error("Erro de Assinatura Webhook:", err.message);
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    /**
-     * PROCESSAMENTO DO EVENTO DE SUCESSO
-     * Este bloco só é executado quando o Stripe confirma que o dinheiro caiu.
-     */
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object;
         const uid = session.client_reference_id;
@@ -53,31 +41,34 @@ export default async function handler(req, res) {
         
         const userRef = db.collection("usuarios").doc(uid);
 
+        /**
+         * RIGOR TÉCNICO: IDs ATUALIZADOS CONFORME PRINTS DE 16/02/2026
+         * Se o ID que vier do Stripe for um destes, o banco de dados será atualizado.
+         */
+        const ID_MENSAL_NOVO = "price_1T1TO1Lc8MnSdAQGTLSfGS34";
+        const ID_LIVRO_NOVO = "price_1T1TOkLc8MnSdAQGz5JdrjkB";
+
         try {
-            if (priceId === process.env.ID_ASSINATURA) {
-                // Ativação da Mensalidade de 49,90
+            if (priceId === ID_MENSAL_NOVO) {
                 await userRef.update({ 
                     status: "premium", 
                     plano: "mensal_49_90",
                     data_assinatura: FieldValue.serverTimestamp() 
                 });
-                console.log(`[SUCESSO] Usuário ${uid} sintonizado como PREMIUM.`);
+                console.log(`[FIREBASE] Assinatura Mensal ativada para: ${uid}`);
             } 
-            else if (priceId === process.env.ID_LIVRO) {
-                // Ativação do Livro do Destino Master (Venda Única)
+            else if (priceId === ID_LIVRO_NOVO) {
                 await userRef.update({ 
                     livro_adquirido: true, 
                     data_compra_livro: FieldValue.serverTimestamp() 
                 });
-                console.log(`[SUCESSO] Livro Master liberado para o usuário ${uid}.`);
+                console.log(`[FIREBASE] Livro Master ativado para: ${uid}`);
             }
         } catch (dbError) {
-            console.error("ERRO NO BANCO DE DADOS:", dbError.message);
-            // Retornamos 500 para o Stripe tentar novamente mais tarde
-            return res.status(500).json({ error: "Falha ao gravar no Firebase" });
+            console.error("Erro ao gravar no Firestore:", dbError.message);
+            return res.status(500).json({ error: "Falha na gravação final." });
         }
     }
 
-    // Resposta 200 informa ao Stripe que recebemos a mensagem com sucesso
     res.status(200).json({ received: true });
 }
