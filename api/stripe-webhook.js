@@ -27,45 +27,68 @@ export default async function handler(req, res) {
 
     let event;
     try {
-        // RIGOR TÉCNICO: O STRIPE_WEBHOOK_SECRET deve ser o whsec_live no Vercel
         event = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
     } catch (err) {
         console.error("ERRO WEBHOOK PRODUÇÃO:", err.message);
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // IDs REAIS DE PRODUÇÃO (Substitua pelos novos gerados no Live Mode)
-    const ID_LIVE_MENSAL = "COLE_AQUI_O_ID_DO_PRINT_1";
-    const ID_LIVE_LIVRO = "COLE_AQUI_O_ID_DO_PRINT_2";
+    // IDs DE PRODUÇÃO (Extraídos de image_8a18e2.png e image_8a1921.png)
+    const ID_LIVE_MENSAL = "price_1T1TO1Lc8MnSdAQGTLSfGS34";
+    const ID_LIVE_LIVRO = "price_1T1TOkLc8MnSdAQGz5JdrjkB";
 
     const session = event.data.object;
-    const uid = session.client_reference_id || session.metadata?.uid;
+    const uid = session.client_reference_id || (session.metadata ? session.metadata.uid : null);
 
-    switch (event.type) {
-        case 'checkout.session.completed':
-            const priceId = session.metadata.priceId;
-            if (priceId === ID_LIVE_MENSAL) {
-                await db.collection("usuarios").doc(uid).update({ status: "premium", plano: "mensal_live", data_assinatura: FieldValue.serverTimestamp() });
-            } else if (priceId === ID_LIVE_LIVRO) {
-                await db.collection("usuarios").doc(uid).update({ livro_adquirido: true, data_compra_livro: FieldValue.serverTimestamp() });
-            }
-            break;
+    try {
+        switch (event.type) {
+            case 'checkout.session.completed':
+                const priceId = session.metadata ? session.metadata.priceId : null;
+                if (priceId === ID_LIVE_MENSAL) {
+                    await db.collection("usuarios").doc(uid).update({ 
+                        status: "premium", 
+                        plano: "mensal_live", 
+                        data_assinatura: FieldValue.serverTimestamp() 
+                    });
+                    console.log(`[PRODUÇÃO] Assinatura ativa: ${uid}`);
+                } else if (priceId === ID_LIVE_LIVRO) {
+                    await db.collection("usuarios").doc(uid).update({ 
+                        livro_adquirido: true, 
+                        data_compra_livro: FieldValue.serverTimestamp() 
+                    });
+                    console.log(`[PRODUÇÃO] Livro Master adquirido: ${uid}`);
+                }
+                break;
 
-        case 'invoice.paid':
-            // Garante a renovação mensal automática
-            const subId = session.subscription;
-            if (subId) {
-                const subscription = await stripe.subscriptions.retrieve(subId);
-                const customerUid = subscription.metadata.uid;
-                await db.collection("usuarios").doc(customerUid).update({ status: "premium", ultima_renovacao: FieldValue.serverTimestamp() });
-            }
-            break;
+            case 'invoice.paid':
+                // Renovação mensal automática via Stripe Subscription
+                const subId = session.subscription;
+                if (subId) {
+                    const subscription = await stripe.subscriptions.retrieve(subId);
+                    const subUid = subscription.metadata.uid;
+                    if (subUid) {
+                        await db.collection("usuarios").doc(subUid).update({ 
+                            status: "premium", 
+                            ultima_renovacao: FieldValue.serverTimestamp() 
+                        });
+                    }
+                }
+                break;
 
-        case 'customer.subscription.deleted':
-            // Revogação de acesso por falta de pagamento ou cancelamento
-            const canceledUid = session.metadata.uid;
-            await db.collection("usuarios").doc(canceledUid).update({ status: "free", plano: "cancelado" });
-            break;
+            case 'customer.subscription.deleted':
+                // Revogação de acesso por cancelamento ou inadimplência
+                const canceledUid = session.metadata ? session.metadata.uid : null;
+                if (canceledUid) {
+                    await db.collection("usuarios").doc(canceledUid).update({ 
+                        status: "free", 
+                        plano: "cancelado" 
+                    });
+                }
+                break;
+        }
+    } catch (dbError) {
+        console.error("ERRO FIREBASE PRODUÇÃO:", dbError.message);
+        return res.status(500).json({ error: "Erro de banco de dados" });
     }
 
     res.status(200).json({ received: true });
