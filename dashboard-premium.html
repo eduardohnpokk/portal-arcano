@@ -25,7 +25,7 @@
         .card-icon { font-size: 2.2em; color: var(--gold); margin-bottom: 15px; }
         .card h3 { font-family: 'Cinzel'; font-size: 1.1em; color: #fff; text-transform: uppercase; margin: 0 0 10px 0; }
         .btn-logout { background: transparent; border: 1px solid #333; color: #666; padding: 10px 30px; font-family: 'Cinzel'; cursor: pointer; margin-bottom: 50px; }
-        .btn-cancel { background: transparent; border: 1px solid #440000; color: #770000; padding: 5px 15px; margin-bottom: 60px; font-size: 0.7em; cursor: pointer; font-family: 'Cinzel'; transition: 0.3s; opacity: 0.5; }
+        .btn-cancel { background: transparent; border: 1px solid #440000; color: #770000; padding: 5px 15px; margin-top: 60px; font-size: 0.7em; cursor: pointer; font-family: 'Cinzel'; transition: 0.3s; opacity: 0.5; }
         .btn-cancel:hover { background: #440000; color: #fff; opacity: 1; }
     </style>
 </head>
@@ -61,6 +61,8 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+
+        // ID DE PRODUÇÃO: price_1T1TOkLc8MnSdAQGz5JdrjkB
         const ID_LIVRO_MASTER = "price_1T1TOkLc8MnSdAQGz5JdrjkB";
 
         async function comprarLivro() {
@@ -83,20 +85,17 @@
             }
         }
 
-        // FUNÇÃO CIRÚRGICA: Cancelamento de Conta
         async function cancelAccount() {
-            const confirmacao = confirm("AVISO DE ELITE: Esta ação é definitiva. Seus dados, acessos e o Livro Master serão apagados. Deseja prosseguir?");
+            const confirmacao = confirm("AVISO: Esta ação é definitiva e apagará todos os seus dados. Deseja prosseguir?");
             if(!confirmacao) return;
             const user = auth.currentUser;
             if(!user) return;
             try {
                 await db.collection("usuarios").doc(user.uid).delete();
                 await user.delete();
-                alert("CONTA EXCLUÍDA. Sua jornada no Portal Arcano foi encerrada.");
+                alert("CONTA EXCLUÍDA.");
                 window.location.href = "index.html";
-            } catch (e) {
-                alert("ERRO DE SEGURANÇA: Para excluir sua conta, você precisa ter feito login recentemente. Saia e entre novamente antes de tentar excluir.");
-            }
+            } catch (e) { alert("Erro de segurança. Tente sair e entrar novamente."); }
         }
 
         auth.onAuthStateChanged(user => {
