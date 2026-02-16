@@ -3,19 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
     <title>Portal Arcano | Mapa Astral Completo, Sinastria e Autoconhecimento</title>
-    <meta name="description" content="Descubra sua missão de vida com o Mapa Astral mais completo do Brasil. Análise profunda de Sol, Lua, Ascendente e Casas. Acesse agora o Portal Arcano.">
-    <meta name="keywords" content="mapa astral, astrologia, horóscopo, signos, ascendente, revolução solar, sinastria, autoconhecimento, psicologia, mapa natal">
-    <meta name="author" content="Eduardo Pokk">
-    <meta name="robots" content="index, follow"> 
-    <meta name="theme-color" content="#050505"> 
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Descubra o que os astros dizem sobre você | Portal Arcano">
-    <meta property="og:description" content="Não é apenas horóscopo. É uma ferramenta de psicologia e autoconhecimento.">
-    <meta property="og:image" content="assets/share-image.jpg"> 
-    <meta property="og:site_name" content="Portal Arcano">
-
+    <meta name="description" content="Descubra sua missão de vida com o Mapa Astral mais completo do Brasil. Análise profunda de Sol, Lua, Ascendente e Casas.">
+    
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
@@ -25,215 +15,123 @@
     
     <style>
         :root { --gold: #d4af37; --bg-dark: #050505; --glass: rgba(255, 255, 255, 0.05); }
-        
         * { scroll-behavior: smooth; }
-
-        body { 
-            margin: 0; 
-            font-family: 'Cormorant Garamond', serif; 
-            background-color: var(--bg-dark);
-            background-image: url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: #e0e0e0; 
-            overflow-x: hidden;
-        }
-
-        /* OVERLAY DA NEBULOSA - AJUSTADO PARA 0.45 */
-        body::before {
-            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.45); z-index: -1;
-        }
-
-        /* NAVEGAÇÃO */
-        nav {
-            padding: 20px 50px; display: flex; justify-content: space-between; align-items: center;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-            position: fixed; top: 0; width: 100%; z-index: 100; box-sizing: border-box;
-        }
+        body { margin: 0; font-family: 'Cormorant Garamond', serif; background-color: var(--bg-dark); background-image: url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80'); background-size: cover; background-position: center; background-attachment: fixed; color: #e0e0e0; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.45); z-index: -1; }
+        nav { padding: 20px 50px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); position: fixed; top: 0; width: 100%; z-index: 100; box-sizing: border-box; }
         .nav-logo { font-family: 'Cinzel'; color: var(--gold); font-size: 1.2em; letter-spacing: 2px; }
-        .nav-btn { color: #fff; text-decoration: none; font-family: 'Cinzel'; font-size: 0.8em; border: 1px solid var(--gold); padding: 8px 20px; border-radius: 4px; transition: 0.3s; }
+        .nav-btn { color: #fff; text-decoration: none; font-family: 'Cinzel'; font-size: 0.8em; border: 1px solid var(--gold); padding: 8px 20px; border-radius: 4px; transition: 0.3s; cursor: pointer; }
         .nav-btn:hover { background: var(--gold); color: #000; }
-        
-        /* HERO SECTION */
-        .hero-section {
-            min-height: 100vh;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 20px;
-            animation: fadeIn 2s;
-        }
-
-        h1 { 
-            font-family: 'Cinzel'; color: var(--gold); font-size: clamp(3em, 8vw, 5em); margin: 0; 
-            text-shadow: 0 0 30px rgba(212,175,55,0.6); letter-spacing: 8px;
-        }
-        
-        .subtitle { 
-            font-size: 1.5em; max-width: 800px; margin: 20px auto 40px auto; 
-            color: #eee; text-shadow: 0 2px 5px #000;
-        }
-
-        .btn-cta {
-            background: linear-gradient(45deg, #d4af37, #b8860b);
-            color: #000; font-family: 'Cinzel'; font-size: 1.1em; padding: 20px 60px;
-            border: none; cursor: pointer; font-weight: bold; border-radius: 50px;
-            box-shadow: 0 0 30px rgba(212,175,55,0.4); transition: 0.3s;
-            text-decoration: none; display: inline-block; letter-spacing: 2px;
-        }
+        .hero-section { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; animation: fadeIn 2s; }
+        h1 { font-family: 'Cinzel'; color: var(--gold); font-size: clamp(3em, 8vw, 5em); margin: 0; text-shadow: 0 0 30px rgba(212,175,55,0.6); letter-spacing: 8px; }
+        .subtitle { font-size: 1.5em; max-width: 800px; margin: 20px auto 40px auto; color: #eee; text-shadow: 0 2px 5px #000; }
+        .btn-cta { background: linear-gradient(45deg, #d4af37, #b8860b); color: #000; font-family: 'Cinzel'; font-size: 1.1em; padding: 20px 60px; border: none; cursor: pointer; font-weight: bold; border-radius: 50px; box-shadow: 0 0 30px rgba(212,175,55,0.4); transition: 0.3s; text-decoration: none; display: inline-block; letter-spacing: 2px; }
         .btn-cta:hover { transform: scale(1.05); box-shadow: 0 0 50px rgba(212,175,55,0.8); background: #fff; }
-
-        /* GRID DE FERRAMENTAS (8 ITENS) */
         .tools-section { padding: 100px 20px; text-align: center; }
         .section-title { font-family: 'Cinzel'; color: var(--gold); font-size: 2.5em; margin-bottom: 50px; }
-        
-        .tools-grid { 
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
-            gap: 25px; max-width: 1200px; margin: 0 auto; 
-        }
-        
-        .tool-card { 
-            padding: 35px 20px; border: 1px solid rgba(255,255,255,0.1); 
-            background: var(--glass); backdrop-filter: blur(8px);
-            border-radius: 8px; transition: 0.4s;
-        }
-        .tool-card:hover { 
-            border-color: var(--gold); transform: translateY(-10px); 
-            background: rgba(212,175,55,0.05);
-        }
+        .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; max-width: 1200px; margin: 0 auto; }
+        .tool-card { padding: 35px 20px; border: 1px solid rgba(255,255,255,0.1); background: var(--glass); backdrop-filter: blur(8px); border-radius: 8px; transition: 0.4s; }
+        .tool-card:hover { border-color: var(--gold); transform: translateY(-10px); background: rgba(212,175,55,0.05); }
         .tool-icon { font-size: 2.5em; color: var(--gold); margin-bottom: 20px; opacity: 0.8; }
         .tool-card h3 { font-family: 'Cinzel'; font-size: 1.1em; color: #fff; margin: 0 0 10px 0; }
         .tool-card p { font-size: 0.9em; color: #999; line-height: 1.5; margin: 0; }
-
-        /* AUTH BOX (TEMPLO) */
-        .auth-section {
-            padding: 100px 20px; display: flex; justify-content: center;
-        }
-
-        .auth-box { 
-            background: rgba(10, 10, 10, 0.9); border: 1px solid var(--gold); 
-            padding: 40px; max-width: 450px; width: 100%; border-radius: 15px; 
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
-        }
-        
-        input { 
-            width: 100%; padding: 15px; margin: 10px 0; box-sizing: border-box;
-            background: #000; border: 1px solid #333; color: #fff; 
-            border-radius: 5px; font-family: 'Cormorant Garamond'; font-size: 1.1em;
-        }
-        input:focus { border-color: var(--gold); outline: none; }
+        .auth-section { padding: 100px 20px; display: flex; justify-content: center; }
+        .auth-box { background: rgba(10, 10, 10, 0.9); border: 1px solid var(--gold); padding: 40px; max-width: 450px; width: 100%; border-radius: 15px; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
+        input { width: 100%; padding: 15px; margin: 10px 0; box-sizing: border-box; background: #000; border: 1px solid #333; color: #fff; border-radius: 5px; font-family: 'Cormorant Garamond'; font-size: 1.1em; }
         label { display: block; text-align: left; font-size: 0.9em; color: var(--gold); margin-top: 10px; font-family: 'Cinzel'; }
-        
-        .auth-btn { 
-            width: 100%; padding: 15px; background: var(--gold); border: none; 
-            font-weight: bold; cursor: pointer; margin-top: 20px; 
-            font-family: 'Cinzel'; border-radius: 5px; font-size: 1.1em;
-        }
-        
-        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .auth-btn { width: 100%; padding: 15px; background: var(--gold); border: none; font-weight: bold; cursor: pointer; margin-top: 20px; font-family: 'Cinzel'; border-radius: 5px; font-size: 1.1em; }
         .toggle { color: #888; margin-top: 20px; cursor: pointer; text-decoration: underline; font-size: 0.95em; text-align: center; }
-
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @media(max-width: 768px) { h1 { font-size: 2.5em; } nav { padding: 20px; } }
     </style>
 </head>
 <body>
 
     <nav>
         <div class="nav-logo">PORTAL ARCANO</div>
-        <a href="#templo" class="nav-btn" onclick="showLogin()">Acessar</a>
+        <div class="nav-btn" onclick="showLogin()">Acessar Templo</div>
     </nav>
 
     <div class="hero-section">
         <h1>PORTAL ARCANO</h1>
-        <p class="subtitle">A união entre a astronomia de precisão e a sabedoria ancestral. Decodifique sua alma e descubra o que o universo reservou para você.</p>
-        <a href="#templo" class="btn-cta" onclick="showRegister()">REVELAR MEU DESTINO</a>
+        <p class="subtitle">Astronomia de Precisão e Sabedoria Sistêmica. Decodifique seu destino com o Dossiê Arcano para 2026.</p>
+        <div class="btn-cta" onclick="showRegister()">INICIAR MINHA JORNADA</div>
     </div>
 
     <section class="tools-section">
-        <h2 class="section-title">UMA JORNADA COMPLETA</h2>
+        <h2 class="section-title">OS MISTÉRIOS REVELADOS</h2>
         <div class="tools-grid">
             <div class="tool-card">
                 <i class="fas fa-chart-pie tool-icon"></i>
-                <h3>Mapa Natal</h3>
-                <p>O retrato do céu no instante em que você nasceu.</p>
+                <h3>Mapa Natal Premium</h3>
+                <p>Análise profunda de Sol, Lua, Ascendente e Casas astrológicas.</p>
             </div>
             <div class="tool-card">
-                <i class="fas fa-eye tool-icon"></i>
-                <h3>Oráculo Sagrado</h3>
-                <p>O Tarot como guia imediato para suas dúvidas.</p>
+                <i class="fas fa-sun tool-icon"></i>
+                <h3>Revolução Solar</h3>
+                <p>Seu mapa exclusivo para os 12 meses de 2026.</p>
             </div>
             <div class="tool-card">
-                <i class="fas fa-star tool-icon"></i>
-                <h3>Trânsitos Diários</h3>
-                <p>Como o céu de hoje interage com sua essência.</p>
+                <i class="fas fa-users tool-icon"></i>
+                <h3>Sinastria de Almas</h3>
+                <p>Compatibilidade kármica e afetiva entre dois mapas.</p>
             </div>
             <div class="tool-card">
-                <i class="fas fa-arrow-up-9-1 tool-icon"></i>
-                <h3>Numerologia</h3>
-                <p>A vibração matemática do seu nome e destino.</p>
+                <i class="fas fa-calculator tool-icon"></i>
+                <h3>Numerologia Sistêmica</h3>
+                <p>O código matemático que rege seu nome e missão de vida.</p>
+            </div>
+            <div class="tool-card">
+                <i class="fas fa-hourglass-half tool-icon"></i>
+                <h3>Ciclos de Maturidade</h3>
+                <p>Identifique o seu Retorno de Saturno e crises evolutivas.</p>
+            </div>
+            <div class="tool-card">
+                <i class="fas fa-calendar-check tool-icon"></i>
+                <h3>Astrologia Eletiva</h3>
+                <p>Calendário de datas de poder para negócios e amor.</p>
             </div>
             <div class="tool-card">
                 <i class="fas fa-dragon tool-icon"></i>
                 <h3>Horóscopo Chinês</h3>
-                <p>Sua natureza elemental milenar do oriente.</p>
-            </div>
-            <div class="tool-card">
-                <i class="fas fa-leaf tool-icon"></i>
-                <h3>Banhos & Ervas</h3>
-                <p>Rituais de limpeza e equilíbrio energético.</p>
+                <p>Seu Pilar do Destino (BaZi) e influências de 2026.</p>
             </div>
             <div class="tool-card">
                 <i class="fas fa-wind tool-icon"></i>
-                <h3>Feng Shui</h3>
-                <p>Harmonização de ambientes para prosperidade.</p>
+                <h3>Feng Shui 2026</h3>
+                <p>Curas e ativações baseadas nas Estrelas Voadoras Anuais.</p>
             </div>
             <div class="tool-card">
-                <i class="fas fa-question-circle tool-icon"></i>
-                <h3>A Sabedoria</h3>
-                <p>Central completa de ensinamentos evolutivos.</p>
+                <i class="fas fa-mortar-pestle tool-icon"></i>
+                <h3>Alquimia & Banhos</h3>
+                <p>Rituais botânicos sintonizados com as Horas Planetárias.</p>
+            </div>
+            <div class="tool-card">
+                <i class="fas fa-eye tool-icon"></i>
+                <h3>Oráculo Sagrado</h3>
+                <p>Tarot integrado à IA para respostas imediatas.</p>
             </div>
         </div>
     </section>
 
     <div class="auth-section" id="templo">
         <div class="auth-box">
-            <div style="text-align:center; margin-bottom:20px;">
-                <i class="fas fa-moon" style="font-size:3em; color:var(--gold);"></i>
-            </div>
-            <h2 id="form-title" style="color:var(--gold); font-family:'Cinzel'; text-align:center; margin:0 0 20px 0;">Entrar no Templo</h2>
-            
+            <h2 id="form-title" style="color:var(--gold); font-family:'Cinzel'; text-align:center; margin-bottom:20px;">Entrar no Templo</h2>
             <div id="login-form">
                 <input type="email" id="email" placeholder="E-mail">
                 <input type="password" id="pass" placeholder="Senha">
                 <button class="auth-btn" onclick="login()">ENTRAR</button>
-                <p class="toggle" onclick="showRegister()">Ainda não é um iniciado? Cadastre-se</p>
+                <p class="toggle" onclick="showRegister()">Cadastre-se para iniciar</p>
             </div>
-
             <div id="register-form" style="display:none">
                 <input type="text" id="reg-nome" placeholder="Nome Completo">
                 <input type="email" id="reg-email" placeholder="E-mail">
                 <input type="password" id="reg-pass" placeholder="Crie uma Senha">
-                
-                <div class="row-2">
-                    <div>
-                        <label>Nascimento</label>
-                        <input type="date" id="reg-nasc">
-                    </div>
-                    <div>
-                        <label>Hora Exata</label>
-                        <input type="time" id="reg-hora">
-                    </div>
+                <div style="display:flex; gap:10px;">
+                    <input type="date" id="reg-nasc">
+                    <input type="time" id="reg-hora">
                 </div>
-
-                <div class="row-2">
-                    <input type="text" id="reg-cidade" placeholder="Cidade">
-                    <input type="text" id="reg-uf" placeholder="UF" maxlength="2">
-                </div>
-
-                <input type="tel" id="reg-tel" placeholder="WhatsApp (Opcional)">
-                
-                <button class="auth-btn" onclick="register()">CRIAR MAPA AGORA</button>
+                <input type="text" id="reg-cidade" placeholder="Cidade">
+                <button class="auth-btn" onclick="register()">CRIAR MEU PORTAL</button>
                 <p class="toggle" onclick="showLogin()">Já possui conta? Entrar</p>
             </div>
         </div>
@@ -247,20 +145,10 @@
 
         auth.onAuthStateChanged(user => {
             if (user) {
-                const btns = document.querySelectorAll('button');
-                btns.forEach(b => b.innerText = "Verificando...");
-                
                 db.collection("usuarios").doc(user.uid).get().then(doc => {
-                    if (doc.exists) {
-                        const d = doc.data();
-                        const isPremium = (d.status === 'premium' || d.plano === 'premium' || d.premium === true);
-                        window.location.href = isPremium ? "dashboard-premium.html" : "dashboard.html";
-                    } else {
-                        window.location.href = "dashboard.html";
-                    }
-                }).catch(e => {
-                    console.error(e);
-                    window.location.href = "dashboard.html"; 
+                    const d = doc.data() || {};
+                    const isPremium = (d.status === 'premium' || d.plano === 'premium');
+                    window.location.href = isPremium ? "dashboard-premium.html" : "dashboard.html";
                 });
             }
         });
@@ -268,8 +156,7 @@
         function login() {
             const email = document.getElementById('email').value;
             const pass = document.getElementById('pass').value;
-            if(!email || !pass) return alert("Preencha todos os campos.");
-            auth.signInWithEmailAndPassword(email, pass).catch(e => alert("Erro: " + e.message));
+            auth.signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
         }
 
         function register() {
@@ -279,30 +166,19 @@
             const nasc = document.getElementById('reg-nasc').value;
             const hora = document.getElementById('reg-hora').value;
             const cidade = document.getElementById('reg-cidade').value;
-            const uf = document.getElementById('reg-uf').value;
-            const tel = document.getElementById('reg-tel').value;
 
-            if(!nome || !email || !pass || !nasc || !hora || !cidade || !uf) return alert("Preencha todos os campos.");
+            if(!nome || !email || !pass || !nasc || !hora || !cidade) return alert("Preencha todos os dados.");
 
             auth.createUserWithEmailAndPassword(email, pass).then(cred => {
                 return db.collection("usuarios").doc(cred.user.uid).set({
-                    nome, email, dataNascimento: nasc, horaNascimento: hora, cidade, estado: uf, telefone: tel,
+                    nome, email, dataNascimento: nasc, horaNascimento: hora, cidade,
                     status: 'free', plano: 'gratuito', data_cadastro: new Date().toISOString()
                 });
-            }).then(() => window.location.href = "dashboard.html").catch(e => alert("Erro: " + e.message));
+            }).then(() => window.location.href = "dashboard.html").catch(e => alert(e.message));
         }
 
-        function showRegister() { 
-            document.getElementById('login-form').style.display='none'; 
-            document.getElementById('register-form').style.display='block'; 
-            document.getElementById('form-title').innerText="Cadastro de Iniciado"; 
-            document.getElementById('templo').scrollIntoView({behavior: "smooth"});
-        }
-        function showLogin() { 
-            document.getElementById('register-form').style.display='none'; 
-            document.getElementById('login-form').style.display='block'; 
-            document.getElementById('form-title').innerText="Entrar no Templo"; 
-        }
+        function showRegister() { document.getElementById('login-form').style.display='none'; document.getElementById('register-form').style.display='block'; document.getElementById('form-title').innerText="Iniciação"; document.getElementById('templo').scrollIntoView({behavior: "smooth"}); }
+        function showLogin() { document.getElementById('register-form').style.display='none'; document.getElementById('login-form').style.display='block'; document.getElementById('form-title').innerText="Entrar no Templo"; }
     </script>
 </body>
 </html>
