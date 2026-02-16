@@ -1,19 +1,21 @@
 import Stripe from 'stripe';
 
-/**
- * PRIORIDADE 13: ESPECIALISTA EM TI
- * Motor de Checkout Integral - Versão 2026.02.16
- */
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
 export default async function handler(req, res) {
-    if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
-    
+    // Rigor Técnico: Bloqueia métodos não autorizados
+    if (req.method !== 'POST') {
+        return res.status(405).send('Method Not Allowed');
+    }
+
+    // Inicialização interna para garantir a leitura das variáveis de ambiente no Vercel
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
     const { priceId, uid, email, mode } = req.body;
+
+    // Log de Diagnóstico (Aparecerá no console do Vercel)
+    console.log(`Iniciando Checkout para UID: ${uid} | Price: ${priceId}`);
 
     try {
         const session = await stripe.checkout.sessions.create({
-            // REGRA MANDATÓRIA: Apenas cartão. PIX proibido.
+            // Regra Mandatória: Apenas cartão. PIX proibido conforme instrução.
             payment_method_types: ['card'], 
             line_items: [{ price: priceId, quantity: 1 }],
             mode: mode,
@@ -26,8 +28,8 @@ export default async function handler(req, res) {
         
         res.status(200).json({ url: session.url });
     } catch (error) {
-        // Estudo de Falhas: Captura o erro "No such price" e o envia para o site
-        console.error("ERRO STRIPE:", error.message);
+        // Estudo de Falhas: Retorna o erro exato do Stripe para o alerta do site
+        console.error("ERRO CRÍTICO STRIPE:", error.message);
         res.status(400).json({ error: error.message });
     }
 }
