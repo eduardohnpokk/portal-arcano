@@ -5,14 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Arcano | Mapa Astral Completo, Sinastria e Autoconhecimento</title>
     <meta name="description" content="Descubra sua missão de vida com o Mapa Astral mais completo do Brasil. Análise profunda de Sol, Lua, Ascendente e Casas.">
-    
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <style>
         :root { --gold: #d4af37; --bg-dark: #050505; --glass: rgba(255, 255, 255, 0.05); }
         * { scroll-behavior: smooth; }
@@ -45,74 +42,30 @@
     </style>
 </head>
 <body>
-
     <nav>
         <div class="nav-logo">PORTAL ARCANO</div>
         <div class="nav-btn" onclick="showLogin()">Acessar Templo</div>
     </nav>
-
     <div class="hero-section">
         <h1>PORTAL ARCANO</h1>
         <p class="subtitle">Astronomia de Precisão e Sabedoria Sistêmica. Decodifique seu destino com o Dossiê Arcano para 2026.</p>
         <div class="btn-cta" onclick="showRegister()">INICIAR MINHA JORNADA</div>
     </div>
-
     <section class="tools-section">
         <h2 class="section-title">OS MISTÉRIOS REVELADOS</h2>
         <div class="tools-grid">
-            <div class="tool-card">
-                <i class="fas fa-chart-pie tool-icon"></i>
-                <h3>Mapa Natal Premium</h3>
-                <p>Análise profunda de Sol, Lua, Ascendente e Casas astrológicas.</p>
-            </div>
-            <div class="tool-card">
-                <i class="fas fa-sun tool-icon"></i>
-                <h3>Revolução Solar</h3>
-                <p>Seu mapa exclusivo para os 12 meses de 2026.</p>
-            </div>
-            <div class="tool-card">
-                <i class="fas fa-users tool-icon"></i>
-                <h3>Sinastria de Almas</h3>
-                <p>Compatibilidade kármica e afetiva entre dois mapas.</p>
-            </div>
-            <div class="tool-card">
-                <i class="fas fa-calculator tool-icon"></i>
-                <h3>Numerologia Sistêmica</h3>
-                <p>O código matemático que rege seu nome e missão de vida.</p>
-            </div>
-            <div class="tool-card">
-                <i class="fas fa-hourglass-half tool-icon"></i>
-                <h3>Ciclos de Maturidade</h3>
-                <p>Identifique o seu Retorno de Saturno e crises evolutivas.</p>
-            </div>
-            <div class="tool-card">
-                <i class="fas fa-calendar-check tool-icon"></i>
-                <h3>Astrologia Eletiva</h3>
-                <p>Calendário de datas de poder para negócios e amor.</p>
-            </div>
-            <div class="tool-card">
-                <i class="fas fa-dragon tool-icon"></i>
-                <h3>Horóscopo Chinês</h3>
-                <p>Seu Pilar do Destino (BaZi) e influências de 2026.</p>
-            </div>
-            <div class="tool-card">
-                <i class="fas fa-wind tool-icon"></i>
-                <h3>Feng Shui 2026</h3>
-                <p>Curas e ativações baseadas nas Estrelas Voadoras Anuais.</p>
-            </div>
-            <div class="tool-card">
-                <i class="fas fa-mortar-pestle tool-icon"></i>
-                <h3>Alquimia & Banhos</h3>
-                <p>Rituais botânicos sintonizados com as Horas Planetárias.</p>
-            </div>
-            <div class="tool-card">
-                <i class="fas fa-eye tool-icon"></i>
-                <h3>Oráculo Sagrado</h3>
-                <p>Tarot integrado à IA para respostas imediatas.</p>
-            </div>
+            <div class="tool-card"><i class="fas fa-chart-pie tool-icon"></i><h3>Mapa Natal Premium</h3><p>Análise profunda de Sol, Lua, Ascendente e Casas astrológicas.</p></div>
+            <div class="tool-card"><i class="fas fa-sun tool-icon"></i><h3>Revolução Solar</h3><p>Seu mapa exclusivo para os 12 meses de 2026.</p></div>
+            <div class="tool-card"><i class="fas fa-users tool-icon"></i><h3>Sinastria de Almas</h3><p>Compatibilidade kármica e afetiva entre dois mapas.</p></div>
+            <div class="tool-card"><i class="fas fa-calculator tool-icon"></i><h3>Numerologia Sistêmica</h3><p>O código matemático que rege seu nome e missão de vida.</p></div>
+            <div class="tool-card"><i class="fas fa-hourglass-half tool-icon"></i><h3>Ciclos de Maturidade</h3><p>Identifique o seu Retorno de Saturno e crises evolutivas.</p></div>
+            <div class="tool-card"><i class="fas fa-calendar-check tool-icon"></i><h3>Astrologia Eletiva</h3><p>Calendário de datas de poder para negócios e amor.</p></div>
+            <div class="tool-card"><i class="fas fa-dragon tool-icon"></i><h3>Horóscopo Chinês</h3><p>Seu Pilar do Destino (BaZi) e influências de 2026.</p></div>
+            <div class="tool-card"><i class="fas fa-wind tool-icon"></i><h3>Feng Shui 2026</h3><p>Curas e ativações baseadas nas Estrelas Voadoras Anuais.</p></div>
+            <div class="tool-card"><i class="fas fa-mortar-pestle tool-icon"></i><h3>Alquimia & Banhos</h3><p>Rituais botânicos sintonizados com as Horas Planetárias.</p></div>
+            <div class="tool-card"><i class="fas fa-eye tool-icon"></i><h3>Oráculo Sagrado</h3><p>Tarot integrado à IA para respostas imediatas.</p></div>
         </div>
     </section>
-
     <div class="auth-section" id="templo">
         <div class="auth-box">
             <h2 id="form-title" style="color:var(--gold); font-family:'Cinzel'; text-align:center; margin-bottom:20px;">Entrar no Templo</h2>
@@ -120,23 +73,20 @@
                 <input type="email" id="email" placeholder="E-mail">
                 <input type="password" id="pass" placeholder="Senha">
                 <button class="auth-btn" onclick="login()">ENTRAR</button>
+                <p class="toggle" onclick="forgotPassword()" style="color:var(--gold); font-size:0.8em;">Esqueci minha senha</p>
                 <p class="toggle" onclick="showRegister()">Cadastre-se para iniciar</p>
             </div>
             <div id="register-form" style="display:none">
                 <input type="text" id="reg-nome" placeholder="Nome Completo">
                 <input type="email" id="reg-email" placeholder="E-mail">
                 <input type="password" id="reg-pass" placeholder="Crie uma Senha">
-                <div style="display:flex; gap:10px;">
-                    <input type="date" id="reg-nasc">
-                    <input type="time" id="reg-hora">
-                </div>
+                <div style="display:flex; gap:10px;"><input type="date" id="reg-nasc"><input type="time" id="reg-hora"></div>
                 <input type="text" id="reg-cidade" placeholder="Cidade">
                 <button class="auth-btn" onclick="register()">CRIAR MEU PORTAL</button>
                 <p class="toggle" onclick="showLogin()">Já possui conta? Entrar</p>
             </div>
         </div>
     </div>
-
     <script>
         const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
         try { firebase.initializeApp(firebaseConfig); } catch(e) {}
@@ -160,6 +110,15 @@
             auth.signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
         }
 
+        // FUNÇÃO CIRÚRGICA: Recuperação de Senha
+        function forgotPassword() {
+            const email = document.getElementById('email').value;
+            if(!email) return alert("Por favor, digite seu e-mail no campo acima primeiro.");
+            auth.sendPasswordResetEmail(email)
+                .then(() => alert("E-mail de recuperação enviado! Verifique sua caixa de entrada."))
+                .catch(e => alert("ERRO: " + e.message));
+        }
+
         function register() {
             const nome = document.getElementById('reg-nome').value;
             const email = document.getElementById('reg-email').value;
@@ -167,9 +126,7 @@
             const nasc = document.getElementById('reg-nasc').value;
             const hora = document.getElementById('reg-hora').value;
             const cidade = document.getElementById('reg-cidade').value;
-
             if(!nome || !email || !pass || !nasc || !hora || !cidade) return alert("Preencha todos os dados.");
-
             auth.createUserWithEmailAndPassword(email, pass).then(cred => {
                 return db.collection("usuarios").doc(cred.user.uid).set({
                     nome, email, dataNascimento: nasc, horaNascimento: hora, cidade,
@@ -177,22 +134,8 @@
                 });
             }).then(() => window.location.href = "dashboard.html").catch(e => alert(e.message));
         }
-
-        // CORREÇÃO CIRÚRGICA: Adicionado scrollIntoView para garantir que o formulário apareça na tela
-        function showRegister() { 
-            document.getElementById('login-form').style.display='none'; 
-            document.getElementById('register-form').style.display='block'; 
-            document.getElementById('form-title').innerText="Iniciação"; 
-            document.getElementById('templo').scrollIntoView({behavior: "smooth"}); 
-        }
-
-        // CORREÇÃO CIRÚRGICA: Adicionado scrollIntoView para o login também
-        function showLogin() { 
-            document.getElementById('register-form').style.display='none'; 
-            document.getElementById('login-form').style.display='block'; 
-            document.getElementById('form-title').innerText="Entrar no Templo"; 
-            document.getElementById('templo').scrollIntoView({behavior: "smooth"}); 
-        }
+        function showRegister() { document.getElementById('login-form').style.display='none'; document.getElementById('register-form').style.display='block'; document.getElementById('form-title').innerText="Iniciação"; document.getElementById('templo').scrollIntoView({behavior: "smooth"}); }
+        function showLogin() { document.getElementById('register-form').style.display='none'; document.getElementById('login-form').style.display='block'; document.getElementById('form-title').innerText="Entrar no Templo"; document.getElementById('templo').scrollIntoView({behavior: "smooth"}); }
     </script>
 </body>
 </html>
