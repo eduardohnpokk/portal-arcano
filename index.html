@@ -156,6 +156,7 @@
         function login() {
             const email = document.getElementById('email').value;
             const pass = document.getElementById('pass').value;
+            if(!email || !pass) return alert("Preencha e-mail e senha.");
             auth.signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
         }
 
@@ -177,8 +178,21 @@
             }).then(() => window.location.href = "dashboard.html").catch(e => alert(e.message));
         }
 
-        function showRegister() { document.getElementById('login-form').style.display='none'; document.getElementById('register-form').style.display='block'; document.getElementById('form-title').innerText="Iniciação"; document.getElementById('templo').scrollIntoView({behavior: "smooth"}); }
-        function showLogin() { document.getElementById('register-form').style.display='none'; document.getElementById('login-form').style.display='block'; document.getElementById('form-title').innerText="Entrar no Templo"; }
+        // CORREÇÃO CIRÚRGICA: Adicionado scrollIntoView para garantir que o formulário apareça na tela
+        function showRegister() { 
+            document.getElementById('login-form').style.display='none'; 
+            document.getElementById('register-form').style.display='block'; 
+            document.getElementById('form-title').innerText="Iniciação"; 
+            document.getElementById('templo').scrollIntoView({behavior: "smooth"}); 
+        }
+
+        // CORREÇÃO CIRÚRGICA: Adicionado scrollIntoView para o login também
+        function showLogin() { 
+            document.getElementById('register-form').style.display='none'; 
+            document.getElementById('login-form').style.display='block'; 
+            document.getElementById('form-title').innerText="Entrar no Templo"; 
+            document.getElementById('templo').scrollIntoView({behavior: "smooth"}); 
+        }
     </script>
 </body>
 </html>
