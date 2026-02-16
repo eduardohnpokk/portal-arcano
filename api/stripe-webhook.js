@@ -2,15 +2,22 @@ import Stripe from 'stripe';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 
-// Inicialização segura do Firebase Admin
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+// INICIALIZAÇÃO DE ELITE: INDIVIDUAL E SEGURA
 if (!getApps().length) {
-    initializeApp({ credential: cert(serviceAccount) });
+    initializeApp({
+        credential: cert({
+            projectId: process.env.FIREBASE_PROJECT_ID,
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+            // O segredo para não falhar: substituir as barras invertidas literais
+            privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+        }),
+    });
 }
+
 const db = getFirestore();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-export const config = { api: { bodyParser: false } }; // Necessário para o Stripe validar a assinatura
+export const config = { api: { bodyParser: false } };
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
@@ -24,6 +31,7 @@ export default async function handler(req, res) {
     try {
         event = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
     } catch (err) {
+        console.error("Erro de Assinatura:", err.message);
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
@@ -31,11 +39,13 @@ export default async function handler(req, res) {
         const session = event.data.object;
         const uid = session.client_reference_id;
         const priceId = session.metadata.priceId;
+        
         const userRef = db.collection("usuarios").doc(uid);
 
         if (priceId === process.env.ID_ASSINATURA) {
             await userRef.update({ 
                 status: "premium", 
+                plano: "mensal_49_90",
                 data_assinatura: FieldValue.serverTimestamp() 
             });
         } else if (priceId === process.env.ID_LIVRO) {
