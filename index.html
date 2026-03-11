@@ -3,139 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Arcano | Mapa Astral Completo, Sinastria e Autoconhecimento</title>
-    <meta name="description" content="Descubra sua missão de vida com o Mapa Astral mais completo do Brasil. Análise profunda de Sol, Lua, Ascendente e Casas.">
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <title>Portal Arcano | Transmutação em Curso</title>
+    <meta name="description" content="O Portal Arcano está a passar por uma atualização de elite para integrar novas inteligências sistêmicas.">
+    
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        :root { --gold: #d4af37; --bg-dark: #050505; --glass: rgba(255, 255, 255, 0.05); }
-        * { scroll-behavior: smooth; }
-        body { margin: 0; font-family: 'Cormorant Garamond', serif; background-color: var(--bg-dark); background-image: url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80'); background-size: cover; background-position: center; background-attachment: fixed; color: #e0e0e0; overflow-x: hidden; }
-        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.45); z-index: -1; }
-        nav { padding: 20px 50px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); position: fixed; top: 0; width: 100%; z-index: 100; box-sizing: border-box; }
-        .nav-logo { font-family: 'Cinzel'; color: var(--gold); font-size: 1.2em; letter-spacing: 2px; }
-        .nav-btn { color: #fff; text-decoration: none; font-family: 'Cinzel'; font-size: 0.8em; border: 1px solid var(--gold); padding: 8px 20px; border-radius: 4px; transition: 0.3s; cursor: pointer; }
-        .nav-btn:hover { background: var(--gold); color: #000; }
-        .hero-section { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; animation: fadeIn 2s; }
-        h1 { font-family: 'Cinzel'; color: var(--gold); font-size: clamp(3em, 8vw, 5em); margin: 0; text-shadow: 0 0 30px rgba(212,175,55,0.6); letter-spacing: 8px; }
-        .subtitle { font-size: 1.5em; max-width: 800px; margin: 20px auto 40px auto; color: #eee; text-shadow: 0 2px 5px #000; }
-        .btn-cta { background: linear-gradient(45deg, #d4af37, #b8860b); color: #000; font-family: 'Cinzel'; font-size: 1.1em; padding: 20px 60px; border: none; cursor: pointer; font-weight: bold; border-radius: 50px; box-shadow: 0 0 30px rgba(212,175,55,0.4); transition: 0.3s; text-decoration: none; display: inline-block; letter-spacing: 2px; }
-        .btn-cta:hover { transform: scale(1.05); box-shadow: 0 0 50px rgba(212,175,55,0.8); background: #fff; }
-        .tools-section { padding: 100px 20px; text-align: center; }
-        .section-title { font-family: 'Cinzel'; color: var(--gold); font-size: 2.5em; margin-bottom: 50px; }
-        .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; max-width: 1200px; margin: 0 auto; }
-        .tool-card { padding: 35px 20px; border: 1px solid rgba(255,255,255,0.1); background: var(--glass); backdrop-filter: blur(8px); border-radius: 8px; transition: 0.4s; }
-        .tool-card:hover { border-color: var(--gold); transform: translateY(-10px); background: rgba(212,175,55,0.05); }
-        .tool-icon { font-size: 2.5em; color: var(--gold); margin-bottom: 20px; opacity: 0.8; }
-        .tool-card h3 { font-family: 'Cinzel'; font-size: 1.1em; color: #fff; margin: 0 0 10px 0; }
-        .tool-card p { font-size: 0.9em; color: #999; line-height: 1.5; margin: 0; }
-        .auth-section { padding: 100px 20px; display: flex; justify-content: center; }
-        .auth-box { background: rgba(10, 10, 10, 0.9); border: 1px solid var(--gold); padding: 40px; max-width: 450px; width: 100%; border-radius: 15px; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
-        input { width: 100%; padding: 15px; margin: 10px 0; box-sizing: border-box; background: #000; border: 1px solid #333; color: #fff; border-radius: 5px; font-family: 'Cormorant Garamond'; font-size: 1.1em; }
-        label { display: block; text-align: left; font-size: 0.9em; color: var(--gold); margin-top: 10px; font-family: 'Cinzel'; }
-        .auth-btn { width: 100%; padding: 15px; background: var(--gold); border: none; font-weight: bold; cursor: pointer; margin-top: 20px; font-family: 'Cinzel'; border-radius: 5px; font-size: 1.1em; }
-        .toggle { color: #888; margin-top: 20px; cursor: pointer; text-decoration: underline; font-size: 0.95em; text-align: center; }
+        :root { --gold: #d4af37; --bg-dark: #050505; }
+        body { 
+            margin: 0; 
+            font-family: 'Cormorant Garamond', serif; 
+            background-color: var(--bg-dark); 
+            background-image: url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80'); 
+            background-size: cover; 
+            background-position: center; 
+            background-attachment: fixed; 
+            color: #e0e0e0; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            text-align: center;
+        }
+        body::before { 
+            content: ''; 
+            position: absolute; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: rgba(0, 0, 0, 0.75); 
+            z-index: -1; 
+        }
+        .maintenance-box {
+            background: rgba(10, 10, 10, 0.85);
+            border: 1px solid var(--gold);
+            padding: 50px 40px;
+            border-radius: 12px;
+            box-shadow: 0 0 50px rgba(212,175,55,0.2);
+            max-width: 600px;
+            width: 90%;
+            z-index: 1;
+            animation: fadeIn 2s;
+        }
+        .icon-spin {
+            font-size: 3.5em;
+            color: var(--gold);
+            margin-bottom: 20px;
+            animation: pulse 3s infinite alternate;
+        }
+        h1 { 
+            font-family: 'Cinzel', serif; 
+            color: var(--gold); 
+            font-size: 2.5em; 
+            margin: 0 0 20px 0; 
+            letter-spacing: 4px; 
+            text-shadow: 0 0 20px rgba(212,175,55,0.4); 
+        }
+        p { 
+            font-size: 1.3em; 
+            line-height: 1.6; 
+            color: #ccc; 
+            margin-bottom: 30px; 
+        }
+        .highlight {
+            font-family: 'Cinzel', serif;
+            color: var(--gold);
+            font-size: 1.1em;
+            letter-spacing: 2px;
+        }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { transform: scale(0.95); opacity: 0.8; } 100% { transform: scale(1.05); opacity: 1; } }
     </style>
 </head>
 <body>
-    <nav>
-        <div class="nav-logo">PORTAL ARCANO</div>
-        <div class="nav-btn" onclick="showLogin()">Acessar Templo</div>
-    </nav>
-    <div class="hero-section">
-        <h1>PORTAL ARCANO</h1>
-        <p class="subtitle">Astronomia de Precisão e Sabedoria Sistêmica. Decodifique seu destino com o Dossiê Arcano para 2026.</p>
-        <div class="btn-cta" onclick="showRegister()">INICIAR MINHA JORNADA</div>
+
+    <div class="maintenance-box">
+        <i class="fas fa-gem icon-spin"></i>
+        <h1>TEMPLO EM RECESSO</h1>
+        <p>O Portal Arcano está a passar por uma transmutação profunda da sua infraestrutura.</p>
+        <p>Estamos a integrar o novo motor cognitivo para elevar a precisão do nosso <strong>Oráculo Sagrado</strong> e dos nossos <strong>Dossiês</strong> ao estado de arte.</p>
+        <div class="highlight">RETORNAREMOS EM BREVE</div>
     </div>
-    <section class="tools-section">
-        <h2 class="section-title">OS MISTÉRIOS REVELADOS</h2>
-        <div class="tools-grid">
-            <div class="tool-card"><i class="fas fa-chart-pie tool-icon"></i><h3>Mapa Natal Premium</h3><p>Análise profunda de Sol, Lua, Ascendente e Casas astrológicas.</p></div>
-            <div class="tool-card"><i class="fas fa-sun tool-icon"></i><h3>Revolução Solar</h3><p>Seu mapa exclusivo para os 12 meses de 2026.</p></div>
-            <div class="tool-card"><i class="fas fa-users tool-icon"></i><h3>Sinastria de Almas</h3><p>Compatibilidade kármica e afetiva entre dois mapas.</p></div>
-            <div class="tool-card"><i class="fas fa-calculator tool-icon"></i><h3>Numerologia Sistêmica</h3><p>O código matemático que rege seu nome e missão de vida.</p></div>
-            <div class="tool-card"><i class="fas fa-hourglass-half tool-icon"></i><h3>Ciclos de Maturidade</h3><p>Identifique o seu Retorno de Saturno e crises evolutivas.</p></div>
-            <div class="tool-card"><i class="fas fa-calendar-check tool-icon"></i><h3>Astrologia Eletiva</h3><p>Calendário de datas de poder para negócios e amor.</p></div>
-            <div class="tool-card"><i class="fas fa-dragon tool-icon"></i><h3>Horóscopo Chinês</h3><p>Seu Pilar do Destino (BaZi) e influências de 2026.</p></div>
-            <div class="tool-card"><i class="fas fa-wind tool-icon"></i><h3>Feng Shui 2026</h3><p>Curas e ativações baseadas nas Estrelas Voadoras Anuais.</p></div>
-            <div class="tool-card"><i class="fas fa-mortar-pestle tool-icon"></i><h3>Alquimia & Banhos</h3><p>Rituais botânicos sintonizados com as Horas Planetárias.</p></div>
-            <div class="tool-card"><i class="fas fa-eye tool-icon"></i><h3>Oráculo Sagrado</h3><p>Tarot integrado à IA para respostas imediatas.</p></div>
-        </div>
-    </section>
-    <div class="auth-section" id="templo">
-        <div class="auth-box">
-            <h2 id="form-title" style="color:var(--gold); font-family:'Cinzel'; text-align:center; margin-bottom:20px;">Entrar no Templo</h2>
-            <div id="login-form">
-                <input type="email" id="email" placeholder="E-mail">
-                <input type="password" id="pass" placeholder="Senha">
-                <button class="auth-btn" onclick="login()">ENTRAR</button>
-                <p class="toggle" onclick="forgotPassword()" style="color:var(--gold); font-size:0.8em;">Esqueci minha senha</p>
-                <p class="toggle" onclick="showRegister()">Cadastre-se para iniciar</p>
-            </div>
-            <div id="register-form" style="display:none">
-                <input type="text" id="reg-nome" placeholder="Nome Completo">
-                <input type="email" id="reg-email" placeholder="E-mail">
-                <input type="password" id="reg-pass" placeholder="Crie uma Senha">
-                <div style="display:flex; gap:10px;"><input type="date" id="reg-nasc"><input type="time" id="reg-hora"></div>
-                <input type="text" id="reg-cidade" placeholder="Cidade">
-                <button class="auth-btn" onclick="register()">CRIAR MEU PORTAL</button>
-                <p class="toggle" onclick="showLogin()">Já possui conta? Entrar</p>
-            </div>
-        </div>
-    </div>
-    <script>
-        const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
-        try { firebase.initializeApp(firebaseConfig); } catch(e) {}
-        const auth = firebase.auth();
-        const db = firebase.firestore();
 
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                db.collection("usuarios").doc(user.uid).get().then(doc => {
-                    const d = doc.data() || {};
-                    const isPremium = (d.status === 'premium' || d.plano === 'premium');
-                    window.location.href = isPremium ? "dashboard-premium.html" : "dashboard.html";
-                });
-            }
-        });
-
-        function login() {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('pass').value;
-            if(!email || !pass) return alert("Preencha e-mail e senha.");
-            auth.signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
-        }
-
-        // FUNÇÃO CIRÚRGICA: Recuperação de Senha
-        function forgotPassword() {
-            const email = document.getElementById('email').value;
-            if(!email) return alert("Por favor, digite seu e-mail no campo acima primeiro.");
-            auth.sendPasswordResetEmail(email)
-                .then(() => alert("E-mail de recuperação enviado! Verifique sua caixa de entrada."))
-                .catch(e => alert("ERRO: " + e.message));
-        }
-
-        function register() {
-            const nome = document.getElementById('reg-nome').value;
-            const email = document.getElementById('reg-email').value;
-            const pass = document.getElementById('reg-pass').value;
-            const nasc = document.getElementById('reg-nasc').value;
-            const hora = document.getElementById('reg-hora').value;
-            const cidade = document.getElementById('reg-cidade').value;
-            if(!nome || !email || !pass || !nasc || !hora || !cidade) return alert("Preencha todos os dados.");
-            auth.createUserWithEmailAndPassword(email, pass).then(cred => {
-                return db.collection("usuarios").doc(cred.user.uid).set({
-                    nome, email, dataNascimento: nasc, horaNascimento: hora, cidade,
-                    status: 'free', plano: 'gratuito', data_cadastro: new Date().toISOString()
-                });
-            }).then(() => window.location.href = "dashboard.html").catch(e => alert(e.message));
-        }
-        function showRegister() { document.getElementById('login-form').style.display='none'; document.getElementById('register-form').style.display='block'; document.getElementById('form-title').innerText="Iniciação"; document.getElementById('templo').scrollIntoView({behavior: "smooth"}); }
-        function showLogin() { document.getElementById('register-form').style.display='none'; document.getElementById('login-form').style.display='block'; document.getElementById('form-title').innerText="Entrar no Templo"; document.getElementById('templo').scrollIntoView({behavior: "smooth"}); }
-    </script>
 </body>
 </html>
