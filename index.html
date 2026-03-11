@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Arcano | Transmutação em Curso</title>
-    <meta name="description" content="O Portal Arcano está a passar por uma atualização de elite para integrar novas inteligências sistêmicas.">
+    <title>Portal Arcano | Alerta de Segurança e Reestruturação</title>
+    <meta name="description" content="O Portal Arcano encontra-se temporariamente indisponível para reestruturação de segurança.">
     
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        :root { --gold: #d4af37; --bg-dark: #050505; }
+        :root { --gold: #d4af37; --bg-dark: #050505; --alert-red: #8b0000; }
         body { 
             margin: 0; 
             font-family: 'Cormorant Garamond', serif; 
@@ -33,45 +33,49 @@
             position: absolute; 
             top: 0; left: 0; 
             width: 100%; height: 100%; 
-            background: rgba(0, 0, 0, 0.75); 
+            background: rgba(0, 0, 0, 0.85); /* Fundo ainda mais escuro para o alerta */
             z-index: -1; 
         }
-        .maintenance-box {
-            background: rgba(10, 10, 10, 0.85);
-            border: 1px solid var(--gold);
+        .alert-box {
+            background: rgba(10, 10, 10, 0.95);
+            border: 1px solid var(--alert-red);
             padding: 50px 40px;
             border-radius: 12px;
-            box-shadow: 0 0 50px rgba(212,175,55,0.2);
-            max-width: 600px;
+            box-shadow: 0 0 50px rgba(139, 0, 0, 0.3);
+            max-width: 650px;
             width: 90%;
             z-index: 1;
-            animation: fadeIn 2s;
+            animation: fadeIn 1.5s;
         }
-        .icon-spin {
-            font-size: 3.5em;
-            color: var(--gold);
-            margin-bottom: 20px;
-            animation: pulse 3s infinite alternate;
+        .icon-alert {
+            font-size: 4em;
+            color: var(--alert-red);
+            margin-bottom: 25px;
+            animation: pulse 2s infinite alternate;
         }
         h1 { 
             font-family: 'Cinzel', serif; 
-            color: var(--gold); 
-            font-size: 2.5em; 
+            color: #fff; 
+            font-size: 2.2em; 
             margin: 0 0 20px 0; 
-            letter-spacing: 4px; 
-            text-shadow: 0 0 20px rgba(212,175,55,0.4); 
+            letter-spacing: 3px; 
+            text-transform: uppercase;
         }
         p { 
-            font-size: 1.3em; 
+            font-size: 1.4em; 
             line-height: 1.6; 
             color: #ccc; 
-            margin-bottom: 30px; 
+            margin-bottom: 20px; 
         }
         .highlight {
             font-family: 'Cinzel', serif;
             color: var(--gold);
             font-size: 1.1em;
             letter-spacing: 2px;
+            margin-top: 30px;
+            display: block;
+            border-top: 1px solid #333;
+            padding-top: 20px;
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulse { 0% { transform: scale(0.95); opacity: 0.8; } 100% { transform: scale(1.05); opacity: 1; } }
@@ -79,12 +83,12 @@
 </head>
 <body>
 
-    <div class="maintenance-box">
-        <i class="fas fa-gem icon-spin"></i>
-        <h1>TEMPLO EM RECESSO</h1>
-        <p>O Portal Arcano está a passar por uma transmutação profunda da sua infraestrutura.</p>
-        <p>Estamos a integrar o novo motor cognitivo para elevar a precisão do nosso <strong>Oráculo Sagrado</strong> e dos nossos <strong>Dossiês</strong> ao estado de arte.</p>
-        <div class="highlight">RETORNAREMOS EM BREVE</div>
+    <div class="alert-box">
+        <i class="fas fa-shield-alt icon-alert"></i>
+        <h1>COMUNICADO OFICIAL</h1>
+        <p>Sofremos uma invasão e nossos arquivos foram danificados.</p>
+        <p>O portal ficará algum tempo fora do ar para que possamos reestruturar absolutamente toda a nossa base e entregá-lo ainda melhor para você.</p>
+        <span class="highlight">AGRADECEMOS A COMPREENSÃO DOS INICIADOS</span>
     </div>
 
 </body>
