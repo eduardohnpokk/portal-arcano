@@ -7,6 +7,6 @@
     "firebase-admin": "^12.0.0",
     "@google-cloud/firestore": "^7.0.0",
     "protobufjs": "^7.2.4",
-    "@google/genai": "^0.1.2"
+    "@google/genai": "latest"
   }
 }
