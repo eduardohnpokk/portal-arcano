@@ -10,6 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
         :root { --gold: #d4af37; --bg-dark: #050505; --card-w: 120px; --card-h: 200px; }
@@ -85,16 +86,21 @@
         .arcana-num { font-size: 1.5em; color: #fff; margin-bottom: auto; }
         .arcana-img { font-size: 2.5em; margin: 10px 0; }
 
-        /* ÁREA DE LEITURA (RESULTADO) */
+        /* ÁREA DE LEITURA (RESULTADO GEMINI) */
         #reading-result {
             max-width: 800px; padding: 40px; background: #111; border-top: 2px solid var(--gold);
-            display: none; animation: fadeIn 2s;
+            display: none; animation: fadeIn 2s; margin: 0 auto;
         }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .meaning-block { margin-bottom: 30px; text-align: justify; }
         .position-title { color: #666; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
         .card-title { color: var(--gold); font-family: 'Cinzel'; font-size: 1.5em; margin: 0 0 10px 0; }
+
+        /* FORMATACAO DA IA */
+        .gemini-text { color: #ddd; line-height: 1.8; font-size: 1.1em; text-align: justify; }
+        .gemini-text p { margin-bottom: 15px; }
+        .gemini-text strong { color: var(--gold); font-family: 'Cinzel'; }
 
         @media(max-width: 600px) {
             .spread-area { transform: scale(0.7); gap: 10px; }
@@ -103,6 +109,8 @@
     </style>
 </head>
 <body>
+
+    <script src="oraculo-database.js"></script>
 
     <div class="nav-bar">
         <div class="back-btn" onclick="window.location.href='dashboard-premium.html'">← Sair do Oráculo</div>
@@ -126,70 +134,47 @@
     </div>
 
     <div id="reading-result">
-        <h2 style="text-align:center; color:var(--gold); font-family:'Cinzel'; margin-bottom:40px;">A Revelação</h2>
+        <h2 style="text-align:center; color:var(--gold); font-family:'Cinzel'; margin-bottom:40px;">A Revelação do Mestre</h2>
         <div id="text-content"></div>
-        <button onclick="location.reload()" style="display:block; margin:30px auto; background:transparent; border:1px solid var(--gold); color:var(--gold); padding:10px 30px; cursor:pointer; font-family:'Cinzel';">Nova Leitura</button>
+        <button onclick="location.reload()" style="display:block; margin:30px auto; background:transparent; border:1px solid var(--gold); color:var(--gold); padding:10px 30px; cursor:pointer; font-family:'Cinzel'; transition: 0.3s;">Realizar Nova Leitura</button>
     </div>
 
 <script>
-    // --- 1. BANCO DE DADOS DEEP TAROT (Major Arcana) ---
-    // Estrutura: Nome, Ícone, Significado Profundo (Não apenas descritivo)
-    const TAROT_DB = [
-        { id: 0, nome: "O Louco", icone: "🃟", significado: "Você está diante de um abismo, mas não é uma queda, é um voo. Esta carta exige um salto de fé. O lógico e o racional não funcionam aqui. Aja com a inocência de quem não conhece o medo. O risco é real, mas ficar parado é a morte da alma." },
-        { id: 1, nome: "O Mago", icone: "🪄", significado: "Você tem todas as ferramentas na mesa, mas elas são inúteis se você não tiver vontade. O Mago não espera a sorte, ele a cria. O momento exige ação focada e manipulação consciente da realidade. Pare de planejar e comece a materializar." },
-        { id: 2, nome: "A Sacerdotisa", icone: "🌙", significado: "O silêncio é sua resposta. O que você procura não está no mundo externo, mas nos sussurros da sua intuição. Há algo oculto que ainda não foi revelado. Não force a porta; espere e observe. A passividade aqui é uma estratégia de poder." },
-        { id: 3, nome: "A Imperatriz", icone: "👑", significado: "Fecundidade e abundância. O que você plantou vai crescer, mas precisa de prazer e beleza para florescer. Esta carta pede que você se conecte com o mundo sensorial. Crie, ame e permita-se o luxo de ser quem você é. A aridez acabou." },
-        { id: 4, nome: "O Imperador", icone: "🏛️", significado: "O caos exige ordem. Não é hora de flexibilidade, mas de estrutura, regras e limites claros. Se você não governar sua própria vida, alguém o fará. Assuma a autoridade, seja frio se necessário, e construa alicerces que durem." },
-        { id: 5, nome: "O Hierofante", icone: "🙏", significado: "Busque a sabedoria que já foi testada pelo tempo. Não é hora de reinventar a roda, mas de seguir a tradição ou buscar um mentor. Há uma lição espiritual aqui: a conformidade, às vezes, é necessária para pertencer a algo maior." },
-        { id: 6, nome: "Os Enamorados", icone: "❤️", significado: "Uma encruzilhada moral. Não se trata apenas de romance, mas de uma escolha irrevogável. Você deve escolher não o que é fácil, mas o que faz seu coração vibrar. Unir opostos dentro de si mesmo é a chave para avançar." },
-        { id: 7, nome: "O Carro", icone: "🛒", significado: "Vitória através do controle da vontade. Você está sendo puxado por forças opostas, e só a sua determinação pode mantê-las na linha. Avance sem olhar para os lados. A agressividade focada é necessária agora. Não pare até conquistar." },
-        { id: 8, nome: "A Força", icone: "🦁", significado: "Domine a besta, não com violência, mas com compaixão. Sua verdadeira força não é física, é moral. Você está enfrentando um desafio que exige paciência infinita e coragem suave. Controle seus instintos mais baixos para elevar-se." },
-        { id: 9, nome: "O Eremita", icone: "🕯️", significado: "Retire-se. O mundo está barulhento demais e a verdade só aparece na solidão. Não busque aprovação externa. Você precisa encontrar sua própria luz na escuridão antes de poder guiar qualquer outra pessoa." },
-        { id: 10, nome: "Roda da Fortuna", icone: "🎡", significado: "O destino está girando e você não tem controle sobre isso. O que está em cima cairá, o que está embaixo subirá. A lição é a impermanência. Não se apegue ao sucesso nem se desespere no fracasso. Tudo passa. Adapte-se." },
-        { id: 11, nome: "Justiça", icone: "⚖️", significado: "Causa e efeito. Você colherá exatamente o que plantou, nem mais, nem menos. Se agiu com integridade, não tema. Se cortou caminhos, a conta chegou. A verdade cortante é necessária para restaurar o equilíbrio. Seja imparcial." },
-        { id: 12, nome: "O Enforcado", icone: "🙃", significado: "O sacrifício é necessário. Você está preso, mas é uma pausa para mudar a perspectiva. Para ganhar o que quer, você precisa desistir de algo que ama ou de uma velha forma de pensar. A entrega voluntária traz a iluminação." },
-        { id: 13, nome: "A Morte", icone: "💀", significado: "Não é o fim da vida, mas o fim de uma era. Algo deve morrer para que o novo nasça. Não resista ao fim. Deixe o cadáver do passado ir embora. A transformação é dolorosa, mas a limpeza é absoluta e necessária." },
-        { id: 14, nome: "A Temperança", icone: "🏺", significado: "Alquimia lenta. Não busque extremos. A cura vem da mistura paciente de opostos. Teste, ajuste, espere. É o momento de curar feridas e encontrar o caminho do meio. A moderação é sua maior arma agora." },
-        { id: 15, nome: "O Diabo", icone: "😈", significado: "Você está preso, mas as correntes são frouxas. Você é escravo de seus próprios desejos, vícios ou materialismo. Reconheça sua sombra. O que você nega o controla. A liberdade começa ao admitir sua própria toxicidade." },
-        { id: 16, nome: "A Torre", icone: "⚡", significado: "Destruição súbita. As estruturas em que você confiava eram falsas e o universo as derrubou. É um choque, mas é uma libertação. Não tente reconstruir o que caiu. Deixe queimar e veja o que sobra na fundação real." },
-        { id: 17, nome: "A Estrela", icone: "⭐", significado: "Após a tempestade da Torre, vem a calma. A esperança retorna. Você está nu, vulnerável, mas conectado ao cosmos. É hora de curar e acreditar no futuro. Siga sua inspiração, ela é a bússola correta agora." },
-        { id: 18, nome: "A Lua", icone: "🐺", significado: "Ilusão e medo. Nada é o que parece. Seus demônios subconscientes estão à solta. Não tome decisões definitivas agora, pois você está vendo sombras. Caminhe com cautela e confie apenas nos seus instintos mais primitivos." },
-        { id: 19, nome: "O Sol", icone: "☀️", significado: "Clareza total, alegria e sucesso. A dúvida se dissipa. É o momento de brilhar sem culpa. O universo está dizendo um grande 'SIM' para você. Celebre a vida, a vitalidade e a verdade exposta à luz do dia." },
-        { id: 20, nome: "O Julgamento", icone: "📯", significado: "O chamado final. Você está sendo convocado para um nível superior de existência. Deixe para trás os velhos erros, perdoe a si mesmo e ascenda. É um renascimento definitivo. Acorde para sua verdadeira vocação." },
-        { id: 21, nome: "O Mundo", icone: "🌍", significado: "Conclusão e totalidade. Um ciclo se fecha com perfeição. Você aprendeu a lição e está pronto para o próximo nível. Sinta a integração de todas as partes do seu ser. O sucesso é absoluto. Você chegou lá." }
-    ];
-
-    // --- 2. LÓGICA DO JOGO ---
+    // --- 1. LÓGICA DO JOGO CONECTADA AO ORACULO-DATABASE.JS ---
     let cartasTiradas = 0;
     const maxCartas = 3;
     const posicoes = ["PASSADO (A Raiz)", "PRESENTE (O Desafio)", "FUTURO (O Conselho)"];
+    
+    // Variável para armazenar as cartas sorteadas pelo algoritmo Fisher-Yates
     let leitura = [];
 
     function tirarCarta() {
+        if (cartasTiradas === 0) {
+            // Sorteia as 3 cartas no primeiro clique, utilizando a função do seu oraculo-database.js
+            leitura = tirarCartas(maxCartas);
+        }
+
         if (cartasTiradas >= maxCartas) return;
 
-        // 1. Sorteio Matemático (Random)
-        const randIndex = Math.floor(Math.random() * TAROT_DB.length);
-        const cartaSorteada = TAROT_DB[randIndex];
-        leitura.push(cartaSorteada);
+        const cartaSorteada = leitura[cartasTiradas];
 
-        // 2. Elementos Visuais
+        // Elementos Visuais
         const deck = document.getElementById('deck');
         const slotDestino = document.getElementById(`slot-${cartasTiradas + 1}`);
         const rectDeck = deck.getBoundingClientRect();
         const rectSlot = slotDestino.getBoundingClientRect();
 
-        // 3. Criação da Carta "Voando"
+        // Criação da Carta "Voando"
         const carta = document.createElement('div');
         carta.className = 'flying-card';
         carta.style.left = rectDeck.left + 'px';
         carta.style.top = rectDeck.top + 'px';
         
-        // Conteúdo da Carta (Frente e Verso)
+        // Conteúdo da Carta (Frente e Verso) integrando ao seu banco
         carta.innerHTML = `
             <div class="face front">
-                <div class="arcana-num">${cartaSorteada.id}</div>
-                <div class="arcana-img">${cartaSorteada.icone}</div>
+                <div class="arcana-num">${cartaSorteada.numero}</div>
+                <div class="arcana-img"><i class="${cartaSorteada.img_placeholder}"></i></div>
                 <div class="arcana-name">${cartaSorteada.nome}</div>
             </div>
             <div class="face back"></div>
@@ -197,49 +182,75 @@
 
         document.body.appendChild(carta);
 
-        // 4. Animação (Move do Deck para o Slot)
-        // Pequeno delay para permitir o render
+        // Animação (Move do Deck para o Slot)
         setTimeout(() => {
             const moveX = rectSlot.left - rectDeck.left;
             const moveY = rectSlot.top - rectDeck.top;
-            
             carta.style.transform = `translate(${moveX}px, ${moveY}px) rotateY(180deg) scale(1)`;
         }, 50);
 
         cartasTiradas++;
 
-        // 5. Finalização
+        // Finalização e Gatilho da IA
         if (cartasTiradas === maxCartas) {
-            document.getElementById('instruction-text').innerText = "As cartas falaram. Veja abaixo a interpretação.";
+            document.getElementById('instruction-text').innerText = "As cartas estão na mesa. O Mestre está sintonizando a revelação...";
             document.getElementById('deck').style.opacity = '0.5';
             document.getElementById('deck').style.pointerEvents = 'none';
-            setTimeout(revelarLeitura, 1500);
+            setTimeout(revelarLeituraIA, 1500);
         } else {
             document.getElementById('instruction-text').innerText = `Mentalize a próxima carta (${posicoes[cartasTiradas]})...`;
         }
     }
 
-    function revelarLeitura() {
-        const container = document.getElementById('text-content');
+    // --- 2. COMUNICAÇÃO COM O CÉREBRO GEMINI 3.0 ---
+    async function revelarLeituraIA() {
         const area = document.getElementById('reading-result');
+        const container = document.getElementById('text-content');
         area.style.display = 'block';
-
-        leitura.forEach((carta, index) => {
-            container.innerHTML += `
-                <div class="meaning-block">
-                    <div class="position-title">${posicoes[index]}</div>
-                    <h3 class="card-title">${carta.icone} ${carta.nome}</h3>
-                    <p style="color:#ccc; line-height:1.8; font-size:1.1em;">${carta.significado}</p>
-                    <hr style="border:0; border-top:1px solid #333; margin-top:20px;">
-                </div>
-            `;
-        });
-        
-        // Scroll suave até o resultado
         area.scrollIntoView({ behavior: 'smooth' });
+        
+        // Tela de carregamento imersiva para o usuário
+        container.innerHTML = `
+            <div style="text-align:center; padding: 40px 0;">
+                <i class="fas fa-compass fa-spin" style="color:var(--gold); font-size:3em; margin-bottom:20px;"></i>
+                <p style="color:#888; font-family:'Cinzel';">Sintonizando com os Registros Akáshicos...</p>
+            </div>
+        `;
+
+        // Montagem do Payload Exato cruzando as posições e arquétipos do seu banco de dados
+        const cartasContexto = leitura.map((c, i) => 
+            `Posição ${posicoes[i]}: Carta ${c.nome} (Arquétipo: ${c.arquetipo})`
+        ).join(" | ");
+
+        const promptIA = `O consulente tirou as seguintes cartas do tarô: ${cartasContexto}. Faça uma leitura interligada, robusta e profunda baseada na energia dessas cartas. Exponha claramente a jornada do Passado, o desafio central do Presente e o conselho místico para o Futuro. Formate o texto de forma limpa.`;
+
+        try {
+            // Chamada Segura para a Rota Vercel
+            const response = await fetch('/api/oraculo-gemini', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: promptIA, modulo: 'Oráculo Sagrado - Tiragem de 3 Cartas' })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) throw new Error(data.error || "Erro desconhecido na comunicação com a IA.");
+
+            // Exibição da Resposta Parruda da IA e injeção do CSS HTML
+            let htmlFormatado = data.resposta
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>');
+
+            container.innerHTML = `<div class="gemini-text"><p>${htmlFormatado}</p></div>`;
+
+        } catch (error) {
+            console.error(error);
+            container.innerHTML = `<p style="color:#d32f2f; text-align:center;">Houve uma turbulência energética na leitura: ${error.message}</p>`;
+        }
     }
 
-    // FIREBASE CHECK (Segurança)
+    // FIREBASE CHECK (Segurança Mantida)
     const firebaseConfig = { apiKey: "AIzaSyDMeLgPB2wroI-papk-T9R_mbCcj3MC2TE", authDomain: "portal-mistico-6532b.firebaseapp.com", projectId: "portal-mistico-6532b", storageBucket: "portal-mistico-6532b.firebasestorage.app", messagingSenderId: "925159229004", appId: "1:925159229004:web:5d9dc758474789085016e9" };
     try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const auth = firebase.auth();
@@ -258,7 +269,6 @@
             });
         } else { window.location.href = 'index.html'; }
     });
-
 </script>
 </body>
 </html>
