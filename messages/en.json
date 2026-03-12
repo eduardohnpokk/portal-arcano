@@ -1,0 +1,20 @@
+{
+  "Auth": {
+    "login": "Sign In",
+    "register": "Create Account",
+    "forgotPassword": "Forgot my password",
+    "email": "Email",
+    "password": "Password",
+    "welcome": "Welcome to Arcanum Portal",
+    "description": "Your journey towards ancestral wisdom starts here.",
+    "name": "Full Name (at birth)",
+    "birthDate": "Birth Date",
+    "birthTime": "Exact Time",
+    "city": "City of Birth",
+    "gpsStatus": "GPS Location",
+    "gpsSuccess": "Coordinates captured precisely",
+    "gpsError": "Could not get GPS. Please type your city.",
+    "submit": "Start Arcanum Journey",
+    "loading": "Processing..."
+  }
+}
