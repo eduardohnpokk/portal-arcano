@@ -22,5 +22,25 @@
     "backToLogin": "Back to Portal",
     "emailSentSuccess": "Recovery email sent! Check your inbox.",
     "emailSentError": "Error sending email. Check if the address is correct."
+  },
+  "Dashboard": {
+    "title": "Your Personal Cosmos",
+    "welcome": "Welcome, {name}",
+    "modules": {
+      "m1": "Birth Chart",
+      "m2": "Solar Return",
+      "m3": "Maturity Cycles",
+      "m4": "Elective Astrology",
+      "m5": "Cabalistic Numerology",
+      "m6": "Chinese Zodiac",
+      "m7": "Personal FengShui",
+      "m8": "Alchemy & Baths",
+      "m9": "Sacred Oracle",
+      "m10": "The Wisdom",
+      "m11": "Signs Love",
+      "m12": "Numerological Love"
+    },
+    "locked": "Module Locked",
+    "unlock": "Unlock Access"
   }
 }
