@@ -1,0 +1,11 @@
+{
+  "Auth": {
+    "login": "Entrar",
+    "register": "Criar Conta",
+    "forgotPassword": "Esqueci minha senha",
+    "email": "E-mail",
+    "password": "Senha",
+    "welcome": "Bem-vindo ao Portal Arcano",
+    "description": "Sua jornada rumo à sabedoria ancestral começa aqui."
+  }
+}
