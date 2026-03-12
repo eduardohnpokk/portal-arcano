@@ -15,6 +15,12 @@
     "gpsSuccess": "Coordenadas capturadas com precisão",
     "gpsError": "Não foi possível obter GPS. Por favor, digite sua cidade.",
     "submit": "Iniciar Jornada Arcana",
-    "loading": "Processando..."
+    "loading": "Processando...",
+    "forgotPasswordTitle": "Recuperar Sabedoria",
+    "forgotPasswordDesc": "Insira seu e-mail para receber o link de redefinição de acesso.",
+    "sendEmail": "Enviar Link de Recuperação",
+    "backToLogin": "Voltar para o Portal",
+    "emailSentSuccess": "E-mail de recuperação enviado! Verifique sua caixa de entrada.",
+    "emailSentError": "Erro ao enviar e-mail. Verifique se o endereço está correto."
   }
 }
