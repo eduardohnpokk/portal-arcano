@@ -22,5 +22,25 @@
     "backToLogin": "Voltar para o Portal",
     "emailSentSuccess": "E-mail de recuperação enviado! Verifique sua caixa de entrada.",
     "emailSentError": "Erro ao enviar e-mail. Verifique se o endereço está correto."
+  },
+  "Dashboard": {
+    "title": "Seu Cosmos Pessoal",
+    "welcome": "Bem-vindo, {name}",
+    "modules": {
+      "m1": "Mapa Astral",
+      "m2": "Revolução Solar",
+      "m3": "Ciclos de Maturidade",
+      "m4": "Astrologia Eletiva",
+      "m5": "Numerologia Cabalística",
+      "m6": "Zodíaco Chinês",
+      "m7": "FengShui Pessoal",
+      "m8": "Alquimia e Banhos",
+      "m9": "Oráculo Sagrado",
+      "m10": "A Sabedoria",
+      "m11": "Amor dos Signos",
+      "m12": "Amor Numerológico"
+    },
+    "locked": "Módulo Bloqueado",
+    "unlock": "Liberar Acesso"
   }
 }
