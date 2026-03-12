@@ -15,6 +15,12 @@
     "gpsSuccess": "Coordinates captured precisely",
     "gpsError": "Could not get GPS. Please type your city.",
     "submit": "Start Arcanum Journey",
-    "loading": "Processing..."
+    "loading": "Processing...",
+    "forgotPasswordTitle": "Recover Wisdom",
+    "forgotPasswordDesc": "Enter your email to receive the access reset link.",
+    "sendEmail": "Send Recovery Link",
+    "backToLogin": "Back to Portal",
+    "emailSentSuccess": "Recovery email sent! Check your inbox.",
+    "emailSentError": "Error sending email. Check if the address is correct."
   }
 }
