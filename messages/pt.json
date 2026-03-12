@@ -6,6 +6,15 @@
     "email": "E-mail",
     "password": "Senha",
     "welcome": "Bem-vindo ao Portal Arcano",
-    "description": "Sua jornada rumo à sabedoria ancestral começa aqui."
+    "description": "Sua jornada rumo à sabedoria ancestral começa aqui.",
+    "name": "Nome Completo (de nascimento)",
+    "birthDate": "Data de Nascimento",
+    "birthTime": "Hora Exata",
+    "city": "Cidade de Nascimento",
+    "gpsStatus": "Localização por GPS",
+    "gpsSuccess": "Coordenadas capturadas com precisão",
+    "gpsError": "Não foi possível obter GPS. Por favor, digite sua cidade.",
+    "submit": "Iniciar Jornada Arcana",
+    "loading": "Processando..."
   }
 }
